@@ -91,10 +91,16 @@ export const solvePlanOptions = async (
   input: PlanInput,
   limit = 3
 ): Promise<PlanOption[]> => {
+  if (import.meta.env.DEV) {
+    console.log("[solver] starting solvePlanOptions");
+  }
   const { foods, pantry, goal, constraints } = input;
   const avoidSet = new Set(constraints?.avoidFoodIds ?? []);
   const preferSet = new Set(constraints?.preferFoodIds ?? []);
 
+  if (import.meta.env.DEV) {
+    console.log("[solver] init z3");
+  }
   const { Context } = await init();
   const { Optimize, Int, Real, ToReal, Or } = new Context("main");
 
@@ -176,7 +182,13 @@ export const solvePlanOptions = async (
 
   const options: PlanOption[] = [];
   for (let i = 0; i < limit; i += 1) {
+    if (import.meta.env.DEV) {
+      console.log("[solver] checking solution", i + 1);
+    }
     const status = await optimizer.check();
+    if (import.meta.env.DEV) {
+      console.log("[solver] status", status);
+    }
     if (status !== "sat") {
       break;
     }
