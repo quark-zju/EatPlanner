@@ -135,7 +135,7 @@ const isAppState = (value: unknown): value is AppState => {
 
 const STORAGE_KEY = "eat-tracker-state-v1";
 const DEFAULT_DRIVE_CLIENT_ID =
-  "190735541755-la9g96kpemb691uhg62fe7ts2mf0f9c4.apps.googleusercontent.com";
+  "775455628972-haf8lsiavs1u6ncpui8f20ac0orkh4nf.apps.googleusercontent.com";
 
 const defaultState: AppState = {
   foods: [
