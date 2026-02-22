@@ -46,3 +46,167 @@
   margin: 0;
   color: #5e5246;
 }
+
+.app__grid {
+  display: grid;
+  gap: 24px;
+}
+
+.primary {
+  border: none;
+  border-radius: 999px;
+  padding: 12px 20px;
+  background: #16100b;
+  color: #fffaf3;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ghost {
+  border: 1px solid #e1d5c8;
+  border-radius: 999px;
+  padding: 8px 14px;
+  background: transparent;
+  color: #3c2e25;
+  cursor: pointer;
+}
+
+.link {
+  border: none;
+  background: none;
+  color: #a24b2a;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+
+.card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.goal-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.goal-row {
+  display: grid;
+  grid-template-columns: minmax(80px, 1fr) 1fr auto 1fr auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.goal-row input {
+  width: 100%;
+}
+
+.macro-label {
+  text-transform: capitalize;
+  font-weight: 600;
+  color: #3c2e25;
+}
+
+input {
+  border: 1px solid #e4dacf;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+.table {
+  display: grid;
+  gap: 10px;
+}
+
+.table__row {
+  display: grid;
+  grid-template-columns: 1.3fr 0.9fr 0.7fr 0.7fr 0.7fr 0.7fr 0.7fr 1.2fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.table__head {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #7d6b5f;
+}
+
+.prefs {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.prefs label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hint {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #7d6b5f;
+}
+
+.options {
+  display: grid;
+  gap: 16px;
+}
+
+.option {
+  border: 1px solid #f0e6dc;
+  border-radius: 16px;
+  padding: 16px;
+  background: #fffaf3;
+}
+
+.option header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.option h3 {
+  margin: 0;
+}
+
+.option h4 {
+  margin: 0 0 8px;
+}
+
+.option__body {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.price {
+  font-weight: 600;
+  color: #3c2e25;
+}
+
+.error {
+  color: #b21f2d;
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .table__row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .table__head {
+    display: none;
+  }
+}
