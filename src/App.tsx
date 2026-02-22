@@ -42,7 +42,7 @@ const defaultState: AppState = {
   ],
   goal: {
     carbs: { min: 90, max: 120 },
-    fat: { min: 10, max: 20 },
+    fat: { min: 10, max: 22 },
     protein: { min: 60, max: 90 },
   },
   constraints: {
