@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computeTotals, solvePlan } from "./solver";
+import { computeTotals, solvePlan, solvePlanOptions } from "./solver";
 import type { Food, PlanInput } from "./types";
 
 const foods: Food[] = [
@@ -96,5 +96,60 @@ describe("solvePlan", () => {
     const result = await solvePlan(input);
     expect(result.status).toBe("unsat");
     expect(result.servings).toEqual({});
+  });
+});
+
+describe("solvePlanOptions", () => {
+  it("returns up to three options ordered by known price", async () => {
+    const pricedFoods: Food[] = [
+      {
+        id: "cheap",
+        name: "Cheap Carb",
+        unit: "serving",
+        price: 1,
+        nutritionPerUnit: { carbs: 50, fat: 0, protein: 0 },
+      },
+      {
+        id: "pricey",
+        name: "Pricey Carb",
+        unit: "serving",
+        price: 4,
+        nutritionPerUnit: { carbs: 50, fat: 0, protein: 0 },
+      },
+      {
+        id: "unknown",
+        name: "Unknown Price Carb",
+        unit: "serving",
+        nutritionPerUnit: { carbs: 50, fat: 0, protein: 0 },
+      },
+    ];
+
+    const input: PlanInput = {
+      foods: pricedFoods,
+      pantry: [
+        { foodId: "cheap", stock: 1 },
+        { foodId: "pricey", stock: 1 },
+        { foodId: "unknown", stock: 1 },
+      ],
+      goal: {
+        carbs: { min: 100, max: 100 },
+        fat: { min: 0, max: 0 },
+        protein: { min: 0, max: 0 },
+      },
+    };
+
+    const options = await solvePlanOptions(input, 3);
+    expect(options.length).toBeGreaterThanOrEqual(2);
+
+    expect(options[0].priceLowerBound).toBe(1);
+    expect(options[0].hasUnknownPrice).toBe(true);
+
+    expect(options[1].priceLowerBound).toBe(4);
+    expect(options[1].hasUnknownPrice).toBe(true);
+
+    if (options[2]) {
+      expect(options[2].priceLowerBound).toBe(5);
+      expect(options[2].hasUnknownPrice).toBe(false);
+    }
   });
 });

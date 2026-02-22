@@ -4,6 +4,7 @@ import type {
   Nutrition,
   PantryItem,
   PlanInput,
+  PlanOption,
   PlanSolution,
 } from "./types";
 
@@ -73,12 +74,29 @@ export const computeTotals = (
 };
 
 export const solvePlan = async (input: PlanInput): Promise<PlanSolution> => {
+  const options = await solvePlanOptions(input, 1);
+  if (options.length === 0) {
+    return {
+      status: "unsat",
+      servings: {},
+      totals: { ...DEFAULT_NUTRITION },
+      priceLowerBound: 0,
+      hasUnknownPrice: false,
+    };
+  }
+  return options[0];
+};
+
+export const solvePlanOptions = async (
+  input: PlanInput,
+  limit = 3
+): Promise<PlanOption[]> => {
   const { foods, pantry, goal, constraints } = input;
   const avoidSet = new Set(constraints?.avoidFoodIds ?? []);
   const preferSet = new Set(constraints?.preferFoodIds ?? []);
 
   const { Context } = await init();
-  const { Optimize, Int, Real, ToReal } = new Context("main");
+  const { Optimize, Int, Real, ToReal, Or } = new Context("main");
 
   const optimizer = new Optimize();
   const servingsVars = new Map<string, ReturnType<typeof Int.const>>();
@@ -140,33 +158,67 @@ export const solvePlan = async (input: PlanInput): Promise<PlanSolution> => {
     optimizer.add(caloriesSum.le(goal.calories.max));
   }
 
+  const priceSum = foods.reduce((acc, food) => {
+    if (food.price === undefined) {
+      return acc;
+    }
+    const variable = servingsVars.get(food.id)!;
+    return acc.add(ToReal(variable).mul(Real.val(toNumber(food.price))));
+  }, Real.val(0));
+
   const totalServings = Array.from(servingsVars.values()).reduce(
     (acc, variable) => acc.add(variable),
     Int.val(0)
   );
-  optimizer.minimize(totalServings);
 
-  const status = await optimizer.check();
-  if (status !== "sat") {
-    return {
+  optimizer.minimize(priceSum);
+  optimizer.minimize(ToReal(totalServings));
+
+  const options: PlanOption[] = [];
+  for (let i = 0; i < limit; i += 1) {
+    const status = await optimizer.check();
+    if (status !== "sat") {
+      break;
+    }
+
+    const model = optimizer.model();
+    const servings: Record<string, number> = {};
+    for (const [foodId, variable] of servingsVars.entries()) {
+      const valueExpr = model.eval(variable, true);
+      servings[foodId] = parseIntegerValue(valueExpr);
+    }
+
+    const totals = computeTotals(foods, servings);
+    let priceLowerBound = 0;
+    let hasUnknownPrice = false;
+
+    for (const food of foods) {
+      const count = servings[food.id] ?? 0;
+      if (count <= 0) {
+        continue;
+      }
+      if (food.price === undefined) {
+        hasUnknownPrice = true;
+      } else {
+        priceLowerBound += food.price * count;
+      }
+    }
+
+    options.push({
       status,
-      servings: {},
-      totals: { ...DEFAULT_NUTRITION },
-    };
+      servings,
+      totals,
+      priceLowerBound,
+      hasUnknownPrice,
+    });
+
+    const blocking = Or(
+      ...Array.from(servingsVars.entries()).map(([foodId, variable]) =>
+        variable.neq(Int.val(servings[foodId]))
+      )
+    );
+    optimizer.add(blocking);
   }
 
-  const model = optimizer.model();
-  const servings: Record<string, number> = {};
-  for (const [foodId, variable] of servingsVars.entries()) {
-    const valueExpr = model.eval(variable, true);
-    servings[foodId] = parseIntegerValue(valueExpr);
-  }
-
-  const totals = computeTotals(foods, servings);
-
-  return {
-    status,
-    servings,
-    totals,
-  };
+  return options;
 };

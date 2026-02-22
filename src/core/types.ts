@@ -48,6 +48,10 @@ export type PlanSolution = {
   status: "sat" | "unsat" | "unknown";
   servings: Record<string, number>;
   totals: Nutrition;
+  priceLowerBound: number;
+  hasUnknownPrice: boolean;
 };
 
 export type NutritionTotals = Nutrition;
+
+export type PlanOption = PlanSolution;
