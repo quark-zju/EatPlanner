@@ -1,48 +1,33 @@
 import { useRef } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import "./App.css";
-import { solvePlanOptions } from "./core";
-import {
-  downloadTextFile,
-  parseImportText,
-  serializeExport,
-} from "./storage/exportImport";
-import {
-  connectGoogleDrive,
-  disconnectGoogleDrive,
-  loadFromGoogleDrive,
-  saveToGoogleDrive,
-} from "./storage/googleDrive";
 import {
   addFoodAtom,
   appStateAtom,
-  clearMessagesAtom,
+  connectDriveAtom,
+  copyToClipboardAtom,
+  disconnectDriveAtom,
   driveBusyAtom,
   driveConnectedAtom,
   errorAtom,
+  exportToFileAtom,
   getPantryByFoodAtom,
+  importFromFileAtom,
+  loadFromDriveAtom,
   noticeAtom,
   planOptionsAtom,
+  pasteFromClipboardAtom,
   removeFoodAtom,
-  setDriveBusyAtom,
-  setDriveConnectedAtom,
   setErrorAtom,
-  setImportedStateAtom,
-  setNoticeAtom,
-  setPlanOptionsAtom,
-  setSolvingAtom,
+  saveToDriveAtom,
+  solvePlanAtom,
   solvingAtom,
   toggleConstraintAtom,
   updateFoodAtom,
   updateGoalAtom,
   updateNutritionAtom,
   updateStockAtom,
-  type AppState,
 } from "./state/appAtoms";
-import { isAppState } from "./state/appState";
-
-const DEFAULT_DRIVE_CLIENT_ID =
-  "775455628972-haf8lsiavs1u6ncpui8f20ac0orkh4nf.apps.googleusercontent.com";
 
 const formatPrice = (option: { priceLowerBound: number; hasUnknownPrice: boolean }) => {
   const base = option.priceLowerBound.toFixed(2);
@@ -59,7 +44,16 @@ export default function App() {
   const driveBusy = useAtomValue(driveBusyAtom);
   const pantryByFood = useAtomValue(getPantryByFoodAtom);
 
-  const setImportedState = useSetAtom(setImportedStateAtom);
+  const solve = useSetAtom(solvePlanAtom);
+  const exportToFile = useSetAtom(exportToFileAtom);
+  const copyToClipboard = useSetAtom(copyToClipboardAtom);
+  const pasteFromClipboard = useSetAtom(pasteFromClipboardAtom);
+  const importFromFile = useSetAtom(importFromFileAtom);
+  const connectDrive = useSetAtom(connectDriveAtom);
+  const disconnectDrive = useSetAtom(disconnectDriveAtom);
+  const saveToDrive = useSetAtom(saveToDriveAtom);
+  const loadFromDrive = useSetAtom(loadFromDriveAtom);
+
   const addFood = useSetAtom(addFoodAtom);
   const removeFood = useSetAtom(removeFoodAtom);
   const updateFood = useSetAtom(updateFoodAtom);
@@ -68,134 +62,9 @@ export default function App() {
   const updateGoal = useSetAtom(updateGoalAtom);
   const toggleConstraint = useSetAtom(toggleConstraintAtom);
 
-  const clearMessages = useSetAtom(clearMessagesAtom);
   const setError = useSetAtom(setErrorAtom);
-  const setNotice = useSetAtom(setNoticeAtom);
-  const setPlanOptions = useSetAtom(setPlanOptionsAtom);
-  const setSolving = useSetAtom(setSolvingAtom);
-  const setDriveConnected = useSetAtom(setDriveConnectedAtom);
-  const setDriveBusy = useSetAtom(setDriveBusyAtom);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  const solve = async () => {
-    setSolving(true);
-    clearMessages();
-    try {
-      if (!window.crossOriginIsolated || typeof SharedArrayBuffer === "undefined") {
-        throw new Error(
-          "SharedArrayBuffer is unavailable. Reload after service worker registration or ensure COOP/COEP headers."
-        );
-      }
-      const result = await solvePlanOptions(
-        {
-          foods: state.foods,
-          pantry: state.pantry,
-          goal: state.goal,
-          constraints: state.constraints,
-        },
-        3
-      );
-      setPlanOptions(result);
-      if (result.length === 0) {
-        setError(
-          "No feasible plan found for the current goals and pantry. Try widening ranges or adding stock."
-        );
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Solver failed.");
-    } finally {
-      setSolving(false);
-    }
-  };
-
-  const applyImportedState = (imported: AppState) => {
-    setImportedState(imported);
-  };
-
-  const exportStateToFile = () => {
-    const content = serializeExport(state);
-    downloadTextFile("eat-planner-export.json", content);
-  };
-
-  const copyStateToClipboard = async () => {
-    try {
-      const content = serializeExport(state);
-      await navigator.clipboard.writeText(content);
-      setError(null);
-      setNotice("Export copied to clipboard.");
-    } catch {
-      setError("Clipboard write failed. Use Export File instead.");
-      setNotice(null);
-    }
-  };
-
-  const importFromText = (text: string) => {
-    const imported = parseImportText<AppState>(text, isAppState);
-    applyImportedState(imported);
-  };
-
-  const importFromFile = async (file: File) => {
-    const text = await file.text();
-    importFromText(text);
-  };
-
-  const pasteFromClipboard = async () => {
-    try {
-      const text = await navigator.clipboard.readText();
-      importFromText(text);
-    } catch {
-      setError("Clipboard read failed. Use Import File instead.");
-      setNotice(null);
-    }
-  };
-
-  const connectDrive = async () => {
-    setDriveBusy(true);
-    clearMessages();
-    try {
-      await connectGoogleDrive(DEFAULT_DRIVE_CLIENT_ID);
-      setDriveConnected(true);
-      setNotice("Connected to Google Drive.");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Google Drive connect failed.");
-    } finally {
-      setDriveBusy(false);
-    }
-  };
-
-  const disconnectDrive = () => {
-    disconnectGoogleDrive();
-    setDriveConnected(false);
-    setNotice("Disconnected from Google Drive.");
-  };
-
-  const saveDrive = async () => {
-    setDriveBusy(true);
-    clearMessages();
-    try {
-      await saveToGoogleDrive(DEFAULT_DRIVE_CLIENT_ID, serializeExport(state));
-      setNotice("Saved to Google Drive.");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Google Drive save failed.");
-    } finally {
-      setDriveBusy(false);
-    }
-  };
-
-  const loadDrive = async () => {
-    setDriveBusy(true);
-    clearMessages();
-    try {
-      const content = await loadFromGoogleDrive(DEFAULT_DRIVE_CLIENT_ID);
-      importFromText(content);
-      setNotice("Loaded from Google Drive.");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Google Drive load failed.");
-    } finally {
-      setDriveBusy(false);
-    }
-  };
 
   return (
     <div className="app">
@@ -213,12 +82,12 @@ export default function App() {
         <section className="card">
           <div className="card__header">
             <h2>Storage</h2>
-            <button className="ghost" onClick={exportStateToFile}>
+            <button className="ghost" onClick={() => exportToFile()}>
               Export File
             </button>
           </div>
           <div className="storage-actions">
-            <button className="ghost" onClick={copyStateToClipboard} type="button">
+            <button className="ghost" onClick={() => copyToClipboard()} type="button">
               Copy JSON
             </button>
             <button
@@ -228,7 +97,7 @@ export default function App() {
             >
               Import File
             </button>
-            <button className="ghost" onClick={pasteFromClipboard} type="button">
+            <button className="ghost" onClick={() => pasteFromClipboard()} type="button">
               Paste JSON
             </button>
             <input
@@ -254,19 +123,29 @@ export default function App() {
           <div className="drive-box">
             <div className="storage-actions">
               {!driveConnected && (
-                <button className="ghost" onClick={connectDrive} disabled={driveBusy}>
+                <button className="ghost" onClick={() => connectDrive()} disabled={driveBusy}>
                   Connect Drive
                 </button>
               )}
               {driveConnected && (
-                <button className="ghost" onClick={disconnectDrive} disabled={driveBusy}>
+                <button className="ghost" onClick={() => disconnectDrive()} disabled={driveBusy}>
                   Disconnect Drive
                 </button>
               )}
-              <button className="ghost" onClick={saveDrive} disabled={driveBusy} type="button">
+              <button
+                className="ghost"
+                onClick={() => saveToDrive()}
+                disabled={driveBusy}
+                type="button"
+              >
                 Save to Drive
               </button>
-              <button className="ghost" onClick={loadDrive} disabled={driveBusy} type="button">
+              <button
+                className="ghost"
+                onClick={() => loadFromDrive()}
+                disabled={driveBusy}
+                type="button"
+              >
                 Load from Drive
               </button>
             </div>
