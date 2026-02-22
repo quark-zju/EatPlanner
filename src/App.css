@@ -92,6 +92,16 @@
   margin-bottom: 16px;
 }
 
+.storage-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.hidden-input {
+  display: none;
+}
+
 .goal-grid {
   display: grid;
   gap: 12px;
@@ -208,5 +218,10 @@ input {
 
   .table__head {
     display: none;
+  }
+
+  .app__header {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

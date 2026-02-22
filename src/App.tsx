@@ -1,13 +1,129 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 import type { Food, Goal, PantryItem, PlanOption, PlanConstraints } from "./core";
 import { solvePlanOptions } from "./core";
+import {
+  downloadTextFile,
+  parseImportText,
+  serializeExport,
+} from "./storage/exportImport";
 
 type AppState = {
   foods: Food[];
   pantry: PantryItem[];
   goal: Goal;
   constraints: PlanConstraints;
+};
+
+const isNumber = (value: unknown): value is number =>
+  typeof value === "number" && Number.isFinite(value);
+
+const isMacroRange = (value: unknown): value is { min: number; max: number } => {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const range = value as { min?: unknown; max?: unknown };
+  return isNumber(range.min) && isNumber(range.max);
+};
+
+const isNutrition = (value: unknown) => {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const nutrition = value as {
+    carbs?: unknown;
+    fat?: unknown;
+    protein?: unknown;
+    calories?: unknown;
+  };
+  const caloriesOk =
+    nutrition.calories === undefined || isNumber(nutrition.calories);
+  return (
+    isNumber(nutrition.carbs) &&
+    isNumber(nutrition.fat) &&
+    isNumber(nutrition.protein) &&
+    caloriesOk
+  );
+};
+
+const isAppState = (value: unknown): value is AppState => {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const obj = value as {
+    foods?: unknown;
+    pantry?: unknown;
+    goal?: unknown;
+    constraints?: unknown;
+  };
+
+  if (!Array.isArray(obj.foods) || !Array.isArray(obj.pantry)) {
+    return false;
+  }
+
+  const foodsOk = obj.foods.every((food) => {
+    if (!food || typeof food !== "object") {
+      return false;
+    }
+    const f = food as {
+      id?: unknown;
+      name?: unknown;
+      unit?: unknown;
+      nutritionPerUnit?: unknown;
+      price?: unknown;
+    };
+    const priceOk = f.price === undefined || isNumber(f.price);
+    return (
+      typeof f.id === "string" &&
+      typeof f.name === "string" &&
+      typeof f.unit === "string" &&
+      isNutrition(f.nutritionPerUnit) &&
+      priceOk
+    );
+  });
+
+  const pantryOk = obj.pantry.every((entry) => {
+    if (!entry || typeof entry !== "object") {
+      return false;
+    }
+    const p = entry as { foodId?: unknown; stock?: unknown };
+    return (
+      typeof p.foodId === "string" &&
+      (p.stock === "inf" || isNumber(p.stock))
+    );
+  });
+
+  if (!foodsOk || !pantryOk || !obj.goal || typeof obj.goal !== "object") {
+    return false;
+  }
+
+  const goal = obj.goal as {
+    carbs?: unknown;
+    fat?: unknown;
+    protein?: unknown;
+  };
+  const goalOk =
+    isMacroRange(goal.carbs) &&
+    isMacroRange(goal.fat) &&
+    isMacroRange(goal.protein);
+
+  const constraints = obj.constraints;
+  const constraintsOk =
+    constraints === undefined ||
+    (typeof constraints === "object" &&
+      constraints !== null &&
+      ((constraints as { avoidFoodIds?: unknown }).avoidFoodIds === undefined ||
+        (Array.isArray((constraints as { avoidFoodIds?: unknown }).avoidFoodIds) &&
+          (constraints as { avoidFoodIds: unknown[] }).avoidFoodIds.every(
+            (v) => typeof v === "string"
+          ))) &&
+      ((constraints as { preferFoodIds?: unknown }).preferFoodIds === undefined ||
+        (Array.isArray((constraints as { preferFoodIds?: unknown }).preferFoodIds) &&
+          (constraints as { preferFoodIds: unknown[] }).preferFoodIds.every(
+            (v) => typeof v === "string"
+          ))));
+
+  return goalOk && constraintsOk;
 };
 
 const STORAGE_KEY = "eat-tracker-state-v1";
@@ -86,6 +202,7 @@ export default function App() {
   const [options, setOptions] = useState<PlanOption[]>([]);
   const [isSolving, setIsSolving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -233,6 +350,53 @@ export default function App() {
     }
   };
 
+  const applyImportedState = (imported: AppState) => {
+    setState({
+      ...defaultState,
+      ...imported,
+      constraints: {
+        avoidFoodIds: imported.constraints?.avoidFoodIds ?? [],
+        preferFoodIds: imported.constraints?.preferFoodIds ?? [],
+      },
+    });
+    setOptions([]);
+    setError(null);
+  };
+
+  const exportStateToFile = () => {
+    const content = serializeExport(state);
+    downloadTextFile("eat-tracker-export.json", content);
+  };
+
+  const copyStateToClipboard = async () => {
+    try {
+      const content = serializeExport(state);
+      await navigator.clipboard.writeText(content);
+      setError("Export copied to clipboard.");
+    } catch {
+      setError("Clipboard write failed. Use Export File instead.");
+    }
+  };
+
+  const importFromText = (text: string) => {
+    const imported = parseImportText<AppState>(text, isAppState);
+    applyImportedState(imported);
+  };
+
+  const importFromFile = async (file: File) => {
+    const text = await file.text();
+    importFromText(text);
+  };
+
+  const pasteFromClipboard = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      importFromText(text);
+    } catch {
+      setError("Clipboard read failed. Use Import File instead.");
+    }
+  };
+
   return (
     <div className="app">
       <header className="app__header">
@@ -246,6 +410,56 @@ export default function App() {
       </header>
 
       <main className="app__grid">
+        <section className="card">
+          <div className="card__header">
+            <h2>Storage</h2>
+            <button className="ghost" onClick={exportStateToFile}>
+              Export File
+            </button>
+          </div>
+          <div className="storage-actions">
+            <button
+              className="ghost"
+              onClick={copyStateToClipboard}
+              type="button"
+            >
+              Copy JSON
+            </button>
+            <button
+              className="ghost"
+              onClick={() => fileInputRef.current?.click()}
+              type="button"
+            >
+              Import File
+            </button>
+            <button className="ghost" onClick={pasteFromClipboard} type="button">
+              Paste JSON
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json,application/json"
+              className="hidden-input"
+              onChange={async (event) => {
+                const file = event.target.files?.[0];
+                if (!file) {
+                  return;
+                }
+                try {
+                  await importFromFile(file);
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : "Import failed.");
+                } finally {
+                  event.target.value = "";
+                }
+              }}
+            />
+          </div>
+          <p className="hint">
+            Export uses a versioned schema to keep future migrations safe.
+          </p>
+        </section>
+
         <section className="card">
           <h2>Goals</h2>
           <div className="goal-grid">
