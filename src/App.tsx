@@ -221,6 +221,11 @@ export default function App() {
         3
       );
       setOptions(result);
+      if (result.length === 0) {
+        setError(
+          "No feasible plan found for the current goals and pantry. Try widening ranges or adding stock."
+        );
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Solver failed.");
     } finally {
