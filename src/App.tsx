@@ -135,6 +135,8 @@ const isAppState = (value: unknown): value is AppState => {
 
 const STORAGE_KEY = "eat-tracker-state-v1";
 const DRIVE_CLIENT_ID_STORAGE_KEY = "eat-tracker-drive-client-id-v1";
+const DEFAULT_DRIVE_CLIENT_ID =
+  "190735541755-la9g96kpemb691uhg62fe7ts2mf0f9c4.apps.googleusercontent.com";
 
 const defaultState: AppState = {
   foods: [
@@ -212,7 +214,9 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [driveClientId, setDriveClientId] = useState(
-    () => localStorage.getItem(DRIVE_CLIENT_ID_STORAGE_KEY) ?? ""
+    () =>
+      localStorage.getItem(DRIVE_CLIENT_ID_STORAGE_KEY) ??
+      DEFAULT_DRIVE_CLIENT_ID
   );
   const [driveConnected, setDriveConnected] = useState(() =>
     isGoogleDriveConnected()
