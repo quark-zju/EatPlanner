@@ -163,34 +163,48 @@ export default function TodayTab() {
         )}
 
         {state.todayDraft.items.length > 0 && (
-          <div className="table draft-table">
-            <div className="table__row table__head draft-row">
-              <span>Food</span>
-              <span>Unit</span>
-              <span>Quantity</span>
-              <span>Action</span>
-            </div>
-            {state.todayDraft.items.map((item) => (
-              <div className="table__row draft-row" key={item.foodId}>
-                <span>{item.foodNameSnapshot}</span>
-                <span>{item.unitSnapshot}</span>
-                <input
-                  type="number"
-                  min={0}
-                  step="0.1"
-                  value={item.quantity}
-                  onChange={(event) =>
-                    updateDraftQty({
-                      foodId: item.foodId,
-                      quantity: Number(event.target.value),
-                    })
-                  }
-                />
-                <button className="link" type="button" onClick={() => removeDraftItem(item.foodId)}>
-                  Remove
-                </button>
-              </div>
-            ))}
+          <div className="table-scroll">
+            <table className="editor-table draft-editor-table">
+              <thead>
+                <tr>
+                  <th>Food</th>
+                  <th>Unit</th>
+                  <th>Quantity</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {state.todayDraft.items.map((item) => (
+                  <tr key={item.foodId}>
+                    <td>{item.foodNameSnapshot}</td>
+                    <td>{item.unitSnapshot}</td>
+                    <td>
+                      <input
+                        type="number"
+                        min={0}
+                        step="0.1"
+                        value={item.quantity}
+                        onChange={(event) =>
+                          updateDraftQty({
+                            foodId: item.foodId,
+                            quantity: Number(event.target.value),
+                          })
+                        }
+                      />
+                    </td>
+                    <td>
+                      <button
+                        className="link"
+                        type="button"
+                        onClick={() => removeDraftItem(item.foodId)}
+                      >
+                        Remove
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
 
@@ -213,116 +227,138 @@ export default function TodayTab() {
             Add Food
           </button>
         </div>
-        <div className="table">
-          <div className="table__row table__head">
-            <span>Name</span>
-            <span>Unit</span>
-            <span>Carbs</span>
-            <span>Fat</span>
-            <span>Protein</span>
-            <span>Price</span>
-            <span>Stock</span>
-            <span>Prefs</span>
-          </div>
-          {state.foods.map((food) => {
-            const stock = pantryByFood.get(food.id)?.stock ?? 0;
-            return (
-              <div className="table__row" key={food.id}>
-                <input
-                  value={food.name}
-                  onChange={(event) =>
-                    updateFood({ foodId: food.id, updates: { name: event.target.value } })
-                  }
-                />
-                <input
-                  value={food.unit}
-                  onChange={(event) =>
-                    updateFood({ foodId: food.id, updates: { unit: event.target.value } })
-                  }
-                />
-                <input
-                  type="number"
-                  value={food.nutritionPerUnit.carbs}
-                  onChange={(event) =>
-                    updateNutrition({
-                      foodId: food.id,
-                      updates: { carbs: Number(event.target.value) },
-                    })
-                  }
-                />
-                <input
-                  type="number"
-                  value={food.nutritionPerUnit.fat}
-                  onChange={(event) =>
-                    updateNutrition({
-                      foodId: food.id,
-                      updates: { fat: Number(event.target.value) },
-                    })
-                  }
-                />
-                <input
-                  type="number"
-                  value={food.nutritionPerUnit.protein}
-                  onChange={(event) =>
-                    updateNutrition({
-                      foodId: food.id,
-                      updates: { protein: Number(event.target.value) },
-                    })
-                  }
-                />
-                <input
-                  type="number"
-                  value={food.price ?? ""}
-                  placeholder="?"
-                  onChange={(event) =>
-                    updateFood({
-                      foodId: food.id,
-                      updates: {
-                        price:
-                          event.target.value === "" ? undefined : Number(event.target.value),
-                      },
-                    })
-                  }
-                />
-                <input
-                  type="text"
-                  value={stock}
-                  onChange={(event) => {
-                    const value = event.target.value;
-                    updateStock({
-                      foodId: food.id,
-                      stock: value === "inf" ? "inf" : Number(value),
-                    });
-                  }}
-                />
-                <div className="prefs">
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={state.constraints.preferFoodIds?.includes(food.id)}
-                      onChange={() =>
-                        toggleConstraint({ type: "preferFoodIds", foodId: food.id })
-                      }
-                    />
-                    Prefer
-                  </label>
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={state.constraints.avoidFoodIds?.includes(food.id)}
-                      onChange={() =>
-                        toggleConstraint({ type: "avoidFoodIds", foodId: food.id })
-                      }
-                    />
-                    Avoid
-                  </label>
-                  <button className="link" onClick={() => removeFood(food.id)}>
-                    Remove
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+        <div className="table-scroll">
+          <table className="editor-table pantry-editor-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Unit</th>
+                <th>Carbs</th>
+                <th>Fat</th>
+                <th>Protein</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Prefs</th>
+              </tr>
+            </thead>
+            <tbody>
+              {state.foods.map((food) => {
+                const stock = pantryByFood.get(food.id)?.stock ?? 0;
+                return (
+                  <tr key={food.id}>
+                    <td>
+                      <input
+                        value={food.name}
+                        onChange={(event) =>
+                          updateFood({ foodId: food.id, updates: { name: event.target.value } })
+                        }
+                      />
+                    </td>
+                    <td>
+                      <input
+                        value={food.unit}
+                        onChange={(event) =>
+                          updateFood({ foodId: food.id, updates: { unit: event.target.value } })
+                        }
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        value={food.nutritionPerUnit.carbs}
+                        onChange={(event) =>
+                          updateNutrition({
+                            foodId: food.id,
+                            updates: { carbs: Number(event.target.value) },
+                          })
+                        }
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        value={food.nutritionPerUnit.fat}
+                        onChange={(event) =>
+                          updateNutrition({
+                            foodId: food.id,
+                            updates: { fat: Number(event.target.value) },
+                          })
+                        }
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        value={food.nutritionPerUnit.protein}
+                        onChange={(event) =>
+                          updateNutrition({
+                            foodId: food.id,
+                            updates: { protein: Number(event.target.value) },
+                          })
+                        }
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        value={food.price ?? ""}
+                        placeholder="?"
+                        onChange={(event) =>
+                          updateFood({
+                            foodId: food.id,
+                            updates: {
+                              price:
+                                event.target.value === "" ? undefined : Number(event.target.value),
+                            },
+                          })
+                        }
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="text"
+                        value={stock}
+                        onChange={(event) => {
+                          const value = event.target.value;
+                          updateStock({
+                            foodId: food.id,
+                            stock: value === "inf" ? "inf" : Number(value),
+                          });
+                        }}
+                      />
+                    </td>
+                    <td>
+                      <div className="prefs">
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={state.constraints.preferFoodIds?.includes(food.id)}
+                            onChange={() =>
+                              toggleConstraint({ type: "preferFoodIds", foodId: food.id })
+                            }
+                          />
+                          Prefer
+                        </label>
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={state.constraints.avoidFoodIds?.includes(food.id)}
+                            onChange={() =>
+                              toggleConstraint({ type: "avoidFoodIds", foodId: food.id })
+                            }
+                          />
+                          Avoid
+                        </label>
+                        <button className="link" onClick={() => removeFood(food.id)}>
+                          Remove
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
         <p className="hint">
           Stock accepts numbers or <code>inf</code> for restaurant-style items.
