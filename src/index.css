@@ -1,0 +1,21 @@
+:root {
+  color-scheme: light;
+  font-family: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  line-height: 1.4;
+  font-weight: 400;
+  color: #1a1612;
+  background: radial-gradient(circle at top left, #f2e9db 0%, #f7f2ea 40%, #fbfaf8 100%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
