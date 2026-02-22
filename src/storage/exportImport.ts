@@ -1,5 +1,5 @@
 export const APP_SCHEMA = "eat-planner-state";
-export const APP_SCHEMA_VERSION = 1;
+export const APP_SCHEMA_VERSION = 2;
 
 export type ExportEnvelope<T> = {
   schema: typeof APP_SCHEMA;

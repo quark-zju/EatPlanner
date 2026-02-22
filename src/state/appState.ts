@@ -1,11 +1,60 @@
-import type { Food, Goal, PantryItem, PlanConstraints } from "../core";
 import { Map, fromJS } from "immutable";
+import type {
+  Food,
+  Goal,
+  Nutrition,
+  PantryItem,
+  PlanConstraints,
+} from "../core";
+
+export type UiTab = "today" | "history" | "settings";
+export type LocalDateISO = string;
+
+export type DraftItem = {
+  foodId: string;
+  foodNameSnapshot: string;
+  unitSnapshot: string;
+  nutritionPerUnitSnapshot: Nutrition;
+  quantity: number;
+  pricePerUnitSnapshot?: number;
+};
+
+export type HistoryDayRecord = {
+  dateISO: LocalDateISO;
+  submittedAtISO: string;
+  goalSnapshot: Goal;
+  items: DraftItem[];
+  totals: Nutrition;
+  priceLowerBound: number;
+  hasUnknownPrice: boolean;
+  source: "planner-submit";
+};
+
+export type UiState = {
+  activeTab: UiTab;
+  historyWindowStartISO: LocalDateISO;
+  selectedHistoryDateISO?: LocalDateISO;
+};
+
+export type TodayDraftState = {
+  selectedOptionId?: string;
+  draftDateISO: LocalDateISO;
+  items: DraftItem[];
+  totals: Nutrition;
+};
+
+export type HistoryState = {
+  byDate: Record<LocalDateISO, HistoryDayRecord>;
+};
 
 export type AppState = {
   foods: Food[];
   pantry: PantryItem[];
   goal: Goal;
   constraints: PlanConstraints;
+  ui: UiState;
+  todayDraft: TodayDraftState;
+  history: HistoryState;
 };
 
 export const APP_STATE_STORAGE_KEY = "eat-planner-state-v1";
@@ -41,6 +90,116 @@ const isNutrition = (value: unknown) => {
   );
 };
 
+const isDraftItem = (value: unknown): value is DraftItem => {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const item = value as {
+    foodId?: unknown;
+    foodNameSnapshot?: unknown;
+    unitSnapshot?: unknown;
+    nutritionPerUnitSnapshot?: unknown;
+    quantity?: unknown;
+    pricePerUnitSnapshot?: unknown;
+  };
+  const priceOk =
+    item.pricePerUnitSnapshot === undefined || isNumber(item.pricePerUnitSnapshot);
+  return (
+    typeof item.foodId === "string" &&
+    typeof item.foodNameSnapshot === "string" &&
+    typeof item.unitSnapshot === "string" &&
+    isNutrition(item.nutritionPerUnitSnapshot) &&
+    isNumber(item.quantity) &&
+    priceOk
+  );
+};
+
+const isHistoryDayRecord = (value: unknown): value is HistoryDayRecord => {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const record = value as {
+    dateISO?: unknown;
+    submittedAtISO?: unknown;
+    goalSnapshot?: unknown;
+    items?: unknown;
+    totals?: unknown;
+    priceLowerBound?: unknown;
+    hasUnknownPrice?: unknown;
+    source?: unknown;
+  };
+
+  const goalOk =
+    record.goalSnapshot !== undefined &&
+    typeof record.goalSnapshot === "object" &&
+    isMacroRange((record.goalSnapshot as { carbs?: unknown }).carbs) &&
+    isMacroRange((record.goalSnapshot as { fat?: unknown }).fat) &&
+    isMacroRange((record.goalSnapshot as { protein?: unknown }).protein);
+
+  return (
+    typeof record.dateISO === "string" &&
+    typeof record.submittedAtISO === "string" &&
+    goalOk &&
+    Array.isArray(record.items) &&
+    record.items.every(isDraftItem) &&
+    isNutrition(record.totals) &&
+    isNumber(record.priceLowerBound) &&
+    typeof record.hasUnknownPrice === "boolean" &&
+    record.source === "planner-submit"
+  );
+};
+
+const isUiState = (value: unknown): value is UiState => {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const ui = value as {
+    activeTab?: unknown;
+    historyWindowStartISO?: unknown;
+    selectedHistoryDateISO?: unknown;
+  };
+  const tabOk =
+    ui.activeTab === "today" || ui.activeTab === "history" || ui.activeTab === "settings";
+  const selectedOk =
+    ui.selectedHistoryDateISO === undefined || typeof ui.selectedHistoryDateISO === "string";
+
+  return tabOk && typeof ui.historyWindowStartISO === "string" && selectedOk;
+};
+
+const isTodayDraftState = (value: unknown): value is TodayDraftState => {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const draft = value as {
+    selectedOptionId?: unknown;
+    draftDateISO?: unknown;
+    items?: unknown;
+    totals?: unknown;
+  };
+  const selectedOk =
+    draft.selectedOptionId === undefined || typeof draft.selectedOptionId === "string";
+
+  return (
+    selectedOk &&
+    typeof draft.draftDateISO === "string" &&
+    Array.isArray(draft.items) &&
+    draft.items.every(isDraftItem) &&
+    isNutrition(draft.totals)
+  );
+};
+
+const isHistoryState = (value: unknown): value is HistoryState => {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const history = value as { byDate?: unknown };
+  if (!history.byDate || typeof history.byDate !== "object" || Array.isArray(history.byDate)) {
+    return false;
+  }
+
+  return Object.values(history.byDate as Record<string, unknown>).every(isHistoryDayRecord);
+};
+
 export const isAppState = (value: unknown): value is AppState => {
   if (!value || typeof value !== "object") {
     return false;
@@ -50,6 +209,9 @@ export const isAppState = (value: unknown): value is AppState => {
     pantry?: unknown;
     goal?: unknown;
     constraints?: unknown;
+    ui?: unknown;
+    todayDraft?: unknown;
+    history?: unknown;
   };
 
   if (!Array.isArray(obj.foods) || !Array.isArray(obj.pantry)) {
@@ -114,8 +276,41 @@ export const isAppState = (value: unknown): value is AppState => {
             (v) => typeof v === "string"
           ))));
 
-  return goalOk && constraintsOk;
+  const uiOk = obj.ui === undefined || isUiState(obj.ui);
+  const todayDraftOk = obj.todayDraft === undefined || isTodayDraftState(obj.todayDraft);
+  const historyOk = obj.history === undefined || isHistoryState(obj.history);
+
+  return goalOk && constraintsOk && uiOk && todayDraftOk && historyOk;
 };
+
+export const toLocalDateISO = (date: Date): LocalDateISO => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const fromLocalDateISO = (iso: LocalDateISO) => {
+  const [year, month, day] = iso.split("-").map((part) => Number(part));
+  return new Date(year, month - 1, day);
+};
+
+export const shiftLocalDateISO = (iso: LocalDateISO, days: number): LocalDateISO => {
+  const next = fromLocalDateISO(iso);
+  next.setDate(next.getDate() + days);
+  return toLocalDateISO(next);
+};
+
+export const getRollingWindowStartISO = (baseDate: Date = new Date()): LocalDateISO => {
+  return shiftLocalDateISO(toLocalDateISO(baseDate), -29);
+};
+
+const emptyNutrition = (): Nutrition => ({
+  carbs: 0,
+  fat: 0,
+  protein: 0,
+  calories: 0,
+});
 
 export const defaultAppState: AppState = {
   foods: [
@@ -154,16 +349,50 @@ export const defaultAppState: AppState = {
     avoidFoodIds: [],
     preferFoodIds: [],
   },
+  ui: {
+    activeTab: "today",
+    historyWindowStartISO: getRollingWindowStartISO(),
+    selectedHistoryDateISO: undefined,
+  },
+  todayDraft: {
+    selectedOptionId: undefined,
+    draftDateISO: toLocalDateISO(new Date()),
+    items: [],
+    totals: emptyNutrition(),
+  },
+  history: {
+    byDate: {},
+  },
 };
 
-export const normalizeAppState = (state: AppState): AppState => ({
-  ...defaultAppState,
-  ...state,
-  constraints: {
-    avoidFoodIds: state.constraints?.avoidFoodIds ?? [],
-    preferFoodIds: state.constraints?.preferFoodIds ?? [],
-  },
-});
+export const normalizeAppState = (state: AppState): AppState => {
+  const merged = {
+    ...defaultAppState,
+    ...state,
+    constraints: {
+      avoidFoodIds: state.constraints?.avoidFoodIds ?? [],
+      preferFoodIds: state.constraints?.preferFoodIds ?? [],
+    },
+    ui: {
+      ...defaultAppState.ui,
+      ...(state.ui ?? {}),
+    },
+    todayDraft: {
+      ...defaultAppState.todayDraft,
+      ...(state.todayDraft ?? {}),
+      items: state.todayDraft?.items ?? defaultAppState.todayDraft.items,
+      totals: {
+        ...emptyNutrition(),
+        ...(state.todayDraft?.totals ?? {}),
+      },
+    },
+    history: {
+      byDate: state.history?.byDate ?? {},
+    },
+  };
+
+  return merged;
+};
 
 export type AppStateMap = Map<string, unknown>;
 

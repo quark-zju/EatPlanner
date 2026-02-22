@@ -1,7 +1,14 @@
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import { solvePlanOptions } from "../core";
-import type { Food, Goal, PantryItem, PlanConstraints, PlanOption } from "../core";
+import type {
+  Food,
+  Goal,
+  Nutrition,
+  PantryItem,
+  PlanConstraints,
+  PlanOption,
+} from "../core";
 import {
   downloadTextFile,
   parseImportText,
@@ -18,17 +25,93 @@ import {
   APP_STATE_STORAGE_KEY,
   defaultAppStateMap,
   fromAppStateMap,
+  getRollingWindowStartISO,
   isAppState,
   newFoodId,
   normalizeAppState,
+  shiftLocalDateISO,
   toAppStateMap,
+  toLocalDateISO,
   type AppState,
   type AppStateMap,
+  type DraftItem,
+  type HistoryDayRecord,
+  type LocalDateISO,
+  type UiTab,
 } from "./appState";
 
 const DEFAULT_DRIVE_CLIENT_ID =
   "775455628972-haf8lsiavs1u6ncpui8f20ac0orkh4nf.apps.googleusercontent.com";
 const EXPORT_FILENAME = "eat-planner-export.json";
+
+const emptyNutrition = (): Nutrition => ({
+  carbs: 0,
+  fat: 0,
+  protein: 0,
+  calories: 0,
+});
+
+const clampNonNegative = (value: number) => {
+  if (!Number.isFinite(value)) {
+    return 0;
+  }
+  return value < 0 ? 0 : value;
+};
+
+const calculateDraftTotals = (items: DraftItem[]): Nutrition => {
+  return items.reduce<Nutrition>(
+    (totals, item) => {
+      const qty = clampNonNegative(item.quantity);
+      totals.carbs += item.nutritionPerUnitSnapshot.carbs * qty;
+      totals.fat += item.nutritionPerUnitSnapshot.fat * qty;
+      totals.protein += item.nutritionPerUnitSnapshot.protein * qty;
+      totals.calories =
+        (totals.calories ?? 0) + (item.nutritionPerUnitSnapshot.calories ?? 0) * qty;
+      return totals;
+    },
+    emptyNutrition()
+  );
+};
+
+const calculateDraftPrice = (items: DraftItem[]) => {
+  let priceLowerBound = 0;
+  let hasUnknownPrice = false;
+
+  for (const item of items) {
+    const qty = clampNonNegative(item.quantity);
+    if (qty <= 0) {
+      continue;
+    }
+    if (item.pricePerUnitSnapshot === undefined) {
+      hasUnknownPrice = true;
+    } else {
+      priceLowerBound += item.pricePerUnitSnapshot * qty;
+    }
+  }
+
+  return { priceLowerBound, hasUnknownPrice };
+};
+
+const toDraftItemsFromOption = (state: AppState, option: PlanOption): DraftItem[] => {
+  return Object.entries(option.servings)
+    .filter(([, amount]) => amount > 0)
+    .map(([foodId, amount]) => {
+      const food = state.foods.find((f) => f.id === foodId);
+      return {
+        foodId,
+        foodNameSnapshot: food?.name ?? foodId,
+        unitSnapshot: food?.unit ?? "serving",
+        nutritionPerUnitSnapshot: food?.nutritionPerUnit ?? {
+          carbs: 0,
+          fat: 0,
+          protein: 0,
+        },
+        quantity: amount,
+        pricePerUnitSnapshot: food?.price,
+      };
+    });
+};
+
 const appStateMapStorage = {
   getItem: (key: string, initialValue: AppStateMap): AppStateMap => {
     const raw = localStorage.getItem(key);
@@ -75,11 +158,233 @@ export const noticeAtom = atom<string | null>(null);
 export const driveConnectedAtom = atom(isGoogleDriveConnected());
 export const driveBusyAtom = atom(false);
 
-export const setImportedStateAtom = atom(null, (_get, set, imported: AppState) => {
-  set(appStateAtom, normalizeAppState(imported));
-  set(planOptionsAtom, []);
+export const activeTabAtom = atom(
+  (get) => get(appStateAtom).ui.activeTab,
+  (get, set, tab: UiTab) => {
+    const state = get(appStateAtom);
+    set(appStateAtom, {
+      ...state,
+      ui: {
+        ...state.ui,
+        activeTab: tab,
+      },
+    });
+  }
+);
+
+export const setHistoryWindowAtom = atom(
+  null,
+  (get, set, direction: "prev" | "next" | "today") => {
+    const state = get(appStateAtom);
+    let nextStart = state.ui.historyWindowStartISO;
+    if (direction === "prev") {
+      nextStart = shiftLocalDateISO(nextStart, -30);
+    } else if (direction === "next") {
+      nextStart = shiftLocalDateISO(nextStart, 30);
+    } else {
+      nextStart = getRollingWindowStartISO();
+    }
+
+    set(appStateAtom, {
+      ...state,
+      ui: {
+        ...state.ui,
+        historyWindowStartISO: nextStart,
+        selectedHistoryDateISO: undefined,
+      },
+    });
+  }
+);
+
+export const setSelectedHistoryDateAtom = atom(
+  null,
+  (get, set, dateISO: LocalDateISO | undefined) => {
+    const state = get(appStateAtom);
+    set(appStateAtom, {
+      ...state,
+      ui: {
+        ...state.ui,
+        selectedHistoryDateISO: dateISO,
+      },
+    });
+  }
+);
+
+export const setDraftDateAtom = atom(null, (get, set, dateISO: LocalDateISO) => {
+  const state = get(appStateAtom);
+  set(appStateAtom, {
+    ...state,
+    todayDraft: {
+      ...state.todayDraft,
+      draftDateISO: dateISO,
+    },
+  });
+});
+
+export const selectPlanOptionToDraftAtom = atom(
+  null,
+  (get, set, payload: { optionIndex: number; dateISO?: LocalDateISO }) => {
+    const state = get(appStateAtom);
+    const options = get(planOptionsAtom);
+    const option = options[payload.optionIndex];
+    if (!option) {
+      set(errorAtom, "Selected plan option was not found.");
+      return;
+    }
+
+    const items = toDraftItemsFromOption(state, option);
+    if (items.length === 0) {
+      set(errorAtom, "Selected plan has no items.");
+      return;
+    }
+
+    set(appStateAtom, {
+      ...state,
+      todayDraft: {
+        selectedOptionId: `${Date.now()}-${payload.optionIndex}`,
+        draftDateISO: payload.dateISO ?? state.todayDraft.draftDateISO,
+        items,
+        totals: calculateDraftTotals(items),
+      },
+    });
+    set(errorAtom, null);
+    set(noticeAtom, "Plan loaded into draft editor.");
+  }
+);
+
+export const updateDraftQuantityAtom = atom(
+  null,
+  (get, set, payload: { foodId: string; quantity: number }) => {
+    const state = get(appStateAtom);
+    const nextItems = state.todayDraft.items.map((item) =>
+      item.foodId === payload.foodId
+        ? { ...item, quantity: clampNonNegative(payload.quantity) }
+        : item
+    );
+
+    set(appStateAtom, {
+      ...state,
+      todayDraft: {
+        ...state.todayDraft,
+        items: nextItems,
+        totals: calculateDraftTotals(nextItems),
+      },
+    });
+  }
+);
+
+export const recomputeDraftTotalsAtom = atom(null, (get, set) => {
+  const state = get(appStateAtom);
+  const totals = calculateDraftTotals(state.todayDraft.items);
+  set(appStateAtom, {
+    ...state,
+    todayDraft: {
+      ...state.todayDraft,
+      totals,
+    },
+  });
+});
+
+export const submitDraftToHistoryAtom = atom(null, (get, set) => {
+  const state = get(appStateAtom);
+  const items = state.todayDraft.items.map((item) => ({
+    ...item,
+    quantity: clampNonNegative(item.quantity),
+  }));
+
+  if (items.length === 0) {
+    set(errorAtom, "Draft is empty. Select a plan and edit quantities first.");
+    return;
+  }
+
+  const totals = calculateDraftTotals(items);
+  const price = calculateDraftPrice(items);
+  const dateISO = state.todayDraft.draftDateISO || toLocalDateISO(new Date());
+
+  const record: HistoryDayRecord = {
+    dateISO,
+    submittedAtISO: new Date().toISOString(),
+    goalSnapshot: state.goal,
+    items,
+    totals,
+    priceLowerBound: price.priceLowerBound,
+    hasUnknownPrice: price.hasUnknownPrice,
+    source: "planner-submit",
+  };
+
+  const nextByDate = {
+    ...state.history.byDate,
+    [dateISO]: record,
+  };
+
+  set(appStateAtom, {
+    ...state,
+    history: {
+      byDate: nextByDate,
+    },
+    ui: {
+      ...state.ui,
+      selectedHistoryDateISO: dateISO,
+    },
+    todayDraft: {
+      ...state.todayDraft,
+      items,
+      totals,
+    },
+  });
+
+  const allZero = items.every((item) => item.quantity === 0);
   set(errorAtom, null);
-  set(noticeAtom, "Import completed.");
+  set(
+    noticeAtom,
+    allZero
+      ? "Saved to history. Warning: all quantities are zero."
+      : `Saved ${dateISO} to history.`
+  );
+});
+
+export const historyWindowRangeAtom = atom((get) => {
+  const startISO = get(appStateAtom).ui.historyWindowStartISO;
+  const endISO = shiftLocalDateISO(startISO, 29);
+  return { startISO, endISO };
+});
+
+export const historyDaysInWindowAtom = atom((get) => {
+  const state = get(appStateAtom);
+  const { startISO, endISO } = get(historyWindowRangeAtom);
+
+  return Object.entries(state.history.byDate)
+    .filter(([dateISO]) => dateISO >= startISO && dateISO <= endISO)
+    .sort(([a], [b]) => (a > b ? -1 : a < b ? 1 : 0))
+    .map(([dateISO, record]) => ({ dateISO, record }));
+});
+
+export const historyDayByDateAtom = (dateISO: LocalDateISO) =>
+  atom((get) => get(appStateAtom).history.byDate[dateISO] ?? null);
+
+export const historyAggregatesInWindowAtom = atom((get) => {
+  return get(historyDaysInWindowAtom).reduce(
+    (acc, entry) => {
+      acc.carbs += entry.record.totals.carbs;
+      acc.fat += entry.record.totals.fat;
+      acc.protein += entry.record.totals.protein;
+      acc.calories += entry.record.totals.calories ?? 0;
+      acc.days += 1;
+      return acc;
+    },
+    {
+      carbs: 0,
+      fat: 0,
+      protein: 0,
+      calories: 0,
+      days: 0,
+    }
+  );
+});
+
+export const draftPriceSummaryAtom = atom((get) => {
+  const items = get(appStateAtom).todayDraft.items;
+  return calculateDraftPrice(items);
 });
 
 export const updateFoodAtom = atom(
@@ -257,7 +562,7 @@ export const getConstraintsForFoodAtom = atom((get) => {
   });
 });
 
-export const solvePlanAtom = atom(null, async (get, set) => {
+export const generatePlanOptionsAtom = atom(null, async (get, set) => {
   set(solvingAtom, true);
   set(errorAtom, null);
   set(noticeAtom, null);
@@ -293,6 +598,8 @@ export const solvePlanAtom = atom(null, async (get, set) => {
     set(solvingAtom, false);
   }
 });
+
+export const solvePlanAtom = generatePlanOptionsAtom;
 
 export const exportToFileAtom = atom(null, (get) => {
   const content = serializeExport(get(appStateAtom));
