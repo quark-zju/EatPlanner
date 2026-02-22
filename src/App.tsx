@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useRef } from "react";
+import { useAtomValue, useSetAtom } from "jotai";
 import "./App.css";
-import type { Food, Goal, PantryItem, PlanOption, PlanConstraints } from "./core";
 import { solvePlanOptions } from "./core";
 import {
   downloadTextFile,
@@ -10,333 +10,77 @@ import {
 import {
   connectGoogleDrive,
   disconnectGoogleDrive,
-  isGoogleDriveConnected,
   loadFromGoogleDrive,
   saveToGoogleDrive,
 } from "./storage/googleDrive";
+import {
+  addFoodAtom,
+  appStateAtom,
+  clearMessagesAtom,
+  driveBusyAtom,
+  driveConnectedAtom,
+  errorAtom,
+  getPantryByFoodAtom,
+  noticeAtom,
+  planOptionsAtom,
+  removeFoodAtom,
+  setDriveBusyAtom,
+  setDriveConnectedAtom,
+  setErrorAtom,
+  setImportedStateAtom,
+  setNoticeAtom,
+  setPlanOptionsAtom,
+  setSolvingAtom,
+  solvingAtom,
+  toggleConstraintAtom,
+  updateFoodAtom,
+  updateGoalAtom,
+  updateNutritionAtom,
+  updateStockAtom,
+  type AppState,
+} from "./state/appAtoms";
+import { isAppState } from "./state/appState";
 
-type AppState = {
-  foods: Food[];
-  pantry: PantryItem[];
-  goal: Goal;
-  constraints: PlanConstraints;
-};
-
-const isNumber = (value: unknown): value is number =>
-  typeof value === "number" && Number.isFinite(value);
-
-const isMacroRange = (value: unknown): value is { min: number; max: number } => {
-  if (!value || typeof value !== "object") {
-    return false;
-  }
-  const range = value as { min?: unknown; max?: unknown };
-  return isNumber(range.min) && isNumber(range.max);
-};
-
-const isNutrition = (value: unknown) => {
-  if (!value || typeof value !== "object") {
-    return false;
-  }
-  const nutrition = value as {
-    carbs?: unknown;
-    fat?: unknown;
-    protein?: unknown;
-    calories?: unknown;
-  };
-  const caloriesOk =
-    nutrition.calories === undefined || isNumber(nutrition.calories);
-  return (
-    isNumber(nutrition.carbs) &&
-    isNumber(nutrition.fat) &&
-    isNumber(nutrition.protein) &&
-    caloriesOk
-  );
-};
-
-const isAppState = (value: unknown): value is AppState => {
-  if (!value || typeof value !== "object") {
-    return false;
-  }
-  const obj = value as {
-    foods?: unknown;
-    pantry?: unknown;
-    goal?: unknown;
-    constraints?: unknown;
-  };
-
-  if (!Array.isArray(obj.foods) || !Array.isArray(obj.pantry)) {
-    return false;
-  }
-
-  const foodsOk = obj.foods.every((food) => {
-    if (!food || typeof food !== "object") {
-      return false;
-    }
-    const f = food as {
-      id?: unknown;
-      name?: unknown;
-      unit?: unknown;
-      nutritionPerUnit?: unknown;
-      price?: unknown;
-    };
-    const priceOk = f.price === undefined || isNumber(f.price);
-    return (
-      typeof f.id === "string" &&
-      typeof f.name === "string" &&
-      typeof f.unit === "string" &&
-      isNutrition(f.nutritionPerUnit) &&
-      priceOk
-    );
-  });
-
-  const pantryOk = obj.pantry.every((entry) => {
-    if (!entry || typeof entry !== "object") {
-      return false;
-    }
-    const p = entry as { foodId?: unknown; stock?: unknown };
-    return (
-      typeof p.foodId === "string" &&
-      (p.stock === "inf" || isNumber(p.stock))
-    );
-  });
-
-  if (!foodsOk || !pantryOk || !obj.goal || typeof obj.goal !== "object") {
-    return false;
-  }
-
-  const goal = obj.goal as {
-    carbs?: unknown;
-    fat?: unknown;
-    protein?: unknown;
-  };
-  const goalOk =
-    isMacroRange(goal.carbs) &&
-    isMacroRange(goal.fat) &&
-    isMacroRange(goal.protein);
-
-  const constraints = obj.constraints;
-  const constraintsOk =
-    constraints === undefined ||
-    (typeof constraints === "object" &&
-      constraints !== null &&
-      ((constraints as { avoidFoodIds?: unknown }).avoidFoodIds === undefined ||
-        (Array.isArray((constraints as { avoidFoodIds?: unknown }).avoidFoodIds) &&
-          (constraints as { avoidFoodIds: unknown[] }).avoidFoodIds.every(
-            (v) => typeof v === "string"
-          ))) &&
-      ((constraints as { preferFoodIds?: unknown }).preferFoodIds === undefined ||
-        (Array.isArray((constraints as { preferFoodIds?: unknown }).preferFoodIds) &&
-          (constraints as { preferFoodIds: unknown[] }).preferFoodIds.every(
-            (v) => typeof v === "string"
-          ))));
-
-  return goalOk && constraintsOk;
-};
-
-const STORAGE_KEY = "eat-planner-state-v1";
 const DEFAULT_DRIVE_CLIENT_ID =
   "775455628972-haf8lsiavs1u6ncpui8f20ac0orkh4nf.apps.googleusercontent.com";
 
-const defaultState: AppState = {
-  foods: [
-    {
-      id: "rice",
-      name: "Rice",
-      unit: "serving",
-      nutritionPerUnit: { carbs: 45, fat: 0.4, protein: 4 },
-      price: 1.2,
-    },
-    {
-      id: "chicken",
-      name: "Chicken",
-      unit: "serving",
-      nutritionPerUnit: { carbs: 0, fat: 3, protein: 31 },
-      price: 2.5,
-    },
-    {
-      id: "olive-oil",
-      name: "Olive Oil",
-      unit: "tbsp",
-      nutritionPerUnit: { carbs: 0, fat: 14, protein: 0 },
-    },
-  ],
-  pantry: [
-    { foodId: "rice", stock: 3 },
-    { foodId: "chicken", stock: 3 },
-    { foodId: "olive-oil", stock: 2 },
-  ],
-  goal: {
-    carbs: { min: 90, max: 120 },
-    fat: { min: 10, max: 22 },
-    protein: { min: 60, max: 90 },
-  },
-  constraints: {
-    avoidFoodIds: [],
-    preferFoodIds: [],
-  },
-};
-
-const safeParseState = (): AppState => {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) {
-    return defaultState;
-  }
-  try {
-    const parsed = JSON.parse(raw) as AppState;
-    return {
-      ...defaultState,
-      ...parsed,
-      constraints: {
-        avoidFoodIds: parsed.constraints?.avoidFoodIds ?? [],
-        preferFoodIds: parsed.constraints?.preferFoodIds ?? [],
-      },
-    };
-  } catch {
-    return defaultState;
-  }
-};
-
-const formatPrice = (option: PlanOption) => {
+const formatPrice = (option: { priceLowerBound: number; hasUnknownPrice: boolean }) => {
   const base = option.priceLowerBound.toFixed(2);
   return option.hasUnknownPrice ? `${base}+` : base;
 };
 
-const newId = () =>
-  typeof crypto !== "undefined" && crypto.randomUUID
-    ? crypto.randomUUID()
-    : `food-${Date.now()}`;
-
 export default function App() {
-  const [state, setState] = useState<AppState>(() => safeParseState());
-  const [options, setOptions] = useState<PlanOption[]>([]);
-  const [isSolving, setIsSolving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
-  const [driveConnected, setDriveConnected] = useState(() =>
-    isGoogleDriveConnected()
-  );
-  const [driveBusy, setDriveBusy] = useState(false);
+  const state = useAtomValue(appStateAtom);
+  const options = useAtomValue(planOptionsAtom);
+  const isSolving = useAtomValue(solvingAtom);
+  const error = useAtomValue(errorAtom);
+  const notice = useAtomValue(noticeAtom);
+  const driveConnected = useAtomValue(driveConnectedAtom);
+  const driveBusy = useAtomValue(driveBusyAtom);
+  const pantryByFood = useAtomValue(getPantryByFoodAtom);
+
+  const setImportedState = useSetAtom(setImportedStateAtom);
+  const addFood = useSetAtom(addFoodAtom);
+  const removeFood = useSetAtom(removeFoodAtom);
+  const updateFood = useSetAtom(updateFoodAtom);
+  const updateNutrition = useSetAtom(updateNutritionAtom);
+  const updateStock = useSetAtom(updateStockAtom);
+  const updateGoal = useSetAtom(updateGoalAtom);
+  const toggleConstraint = useSetAtom(toggleConstraintAtom);
+
+  const clearMessages = useSetAtom(clearMessagesAtom);
+  const setError = useSetAtom(setErrorAtom);
+  const setNotice = useSetAtom(setNoticeAtom);
+  const setPlanOptions = useSetAtom(setPlanOptionsAtom);
+  const setSolving = useSetAtom(setSolvingAtom);
+  const setDriveConnected = useSetAtom(setDriveConnectedAtom);
+  const setDriveBusy = useSetAtom(setDriveBusyAtom);
+
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [state]);
-
-  const pantryByFood = useMemo(() => {
-    const map = new Map<string, PantryItem>();
-    state.pantry.forEach((item) => map.set(item.foodId, item));
-    return map;
-  }, [state.pantry]);
-
-  const updateFood = (foodId: string, updates: Partial<Food>) => {
-    setState((prev) => ({
-      ...prev,
-      foods: prev.foods.map((food) =>
-        food.id === foodId ? { ...food, ...updates } : food
-      ),
-    }));
-  };
-
-  const updateNutrition = (
-    foodId: string,
-    updates: Partial<Food["nutritionPerUnit"]>
-  ) => {
-    setState((prev) => ({
-      ...prev,
-      foods: prev.foods.map((food) =>
-        food.id === foodId
-          ? { ...food, nutritionPerUnit: { ...food.nutritionPerUnit, ...updates } }
-          : food
-      ),
-    }));
-  };
-
-  const updateStock = (foodId: string, stock: PantryItem["stock"]) => {
-    setState((prev) => {
-      const existing = prev.pantry.find((item) => item.foodId === foodId);
-      if (existing) {
-        return {
-          ...prev,
-          pantry: prev.pantry.map((item) =>
-            item.foodId === foodId ? { ...item, stock } : item
-          ),
-        };
-      }
-      return {
-        ...prev,
-        pantry: [...prev.pantry, { foodId, stock }],
-      };
-    });
-  };
-
-  const addFood = () => {
-    const id = newId();
-    setState((prev) => ({
-      ...prev,
-      foods: [
-        ...prev.foods,
-        {
-          id,
-          name: "New Food",
-          unit: "serving",
-          nutritionPerUnit: { carbs: 0, fat: 0, protein: 0 },
-        },
-      ],
-      pantry: [...prev.pantry, { foodId: id, stock: 1 }],
-    }));
-  };
-
-  const removeFood = (foodId: string) => {
-    setState((prev) => ({
-      ...prev,
-      foods: prev.foods.filter((food) => food.id !== foodId),
-      pantry: prev.pantry.filter((item) => item.foodId !== foodId),
-      constraints: {
-        avoidFoodIds: prev.constraints.avoidFoodIds?.filter((id) => id !== foodId),
-        preferFoodIds: prev.constraints.preferFoodIds?.filter((id) => id !== foodId),
-      },
-    }));
-  };
-
-  const updateGoal = (
-    key: keyof Goal,
-    field: "min" | "max",
-    value: number
-  ) => {
-    setState((prev) => ({
-      ...prev,
-      goal: {
-        ...prev.goal,
-        [key]: {
-          ...prev.goal[key],
-          [field]: value,
-        },
-      },
-    }));
-  };
-
-  const toggleConstraint = (
-    type: "avoidFoodIds" | "preferFoodIds",
-    foodId: string
-  ) => {
-    setState((prev) => {
-      const list = new Set(prev.constraints[type] ?? []);
-      if (list.has(foodId)) {
-        list.delete(foodId);
-      } else {
-        list.add(foodId);
-      }
-      return {
-        ...prev,
-        constraints: { ...prev.constraints, [type]: Array.from(list) },
-      };
-    });
-  };
-
   const solve = async () => {
-    setIsSolving(true);
-    setError(null);
-    setNotice(null);
+    setSolving(true);
+    clearMessages();
     try {
       if (!window.crossOriginIsolated || typeof SharedArrayBuffer === "undefined") {
         throw new Error(
@@ -352,7 +96,7 @@ export default function App() {
         },
         3
       );
-      setOptions(result);
+      setPlanOptions(result);
       if (result.length === 0) {
         setError(
           "No feasible plan found for the current goals and pantry. Try widening ranges or adding stock."
@@ -361,22 +105,12 @@ export default function App() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Solver failed.");
     } finally {
-      setIsSolving(false);
+      setSolving(false);
     }
   };
 
   const applyImportedState = (imported: AppState) => {
-    setState({
-      ...defaultState,
-      ...imported,
-      constraints: {
-        avoidFoodIds: imported.constraints?.avoidFoodIds ?? [],
-        preferFoodIds: imported.constraints?.preferFoodIds ?? [],
-      },
-    });
-    setOptions([]);
-    setError(null);
-    setNotice("Import completed.");
+    setImportedState(imported);
   };
 
   const exportStateToFile = () => {
@@ -418,8 +152,7 @@ export default function App() {
 
   const connectDrive = async () => {
     setDriveBusy(true);
-    setError(null);
-    setNotice(null);
+    clearMessages();
     try {
       await connectGoogleDrive(DEFAULT_DRIVE_CLIENT_ID);
       setDriveConnected(true);
@@ -439,8 +172,7 @@ export default function App() {
 
   const saveDrive = async () => {
     setDriveBusy(true);
-    setError(null);
-    setNotice(null);
+    clearMessages();
     try {
       await saveToGoogleDrive(DEFAULT_DRIVE_CLIENT_ID, serializeExport(state));
       setNotice("Saved to Google Drive.");
@@ -453,8 +185,7 @@ export default function App() {
 
   const loadDrive = async () => {
     setDriveBusy(true);
-    setError(null);
-    setNotice(null);
+    clearMessages();
     try {
       const content = await loadFromGoogleDrive(DEFAULT_DRIVE_CLIENT_ID);
       importFromText(content);
@@ -487,11 +218,7 @@ export default function App() {
             </button>
           </div>
           <div className="storage-actions">
-            <button
-              className="ghost"
-              onClick={copyStateToClipboard}
-              type="button"
-            >
+            <button className="ghost" onClick={copyStateToClipboard} type="button">
               Copy JSON
             </button>
             <button
@@ -536,20 +263,10 @@ export default function App() {
                   Disconnect Drive
                 </button>
               )}
-              <button
-                className="ghost"
-                onClick={saveDrive}
-                disabled={driveBusy}
-                type="button"
-              >
+              <button className="ghost" onClick={saveDrive} disabled={driveBusy} type="button">
                 Save to Drive
               </button>
-              <button
-                className="ghost"
-                onClick={loadDrive}
-                disabled={driveBusy}
-                type="button"
-              >
+              <button className="ghost" onClick={loadDrive} disabled={driveBusy} type="button">
                 Load from Drive
               </button>
             </div>
@@ -576,7 +293,7 @@ export default function App() {
                   type="number"
                   value={state.goal[macro].min}
                   onChange={(event) =>
-                    updateGoal(macro, "min", Number(event.target.value))
+                    updateGoal({ key: macro, field: "min", value: Number(event.target.value) })
                   }
                 />
                 <span>to</span>
@@ -584,7 +301,7 @@ export default function App() {
                   type="number"
                   value={state.goal[macro].max}
                   onChange={(event) =>
-                    updateGoal(macro, "max", Number(event.target.value))
+                    updateGoal({ key: macro, field: "max", value: Number(event.target.value) })
                   }
                 />
                 <span>g</span>
@@ -596,7 +313,7 @@ export default function App() {
         <section className="card">
           <div className="card__header">
             <h2>Pantry Foods</h2>
-            <button className="ghost" onClick={addFood}>
+            <button className="ghost" onClick={() => addFood()}>
               Add Food
             </button>
           </div>
@@ -618,21 +335,22 @@ export default function App() {
                   <input
                     value={food.name}
                     onChange={(event) =>
-                      updateFood(food.id, { name: event.target.value })
+                      updateFood({ foodId: food.id, updates: { name: event.target.value } })
                     }
                   />
                   <input
                     value={food.unit}
                     onChange={(event) =>
-                      updateFood(food.id, { unit: event.target.value })
+                      updateFood({ foodId: food.id, updates: { unit: event.target.value } })
                     }
                   />
                   <input
                     type="number"
                     value={food.nutritionPerUnit.carbs}
                     onChange={(event) =>
-                      updateNutrition(food.id, {
-                        carbs: Number(event.target.value),
+                      updateNutrition({
+                        foodId: food.id,
+                        updates: { carbs: Number(event.target.value) },
                       })
                     }
                   />
@@ -640,15 +358,19 @@ export default function App() {
                     type="number"
                     value={food.nutritionPerUnit.fat}
                     onChange={(event) =>
-                      updateNutrition(food.id, { fat: Number(event.target.value) })
+                      updateNutrition({
+                        foodId: food.id,
+                        updates: { fat: Number(event.target.value) },
+                      })
                     }
                   />
                   <input
                     type="number"
                     value={food.nutritionPerUnit.protein}
                     onChange={(event) =>
-                      updateNutrition(food.id, {
-                        protein: Number(event.target.value),
+                      updateNutrition({
+                        foodId: food.id,
+                        updates: { protein: Number(event.target.value) },
                       })
                     }
                   />
@@ -657,11 +379,12 @@ export default function App() {
                     value={food.price ?? ""}
                     placeholder="?"
                     onChange={(event) =>
-                      updateFood(food.id, {
-                        price:
-                          event.target.value === ""
-                            ? undefined
-                            : Number(event.target.value),
+                      updateFood({
+                        foodId: food.id,
+                        updates: {
+                          price:
+                            event.target.value === "" ? undefined : Number(event.target.value),
+                        },
                       })
                     }
                   />
@@ -670,21 +393,19 @@ export default function App() {
                     value={stock}
                     onChange={(event) => {
                       const value = event.target.value;
-                      updateStock(
-                        food.id,
-                        value === "inf" ? "inf" : Number(value)
-                      );
+                      updateStock({
+                        foodId: food.id,
+                        stock: value === "inf" ? "inf" : Number(value),
+                      });
                     }}
                   />
                   <div className="prefs">
                     <label>
                       <input
                         type="checkbox"
-                        checked={state.constraints.preferFoodIds?.includes(
-                          food.id
-                        )}
+                        checked={state.constraints.preferFoodIds?.includes(food.id)}
                         onChange={() =>
-                          toggleConstraint("preferFoodIds", food.id)
+                          toggleConstraint({ type: "preferFoodIds", foodId: food.id })
                         }
                       />
                       Prefer
@@ -694,15 +415,12 @@ export default function App() {
                         type="checkbox"
                         checked={state.constraints.avoidFoodIds?.includes(food.id)}
                         onChange={() =>
-                          toggleConstraint("avoidFoodIds", food.id)
+                          toggleConstraint({ type: "avoidFoodIds", foodId: food.id })
                         }
                       />
                       Avoid
                     </label>
-                    <button
-                      className="link"
-                      onClick={() => removeFood(food.id)}
-                    >
+                    <button className="link" onClick={() => removeFood(food.id)}>
                       Remove
                     </button>
                   </div>
@@ -718,17 +436,13 @@ export default function App() {
         <section className="card">
           <h2>Plan Options</h2>
           {error && <p className="error">{error}</p>}
-          {!error && options.length === 0 && (
-            <p className="hint">Generate plans to see results.</p>
-          )}
+          {!error && options.length === 0 && <p className="hint">Generate plans to see results.</p>}
           <div className="options">
             {options.map((option, index) => (
               <article className="option" key={index}>
                 <header>
                   <h3>Option {index + 1}</h3>
-                  <span className="price">
-                    ${formatPrice(option)} total
-                  </span>
+                  <span className="price">${formatPrice(option)} total</span>
                 </header>
                 <div className="option__body">
                   <div>
