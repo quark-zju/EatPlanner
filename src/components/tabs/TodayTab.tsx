@@ -1,12 +1,14 @@
+import { useState } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import {
+  addDraftFoodFromPantryAtom,
   addFoodAtom,
   appStateAtom,
   draftPriceSummaryAtom,
   generatePlanOptionsAtom,
   getPantryByFoodAtom,
   planOptionsAtom,
-  recomputeDraftTotalsAtom,
+  removeDraftItemAtom,
   removeFoodAtom,
   selectPlanOptionToDraftAtom,
   solvingAtom,
@@ -14,7 +16,6 @@ import {
   toggleConstraintAtom,
   updateDraftQuantityAtom,
   updateFoodAtom,
-  updateGoalAtom,
   updateNutritionAtom,
   updateStockAtom,
   setDraftDateAtom,
@@ -36,7 +37,8 @@ export default function TodayTab() {
   const selectOptionToDraft = useSetAtom(selectPlanOptionToDraftAtom);
   const updateDraftQty = useSetAtom(updateDraftQuantityAtom);
   const setDraftDate = useSetAtom(setDraftDateAtom);
-  const recomputeDraftTotals = useSetAtom(recomputeDraftTotalsAtom);
+  const addDraftFood = useSetAtom(addDraftFoodFromPantryAtom);
+  const removeDraftItem = useSetAtom(removeDraftItemAtom);
   const submitDraft = useSetAtom(submitDraftToHistoryAtom);
 
   const addFood = useSetAtom(addFoodAtom);
@@ -44,8 +46,10 @@ export default function TodayTab() {
   const updateFood = useSetAtom(updateFoodAtom);
   const updateNutrition = useSetAtom(updateNutritionAtom);
   const updateStock = useSetAtom(updateStockAtom);
-  const updateGoal = useSetAtom(updateGoalAtom);
   const toggleConstraint = useSetAtom(toggleConstraintAtom);
+
+  const [selectedDraftFoodId, setSelectedDraftFoodId] = useState<string>("");
+  const availableDraftFoods = state.foods.filter((food) => pantryByFood.has(food.id));
 
   return (
     <>
@@ -56,13 +60,18 @@ export default function TodayTab() {
             {isSolving ? "Solving..." : "Generate Plans"}
           </button>
         </div>
+        <p className="hint">
+          Goal ranges are configured in the <strong>Settings</strong> tab.
+        </p>
         {options.length === 0 && <p className="hint">Generate plans to get suggestions.</p>}
         <div className="options">
           {options.map((option, index) => (
             <article className="option" key={`${index}-${option.priceLowerBound}`}>
               <header>
                 <h3>Option {index + 1}</h3>
-                <span className="price">${formatPrice(option.priceLowerBound, option.hasUnknownPrice)}</span>
+                <span className="price">
+                  ${formatPrice(option.priceLowerBound, option.hasUnknownPrice)}
+                </span>
               </header>
               <div className="option__body">
                 <div>
@@ -108,9 +117,6 @@ export default function TodayTab() {
       <section className="card">
         <div className="card__header">
           <h2>Draft Editor</h2>
-          <button className="ghost" onClick={() => recomputeDraftTotals()} type="button">
-            Recompute Totals
-          </button>
         </div>
         <div className="draft-controls">
           <label>
@@ -120,6 +126,35 @@ export default function TodayTab() {
               value={state.todayDraft.draftDateISO}
               onChange={(event) => setDraftDate(event.target.value)}
             />
+          </label>
+          <label>
+            Add Pantry Food
+            <div className="inline-actions">
+              <select
+                value={selectedDraftFoodId}
+                onChange={(event) => setSelectedDraftFoodId(event.target.value)}
+              >
+                <option value="">Select food...</option>
+                {availableDraftFoods.map((food) => (
+                  <option key={food.id} value={food.id}>
+                    {food.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                className="ghost"
+                type="button"
+                onClick={() => {
+                  if (!selectedDraftFoodId) {
+                    return;
+                  }
+                  addDraftFood(selectedDraftFoodId);
+                }}
+                disabled={!selectedDraftFoodId}
+              >
+                Add
+              </button>
+            </div>
           </label>
         </div>
 
@@ -133,6 +168,7 @@ export default function TodayTab() {
               <span>Food</span>
               <span>Unit</span>
               <span>Quantity</span>
+              <span>Action</span>
             </div>
             {state.todayDraft.items.map((item) => (
               <div className="table__row draft-row" key={item.foodId}>
@@ -150,6 +186,9 @@ export default function TodayTab() {
                     })
                   }
                 />
+                <button className="link" type="button" onClick={() => removeDraftItem(item.foodId)}>
+                  Remove
+                </button>
               </div>
             ))}
           </div>
@@ -165,33 +204,6 @@ export default function TodayTab() {
         <button className="primary" onClick={() => submitDraft()} type="button">
           Save To History
         </button>
-      </section>
-
-      <section className="card">
-        <h2>Goals</h2>
-        <div className="goal-grid">
-          {(["carbs", "fat", "protein"] as const).map((macro) => (
-            <div className="goal-row" key={macro}>
-              <label className="macro-label">{macro}</label>
-              <input
-                type="number"
-                value={state.goal[macro].min}
-                onChange={(event) =>
-                  updateGoal({ key: macro, field: "min", value: Number(event.target.value) })
-                }
-              />
-              <span>to</span>
-              <input
-                type="number"
-                value={state.goal[macro].max}
-                onChange={(event) =>
-                  updateGoal({ key: macro, field: "max", value: Number(event.target.value) })
-                }
-              />
-              <span>g</span>
-            </div>
-          ))}
-        </div>
       </section>
 
       <section className="card">

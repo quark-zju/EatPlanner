@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import {
+  appStateAtom,
   connectDriveAtom,
   copyToClipboardAtom,
   disconnectDriveAtom,
@@ -12,9 +13,11 @@ import {
   saveToDriveAtom,
   loadFromDriveAtom,
   setErrorAtom,
+  updateGoalAtom,
 } from "../../state/appAtoms";
 
 export default function SettingsTab() {
+  const state = useAtomValue(appStateAtom);
   const driveConnected = useAtomValue(driveConnectedAtom);
   const driveBusy = useAtomValue(driveBusyAtom);
 
@@ -27,6 +30,7 @@ export default function SettingsTab() {
   const saveToDrive = useSetAtom(saveToDriveAtom);
   const loadFromDrive = useSetAtom(loadFromDriveAtom);
   const setError = useSetAtom(setErrorAtom);
+  const updateGoal = useSetAtom(updateGoalAtom);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -34,6 +38,31 @@ export default function SettingsTab() {
     <section className="card">
       <div className="card__header">
         <h2>Settings</h2>
+      </div>
+
+      <h3>Goals</h3>
+      <div className="goal-grid">
+        {(["carbs", "fat", "protein"] as const).map((macro) => (
+          <div className="goal-row" key={macro}>
+            <label className="macro-label">{macro}</label>
+            <input
+              type="number"
+              value={state.goal[macro].min}
+              onChange={(event) =>
+                updateGoal({ key: macro, field: "min", value: Number(event.target.value) })
+              }
+            />
+            <span>to</span>
+            <input
+              type="number"
+              value={state.goal[macro].max}
+              onChange={(event) =>
+                updateGoal({ key: macro, field: "max", value: Number(event.target.value) })
+              }
+            />
+            <span>g</span>
+          </div>
+        ))}
       </div>
 
       <h3>Data Controls</h3>

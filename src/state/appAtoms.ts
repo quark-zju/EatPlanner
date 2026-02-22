@@ -273,14 +273,53 @@ export const updateDraftQuantityAtom = atom(
   }
 );
 
-export const recomputeDraftTotalsAtom = atom(null, (get, set) => {
+export const addDraftFoodFromPantryAtom = atom(null, (get, set, foodId: string) => {
   const state = get(appStateAtom);
-  const totals = calculateDraftTotals(state.todayDraft.items);
+  const food = state.foods.find((f) => f.id === foodId);
+  if (!food) {
+    set(errorAtom, "Selected pantry food was not found.");
+    return;
+  }
+
+  const existing = state.todayDraft.items.find((item) => item.foodId === foodId);
+  const nextItems = existing
+    ? state.todayDraft.items.map((item) =>
+        item.foodId === foodId
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      )
+    : [
+        ...state.todayDraft.items,
+        {
+          foodId: food.id,
+          foodNameSnapshot: food.name,
+          unitSnapshot: food.unit,
+          nutritionPerUnitSnapshot: food.nutritionPerUnit,
+          quantity: 1,
+          pricePerUnitSnapshot: food.price,
+        },
+      ];
+
   set(appStateAtom, {
     ...state,
     todayDraft: {
       ...state.todayDraft,
-      totals,
+      items: nextItems,
+      totals: calculateDraftTotals(nextItems),
+    },
+  });
+  set(errorAtom, null);
+});
+
+export const removeDraftItemAtom = atom(null, (get, set, foodId: string) => {
+  const state = get(appStateAtom);
+  const nextItems = state.todayDraft.items.filter((item) => item.foodId !== foodId);
+  set(appStateAtom, {
+    ...state,
+    todayDraft: {
+      ...state.todayDraft,
+      items: nextItems,
+      totals: calculateDraftTotals(nextItems),
     },
   });
 });
