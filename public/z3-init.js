@@ -1,1 +1,2 @@
-window.global = window.global || { initZ3: window.initZ3 };
+globalThis.global = globalThis;
+globalThis.global.initZ3 = globalThis.initZ3;

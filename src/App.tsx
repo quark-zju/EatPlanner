@@ -206,6 +206,11 @@ export default function App() {
     setIsSolving(true);
     setError(null);
     try {
+      if (!window.crossOriginIsolated || typeof SharedArrayBuffer === "undefined") {
+        throw new Error(
+          "SharedArrayBuffer is unavailable. Reload after service worker registration or ensure COOP/COEP headers."
+        );
+      }
       const result = await solvePlanOptions(
         {
           foods: state.foods,
