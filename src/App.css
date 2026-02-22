@@ -158,6 +158,26 @@ input {
   color: #7d6b5f;
 }
 
+.hint-block {
+  border: 1px dashed #e4dacf;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+  background: #fffdf9;
+}
+
+.hint-block ul {
+  margin: 8px 0 12px;
+  padding-left: 18px;
+  color: #6b5a4d;
+}
+
+.hint-title {
+  margin: 0;
+  font-weight: 600;
+  color: #3c2e25;
+}
+
 .options {
   display: grid;
   gap: 16px;

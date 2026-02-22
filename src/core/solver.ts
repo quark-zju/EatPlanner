@@ -47,6 +47,55 @@ const getStockForFood = (pantry: PantryItem[], foodId: string) => {
   return entry.stock;
 };
 
+export const computeFeasibleBounds = (input: PlanInput) => {
+  const { foods, pantry, constraints } = input;
+  const avoidSet = new Set(constraints?.avoidFoodIds ?? []);
+
+  return foods.reduce(
+    (acc, food) => {
+      if (avoidSet.has(food.id)) {
+        return acc;
+      }
+      const stock = getStockForFood(pantry, food.id);
+      const maxServings = stock === "inf" ? Infinity : Math.max(0, Math.floor(stock));
+      const nutrition = food.nutritionPerUnit;
+
+      acc.min.carbs += 0;
+      acc.min.fat += 0;
+      acc.min.protein += 0;
+      acc.max.carbs = Number.isFinite(acc.max.carbs)
+        ? acc.max.carbs + toNumber(nutrition.carbs) * maxServings
+        : acc.max.carbs;
+      acc.max.fat = Number.isFinite(acc.max.fat)
+        ? acc.max.fat + toNumber(nutrition.fat) * maxServings
+        : acc.max.fat;
+      acc.max.protein = Number.isFinite(acc.max.protein)
+        ? acc.max.protein + toNumber(nutrition.protein) * maxServings
+        : acc.max.protein;
+
+      acc.min.calories = toNumber(acc.min.calories);
+      if (Number.isFinite(acc.max.calories)) {
+        acc.max.calories =
+          toNumber(acc.max.calories) +
+          toNumber(nutrition.calories) * maxServings;
+      }
+
+      if (stock === "inf") {
+        if (toNumber(nutrition.carbs) > 0) acc.max.carbs = Infinity;
+        if (toNumber(nutrition.fat) > 0) acc.max.fat = Infinity;
+        if (toNumber(nutrition.protein) > 0) acc.max.protein = Infinity;
+        if (toNumber(nutrition.calories) > 0) acc.max.calories = Infinity;
+      }
+
+      return acc;
+    },
+    {
+      min: { carbs: 0, fat: 0, protein: 0, calories: 0 },
+      max: { carbs: 0, fat: 0, protein: 0, calories: 0 },
+    }
+  );
+};
+
 export const computeTotals = (
   foods: Food[],
   servings: Record<string, number>

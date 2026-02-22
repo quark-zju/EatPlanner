@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 import type { Food, Goal, PantryItem, PlanOption, PlanConstraints } from "./core";
-import { solvePlanOptions } from "./core";
+import { computeFeasibleBounds, solvePlanOptions } from "./core";
 
 type AppState = {
   foods: Food[];
@@ -86,6 +86,10 @@ export default function App() {
   const [options, setOptions] = useState<PlanOption[]>([]);
   const [isSolving, setIsSolving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [infeasible, setInfeasible] = useState<{
+    reasons: string[];
+    bounds: ReturnType<typeof computeFeasibleBounds>;
+  } | null>(null);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -205,6 +209,7 @@ export default function App() {
   const solve = async () => {
     setIsSolving(true);
     setError(null);
+    setInfeasible(null);
     try {
       if (!window.crossOriginIsolated || typeof SharedArrayBuffer === "undefined") {
         throw new Error(
@@ -222,6 +227,35 @@ export default function App() {
       );
       setOptions(result);
       if (result.length === 0) {
+        const bounds = computeFeasibleBounds({
+          foods: state.foods,
+          pantry: state.pantry,
+          goal: state.goal,
+          constraints: state.constraints,
+        });
+        const reasons: string[] = [];
+        (["carbs", "fat", "protein"] as const).forEach((macro) => {
+          const max = bounds.max[macro];
+          const min = bounds.min[macro];
+          if (Number.isFinite(max) && state.goal[macro].min > max) {
+            reasons.push(
+              `${macro} min ${state.goal[macro].min}g exceeds max achievable ${max.toFixed(
+                1
+              )}g`
+            );
+          }
+          if (state.goal[macro].max < min) {
+            reasons.push(
+              `${macro} max ${state.goal[macro].max}g is below minimum achievable ${min.toFixed(
+                1
+              )}g`
+            );
+          }
+        });
+        setInfeasible({
+          reasons,
+          bounds,
+        });
         setError(
           "No feasible plan found for the current goals and pantry. Try widening ranges or adding stock."
         );
@@ -231,6 +265,35 @@ export default function App() {
     } finally {
       setIsSolving(false);
     }
+  };
+
+  const relaxGoalsToBounds = () => {
+    if (!infeasible) {
+      return;
+    }
+    setState((prev) => {
+      const nextGoal: Goal = { ...prev.goal };
+      (["carbs", "fat", "protein"] as const).forEach((macro) => {
+        const boundsMax = infeasible.bounds.max[macro];
+        if (Number.isFinite(boundsMax) && nextGoal[macro].min > boundsMax) {
+          nextGoal[macro] = { ...nextGoal[macro], min: Number(boundsMax.toFixed(1)) };
+        }
+        const boundsMin = infeasible.bounds.min[macro];
+        if (nextGoal[macro].max < boundsMin) {
+          nextGoal[macro] = { ...nextGoal[macro], max: Number(boundsMin.toFixed(1)) };
+        }
+        if (nextGoal[macro].min > nextGoal[macro].max) {
+          nextGoal[macro] = {
+            min: nextGoal[macro].max,
+            max: nextGoal[macro].max,
+          };
+        }
+      });
+      return {
+        ...prev,
+        goal: nextGoal,
+      };
+    });
   };
 
   return (
@@ -398,6 +461,22 @@ export default function App() {
         <section className="card">
           <h2>Plan Options</h2>
           {error && <p className="error">{error}</p>}
+          {infeasible && (
+            <div className="hint-block">
+              <p className="hint-title">Why it failed</p>
+              <ul>
+                {infeasible.reasons.length === 0 && (
+                  <li>Constraints are too tight for the available stock.</li>
+                )}
+                {infeasible.reasons.map((reason) => (
+                  <li key={reason}>{reason}</li>
+                ))}
+              </ul>
+              <button className="ghost" onClick={relaxGoalsToBounds}>
+                Auto-relax goals
+              </button>
+            </div>
+          )}
           {!error && options.length === 0 && (
             <p className="hint">Generate plans to see results.</p>
           )}
