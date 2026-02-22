@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 import type { Food, Goal, PantryItem, PlanOption, PlanConstraints } from "./core";
-import { solvePlanOptions } from "./core";
+import { solvePlanOptions } from "./core/browser";
 
 type AppState = {
   foods: Food[];
