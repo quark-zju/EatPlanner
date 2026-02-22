@@ -98,6 +98,12 @@
   flex-wrap: wrap;
 }
 
+.drive-box {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
 .hidden-input {
   display: none;
 }
@@ -209,6 +215,12 @@ input {
 .error {
   color: #b21f2d;
   font-weight: 600;
+}
+
+.notice {
+  color: #2b6e3f;
+  font-weight: 600;
+  margin-top: 10px;
 }
 
 @media (max-width: 900px) {

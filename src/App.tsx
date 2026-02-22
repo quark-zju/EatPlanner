@@ -7,6 +7,13 @@ import {
   parseImportText,
   serializeExport,
 } from "./storage/exportImport";
+import {
+  connectGoogleDrive,
+  disconnectGoogleDrive,
+  isGoogleDriveConnected,
+  loadFromGoogleDrive,
+  saveToGoogleDrive,
+} from "./storage/googleDrive";
 
 type AppState = {
   foods: Food[];
@@ -127,6 +134,7 @@ const isAppState = (value: unknown): value is AppState => {
 };
 
 const STORAGE_KEY = "eat-tracker-state-v1";
+const DRIVE_CLIENT_ID_STORAGE_KEY = "eat-tracker-drive-client-id-v1";
 
 const defaultState: AppState = {
   foods: [
@@ -202,11 +210,23 @@ export default function App() {
   const [options, setOptions] = useState<PlanOption[]>([]);
   const [isSolving, setIsSolving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [driveClientId, setDriveClientId] = useState(
+    () => localStorage.getItem(DRIVE_CLIENT_ID_STORAGE_KEY) ?? ""
+  );
+  const [driveConnected, setDriveConnected] = useState(() =>
+    isGoogleDriveConnected()
+  );
+  const [driveBusy, setDriveBusy] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
+
+  useEffect(() => {
+    localStorage.setItem(DRIVE_CLIENT_ID_STORAGE_KEY, driveClientId);
+  }, [driveClientId]);
 
   const pantryByFood = useMemo(() => {
     const map = new Map<string, PantryItem>();
@@ -322,6 +342,7 @@ export default function App() {
   const solve = async () => {
     setIsSolving(true);
     setError(null);
+    setNotice(null);
     try {
       if (!window.crossOriginIsolated || typeof SharedArrayBuffer === "undefined") {
         throw new Error(
@@ -361,6 +382,7 @@ export default function App() {
     });
     setOptions([]);
     setError(null);
+    setNotice("Import completed.");
   };
 
   const exportStateToFile = () => {
@@ -372,9 +394,11 @@ export default function App() {
     try {
       const content = serializeExport(state);
       await navigator.clipboard.writeText(content);
-      setError("Export copied to clipboard.");
+      setError(null);
+      setNotice("Export copied to clipboard.");
     } catch {
       setError("Clipboard write failed. Use Export File instead.");
+      setNotice(null);
     }
   };
 
@@ -394,6 +418,57 @@ export default function App() {
       importFromText(text);
     } catch {
       setError("Clipboard read failed. Use Import File instead.");
+      setNotice(null);
+    }
+  };
+
+  const connectDrive = async () => {
+    setDriveBusy(true);
+    setError(null);
+    setNotice(null);
+    try {
+      await connectGoogleDrive(driveClientId);
+      setDriveConnected(true);
+      setNotice("Connected to Google Drive.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Google Drive connect failed.");
+    } finally {
+      setDriveBusy(false);
+    }
+  };
+
+  const disconnectDrive = () => {
+    disconnectGoogleDrive();
+    setDriveConnected(false);
+    setNotice("Disconnected from Google Drive.");
+  };
+
+  const saveDrive = async () => {
+    setDriveBusy(true);
+    setError(null);
+    setNotice(null);
+    try {
+      await saveToGoogleDrive(driveClientId, serializeExport(state));
+      setNotice("Saved to Google Drive.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Google Drive save failed.");
+    } finally {
+      setDriveBusy(false);
+    }
+  };
+
+  const loadDrive = async () => {
+    setDriveBusy(true);
+    setError(null);
+    setNotice(null);
+    try {
+      const content = await loadFromGoogleDrive(driveClientId);
+      importFromText(content);
+      setNotice("Loaded from Google Drive.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Google Drive load failed.");
+    } finally {
+      setDriveBusy(false);
     }
   };
 
@@ -455,9 +530,46 @@ export default function App() {
               }}
             />
           </div>
+          <div className="drive-box">
+            <input
+              type="text"
+              value={driveClientId}
+              onChange={(event) => setDriveClientId(event.target.value)}
+              placeholder="Google OAuth Client ID"
+            />
+            <div className="storage-actions">
+              {!driveConnected && (
+                <button className="ghost" onClick={connectDrive} disabled={driveBusy}>
+                  Connect Drive
+                </button>
+              )}
+              {driveConnected && (
+                <button className="ghost" onClick={disconnectDrive} disabled={driveBusy}>
+                  Disconnect Drive
+                </button>
+              )}
+              <button
+                className="ghost"
+                onClick={saveDrive}
+                disabled={driveBusy}
+                type="button"
+              >
+                Save to Drive
+              </button>
+              <button
+                className="ghost"
+                onClick={loadDrive}
+                disabled={driveBusy}
+                type="button"
+              >
+                Load from Drive
+              </button>
+            </div>
+          </div>
           <p className="hint">
-            Export uses a versioned schema to keep future migrations safe.
+            Export uses a versioned schema. Google Drive sync writes to app data.
           </p>
+          {notice && <p className="notice">{notice}</p>}
         </section>
 
         <section className="card">
