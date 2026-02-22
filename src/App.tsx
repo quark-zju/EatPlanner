@@ -557,6 +557,12 @@ export default function App() {
           <p className="hint">
             Export uses a versioned schema. Google Drive sync writes to app data.
           </p>
+          <p className="hint">
+            Privacy Policy:{" "}
+            <a href="/privacy.html" target="_blank" rel="noreferrer">
+              /privacy.html
+            </a>
+          </p>
           {notice && <p className="notice">{notice}</p>}
         </section>
 
