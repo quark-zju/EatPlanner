@@ -2,7 +2,7 @@ const GOOGLE_IDENTITY_URL = "https://accounts.google.com/gsi/client";
 const DRIVE_API_BASE = "https://www.googleapis.com/drive/v3";
 const DRIVE_UPLOAD_BASE = "https://www.googleapis.com/upload/drive/v3";
 
-export const DRIVE_FILE_NAME = "eat-tracker-export.json";
+export const DRIVE_FILE_NAME = "eat-planner-export.json";
 
 let accessToken: string | null = null;
 type TokenClient = {

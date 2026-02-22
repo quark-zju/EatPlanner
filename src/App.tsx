@@ -133,7 +133,7 @@ const isAppState = (value: unknown): value is AppState => {
   return goalOk && constraintsOk;
 };
 
-const STORAGE_KEY = "eat-tracker-state-v1";
+const STORAGE_KEY = "eat-planner-state-v1";
 const DEFAULT_DRIVE_CLIENT_ID =
   "775455628972-haf8lsiavs1u6ncpui8f20ac0orkh4nf.apps.googleusercontent.com";
 
@@ -381,7 +381,7 @@ export default function App() {
 
   const exportStateToFile = () => {
     const content = serializeExport(state);
-    downloadTextFile("eat-tracker-export.json", content);
+    downloadTextFile("eat-planner-export.json", content);
   };
 
   const copyStateToClipboard = async () => {

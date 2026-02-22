@@ -1,4 +1,4 @@
-export const APP_SCHEMA = "eat-tracker-state";
+export const APP_SCHEMA = "eat-planner-state";
 export const APP_SCHEMA_VERSION = 1;
 
 export type ExportEnvelope<T> = {
