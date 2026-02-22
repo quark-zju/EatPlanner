@@ -134,7 +134,6 @@ const isAppState = (value: unknown): value is AppState => {
 };
 
 const STORAGE_KEY = "eat-tracker-state-v1";
-const DRIVE_CLIENT_ID_STORAGE_KEY = "eat-tracker-drive-client-id-v1";
 const DEFAULT_DRIVE_CLIENT_ID =
   "190735541755-la9g96kpemb691uhg62fe7ts2mf0f9c4.apps.googleusercontent.com";
 
@@ -213,11 +212,6 @@ export default function App() {
   const [isSolving, setIsSolving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const [driveClientId, setDriveClientId] = useState(
-    () =>
-      localStorage.getItem(DRIVE_CLIENT_ID_STORAGE_KEY) ??
-      DEFAULT_DRIVE_CLIENT_ID
-  );
   const [driveConnected, setDriveConnected] = useState(() =>
     isGoogleDriveConnected()
   );
@@ -227,10 +221,6 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
-
-  useEffect(() => {
-    localStorage.setItem(DRIVE_CLIENT_ID_STORAGE_KEY, driveClientId);
-  }, [driveClientId]);
 
   const pantryByFood = useMemo(() => {
     const map = new Map<string, PantryItem>();
@@ -431,7 +421,7 @@ export default function App() {
     setError(null);
     setNotice(null);
     try {
-      await connectGoogleDrive(driveClientId);
+      await connectGoogleDrive(DEFAULT_DRIVE_CLIENT_ID);
       setDriveConnected(true);
       setNotice("Connected to Google Drive.");
     } catch (err) {
@@ -452,7 +442,7 @@ export default function App() {
     setError(null);
     setNotice(null);
     try {
-      await saveToGoogleDrive(driveClientId, serializeExport(state));
+      await saveToGoogleDrive(DEFAULT_DRIVE_CLIENT_ID, serializeExport(state));
       setNotice("Saved to Google Drive.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Google Drive save failed.");
@@ -466,7 +456,7 @@ export default function App() {
     setError(null);
     setNotice(null);
     try {
-      const content = await loadFromGoogleDrive(driveClientId);
+      const content = await loadFromGoogleDrive(DEFAULT_DRIVE_CLIENT_ID);
       importFromText(content);
       setNotice("Loaded from Google Drive.");
     } catch (err) {
@@ -535,12 +525,6 @@ export default function App() {
             />
           </div>
           <div className="drive-box">
-            <input
-              type="text"
-              value={driveClientId}
-              onChange={(event) => setDriveClientId(event.target.value)}
-              placeholder="Google OAuth Client ID"
-            />
             <div className="storage-actions">
               {!driveConnected && (
                 <button className="ghost" onClick={connectDrive} disabled={driveBusy}>
