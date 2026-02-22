@@ -16,22 +16,56 @@ import {
 } from "../storage/googleDrive";
 import {
   APP_STATE_STORAGE_KEY,
-  defaultAppState,
+  defaultAppStateMap,
+  fromAppStateMap,
   isAppState,
   newFoodId,
   normalizeAppState,
+  toAppStateMap,
   type AppState,
+  type AppStateMap,
 } from "./appState";
 
 const DEFAULT_DRIVE_CLIENT_ID =
   "775455628972-haf8lsiavs1u6ncpui8f20ac0orkh4nf.apps.googleusercontent.com";
 const EXPORT_FILENAME = "eat-planner-export.json";
+const appStateMapStorage = {
+  getItem: (key: string, initialValue: AppStateMap): AppStateMap => {
+    const raw = localStorage.getItem(key);
+    if (!raw) {
+      return initialValue;
+    }
+    try {
+      const parsed = JSON.parse(raw);
+      if (isAppState(parsed)) {
+        return toAppStateMap(parsed);
+      }
+      return initialValue;
+    } catch {
+      return initialValue;
+    }
+  },
+  setItem: (key: string, newValue: AppStateMap) => {
+    const plain = fromAppStateMap(newValue);
+    localStorage.setItem(key, JSON.stringify(plain));
+  },
+  removeItem: (key: string) => {
+    localStorage.removeItem(key);
+  },
+};
 
-export const appStateAtom = atomWithStorage<AppState>(
+export const appStateMapAtom = atomWithStorage<AppStateMap>(
   APP_STATE_STORAGE_KEY,
-  defaultAppState,
-  undefined,
+  defaultAppStateMap,
+  appStateMapStorage,
   { getOnInit: true }
+);
+
+export const appStateAtom = atom(
+  (get) => fromAppStateMap(get(appStateMapAtom)),
+  (_get, set, nextState: AppState) => {
+    set(appStateMapAtom, toAppStateMap(normalizeAppState(nextState)));
+  }
 );
 
 export const planOptionsAtom = atom<PlanOption[]>([]);

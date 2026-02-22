@@ -1,4 +1,5 @@
 import type { Food, Goal, PantryItem, PlanConstraints } from "../core";
+import { Map, fromJS } from "immutable";
 
 export type AppState = {
   foods: Food[];
@@ -163,6 +164,16 @@ export const normalizeAppState = (state: AppState): AppState => ({
     preferFoodIds: state.constraints?.preferFoodIds ?? [],
   },
 });
+
+export type AppStateMap = Map<string, unknown>;
+
+export const toAppStateMap = (state: AppState): AppStateMap =>
+  fromJS(normalizeAppState(state)) as AppStateMap;
+
+export const fromAppStateMap = (map: AppStateMap): AppState =>
+  normalizeAppState(map.toJS() as AppState);
+
+export const defaultAppStateMap = toAppStateMap(defaultAppState);
 
 export const newFoodId = () =>
   typeof crypto !== "undefined" && crypto.randomUUID
