@@ -34,7 +34,7 @@ describe("solvePlan", () => {
       ],
       goal: {
         carbs: { min: 90, max: 100 },
-        fat: { min: 14, max: 18 },
+        fat: { min: 6, max: 10 },
         protein: { min: 60, max: 70 },
       },
     };
@@ -45,8 +45,8 @@ describe("solvePlan", () => {
     const totals = computeTotals(foods, result.servings);
     expect(totals.carbs).toBeGreaterThanOrEqual(90);
     expect(totals.carbs).toBeLessThanOrEqual(100);
-    expect(totals.fat).toBeGreaterThanOrEqual(14);
-    expect(totals.fat).toBeLessThanOrEqual(18);
+    expect(totals.fat).toBeGreaterThanOrEqual(6);
+    expect(totals.fat).toBeLessThanOrEqual(10);
     expect(totals.protein).toBeGreaterThanOrEqual(60);
     expect(totals.protein).toBeLessThanOrEqual(70);
 

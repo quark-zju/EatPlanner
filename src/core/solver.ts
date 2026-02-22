@@ -78,7 +78,7 @@ export const solvePlan = async (input: PlanInput): Promise<PlanSolution> => {
   const preferSet = new Set(constraints?.preferFoodIds ?? []);
 
   const { Context } = await init();
-  const { Optimize, Int, Real } = new Context("main");
+  const { Optimize, Int, Real, ToReal } = new Context("main");
 
   const optimizer = new Optimize();
   const servingsVars = new Map<string, ReturnType<typeof Int.const>>();
@@ -102,18 +102,22 @@ export const solvePlan = async (input: PlanInput): Promise<PlanSolution> => {
       optimizer.addSoft(variable.gt(0), 1, `prefer_${food.id}`);
     }
 
-    return acc.add(variable.mul(Real.val(toNumber(food.nutritionPerUnit.carbs))));
+    return acc.add(
+      ToReal(variable).mul(Real.val(toNumber(food.nutritionPerUnit.carbs)))
+    );
   }, Real.val(0));
 
   const fatSum = foods.reduce((acc, food) => {
     const variable = servingsVars.get(food.id)!;
-    return acc.add(variable.mul(Real.val(toNumber(food.nutritionPerUnit.fat))));
+    return acc.add(
+      ToReal(variable).mul(Real.val(toNumber(food.nutritionPerUnit.fat)))
+    );
   }, Real.val(0));
 
   const proteinSum = foods.reduce((acc, food) => {
     const variable = servingsVars.get(food.id)!;
     return acc.add(
-      variable.mul(Real.val(toNumber(food.nutritionPerUnit.protein)))
+      ToReal(variable).mul(Real.val(toNumber(food.nutritionPerUnit.protein)))
     );
   }, Real.val(0));
 
@@ -128,7 +132,7 @@ export const solvePlan = async (input: PlanInput): Promise<PlanSolution> => {
     const caloriesSum = foods.reduce((acc, food) => {
       const variable = servingsVars.get(food.id)!;
       return acc.add(
-        variable.mul(Real.val(toNumber(food.nutritionPerUnit.calories)))
+        ToReal(variable).mul(Real.val(toNumber(food.nutritionPerUnit.calories)))
       );
     }, Real.val(0));
 
