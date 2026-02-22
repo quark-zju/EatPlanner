@@ -470,7 +470,7 @@ export default function App() {
     <div className="app">
       <header className="app__header">
         <div>
-          <h1>EatTracker</h1>
+          <h1>Eat Planner</h1>
           <p>Plan meals around the food you already have.</p>
         </div>
         <button className="primary" onClick={solve} disabled={isSolving}>
