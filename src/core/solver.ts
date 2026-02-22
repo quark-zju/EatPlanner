@@ -107,7 +107,8 @@ export const solvePlanOptions = async (
   const optimizer = new Optimize();
   const servingsVars = new Map<string, ReturnType<typeof Int.const>>();
 
-  const carbsSum = foods.reduce((acc, food) => {
+  let carbsSum: any = Real.val(0);
+  for (const food of foods) {
     const variable = Int.const(`servings_${food.id}`);
     servingsVars.set(food.id, variable);
 
@@ -126,24 +127,26 @@ export const solvePlanOptions = async (
       optimizer.addSoft(variable.gt(0), 1, `prefer_${food.id}`);
     }
 
-    return acc.add(
+    carbsSum = carbsSum.add(
       ToReal(variable).mul(Real.val(toNumber(food.nutritionPerUnit.carbs)))
     );
-  }, Real.val(0));
+  }
 
-  const fatSum = foods.reduce((acc, food) => {
+  let fatSum: any = Real.val(0);
+  for (const food of foods) {
     const variable = servingsVars.get(food.id)!;
-    return acc.add(
+    fatSum = fatSum.add(
       ToReal(variable).mul(Real.val(toNumber(food.nutritionPerUnit.fat)))
     );
-  }, Real.val(0));
+  }
 
-  const proteinSum = foods.reduce((acc, food) => {
+  let proteinSum: any = Real.val(0);
+  for (const food of foods) {
     const variable = servingsVars.get(food.id)!;
-    return acc.add(
+    proteinSum = proteinSum.add(
       ToReal(variable).mul(Real.val(toNumber(food.nutritionPerUnit.protein)))
     );
-  }, Real.val(0));
+  }
 
   optimizer.add(carbsSum.ge(goal.carbs.min));
   optimizer.add(carbsSum.le(goal.carbs.max));
@@ -153,29 +156,31 @@ export const solvePlanOptions = async (
   optimizer.add(proteinSum.le(goal.protein.max));
 
   if (goal.calories) {
-    const caloriesSum = foods.reduce((acc, food) => {
+    let caloriesSum: any = Real.val(0);
+    for (const food of foods) {
       const variable = servingsVars.get(food.id)!;
-      return acc.add(
+      caloriesSum = caloriesSum.add(
         ToReal(variable).mul(Real.val(toNumber(food.nutritionPerUnit.calories)))
       );
-    }, Real.val(0));
+    }
 
     optimizer.add(caloriesSum.ge(goal.calories.min));
     optimizer.add(caloriesSum.le(goal.calories.max));
   }
 
-  const priceSum = foods.reduce((acc, food) => {
+  let priceSum: any = Real.val(0);
+  for (const food of foods) {
     if (food.price === undefined) {
-      return acc;
+      continue;
     }
     const variable = servingsVars.get(food.id)!;
-    return acc.add(ToReal(variable).mul(Real.val(toNumber(food.price))));
-  }, Real.val(0));
+    priceSum = priceSum.add(ToReal(variable).mul(Real.val(toNumber(food.price))));
+  }
 
-  const totalServings = Array.from(servingsVars.values()).reduce(
-    (acc, variable) => acc.add(variable),
-    Int.val(0)
-  );
+  let totalServings: any = Int.val(0);
+  for (const variable of servingsVars.values()) {
+    totalServings = totalServings.add(variable);
+  }
 
   optimizer.minimize(priceSum);
   optimizer.minimize(ToReal(totalServings));
