@@ -3,7 +3,6 @@ import { atomWithStorage } from "jotai/utils";
 import { solvePlanOptions } from "../core";
 import type {
   Food,
-  Goal,
   Nutrition,
   PantryItem,
   PlanConstraints,
@@ -25,7 +24,6 @@ import {
   APP_STATE_STORAGE_KEY,
   defaultAppStateMap,
   fromAppStateMap,
-  getRollingWindowStartISO,
   isAppState,
   newFoodId,
   normalizeAppState,
@@ -180,54 +178,6 @@ export const activeTabAtom = atom(
   }
 );
 
-export const setHistoryWindowAtom = atom(
-  null,
-  (get, set, direction: "prev" | "next" | "today") => {
-    const state = get(appStateAtom);
-    let nextStart = state.ui.historyWindowStartISO;
-    if (direction === "prev") {
-      nextStart = shiftLocalDateISO(nextStart, -30);
-    } else if (direction === "next") {
-      nextStart = shiftLocalDateISO(nextStart, 30);
-    } else {
-      nextStart = getRollingWindowStartISO();
-    }
-
-    set(appStateAtom, {
-      ...state,
-      ui: {
-        ...state.ui,
-        historyWindowStartISO: nextStart,
-        selectedHistoryDateISO: undefined,
-      },
-    });
-  }
-);
-
-export const setSelectedHistoryDateAtom = atom(
-  null,
-  (get, set, dateISO: LocalDateISO | undefined) => {
-    const state = get(appStateAtom);
-    set(appStateAtom, {
-      ...state,
-      ui: {
-        ...state.ui,
-        selectedHistoryDateISO: dateISO,
-      },
-    });
-  }
-);
-
-export const setDraftDateAtom = atom(null, (get, set, dateISO: LocalDateISO) => {
-  const state = get(appStateAtom);
-  set(appStateAtom, {
-    ...state,
-    todayDraft: {
-      ...state.todayDraft,
-      draftDateISO: dateISO,
-    },
-  });
-});
 
 export const selectPlanOptionToDraftAtom = atom(
   null,
@@ -635,48 +585,6 @@ export const moveFoodsToTopAtom = atom(null, (get, set, foodIds: string[]) => {
   });
 });
 
-export const updateGoalAtom = atom(
-  null,
-  (
-    get,
-    set,
-    payload: { key: keyof Goal; field: "min" | "max"; value: number }
-  ) => {
-    const state = get(appStateAtom);
-    set(appStateAtom, {
-      ...state,
-      goal: {
-        ...state.goal,
-        [payload.key]: {
-          ...state.goal[payload.key],
-          [payload.field]: payload.value,
-        },
-      },
-    });
-  }
-);
-
-export const toggleConstraintAtom = atom(
-  null,
-  (
-    get,
-    set,
-    payload: { type: "avoidFoodIds" | "preferFoodIds"; foodId: string }
-  ) => {
-    const state = get(appStateAtom);
-    const list = new Set(state.constraints[payload.type] ?? []);
-    if (list.has(payload.foodId)) {
-      list.delete(payload.foodId);
-    } else {
-      list.add(payload.foodId);
-    }
-
-    set(appStateAtom, {
-      ...state,
-      constraints: { ...state.constraints, [payload.type]: Array.from(list) },
-    });
-  }
-);
 
 export const getPantryByFoodAtom = atom((get) => {
   const pantry = get(appStateAtom).pantry;

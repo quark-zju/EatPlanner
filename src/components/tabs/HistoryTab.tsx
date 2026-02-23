@@ -1,12 +1,11 @@
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtomValue } from "jotai";
 import {
   appStateAtom,
   historyAggregatesInWindowAtom,
   historyDaysInWindowAtom,
   historyWindowRangeAtom,
-  setHistoryWindowAtom,
-  setSelectedHistoryDateAtom,
 } from "../../state/appAtoms";
+import { setHistoryWindow, setSelectedHistoryDate } from "../../state/appDomainActions";
 
 const formatPrice = (priceLowerBound: number, hasUnknownPrice: boolean) => {
   const base = priceLowerBound.toFixed(2);
@@ -19,22 +18,19 @@ export default function HistoryTab() {
   const historyDays = useAtomValue(historyDaysInWindowAtom);
   const aggregate = useAtomValue(historyAggregatesInWindowAtom);
 
-  const setWindow = useSetAtom(setHistoryWindowAtom);
-  const setSelectedDate = useSetAtom(setSelectedHistoryDateAtom);
-
   return (
     <>
       <section className="card">
         <div className="card__header">
           <h2>History</h2>
           <div className="storage-actions">
-            <button className="ghost" onClick={() => setWindow("prev")} type="button">
+            <button className="ghost" onClick={() => setHistoryWindow("prev")} type="button">
               Previous 30 days
             </button>
-            <button className="ghost" onClick={() => setWindow("next")} type="button">
+            <button className="ghost" onClick={() => setHistoryWindow("next")} type="button">
               Next 30 days
             </button>
-            <button className="ghost" onClick={() => setWindow("today")} type="button">
+            <button className="ghost" onClick={() => setHistoryWindow("today")} type="button">
               Jump To Current
             </button>
           </div>
@@ -62,9 +58,7 @@ export default function HistoryTab() {
               <article className="history-item" key={dateISO}>
                 <button
                   className={`history-item__header ${selected ? "is-active" : ""}`}
-                  onClick={() =>
-                    setSelectedDate(selected ? undefined : dateISO)
-                  }
+                  onClick={() => setSelectedHistoryDate(selected ? undefined : dateISO)}
                   type="button"
                 >
                   <strong>{dateISO}</strong>

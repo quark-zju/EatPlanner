@@ -10,8 +10,8 @@ import {
   selectPlanOptionToDraftAtom,
   solvingAtom,
   submitDraftToHistoryAtom,
-  setDraftDateAtom,
 } from "../../state/appAtoms";
+import { setDraftDate } from "../../state/appDomainActions";
 import { getFoodIcon } from "../../state/appState";
 
 const formatPrice = (priceLowerBound: number, hasUnknownPrice: boolean) => {
@@ -28,7 +28,6 @@ export default function TodayTab() {
 
   const generatePlans = useSetAtom(generatePlanOptionsAtom);
   const selectOptionToDraft = useSetAtom(selectPlanOptionToDraftAtom);
-  const setDraftDate = useSetAtom(setDraftDateAtom);
   const addDraftFood = useSetAtom(addDraftFoodFromPantryAtom);
   const removeDraftItem = useSetAtom(removeDraftItemAtom);
   const submitDraft = useSetAtom(submitDraftToHistoryAtom);

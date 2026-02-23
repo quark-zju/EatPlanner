@@ -78,6 +78,7 @@ describe("appAtoms history and draft flow", () => {
 
   it("moves history window by 30 days", async () => {
     const atoms = await import("./appAtoms");
+    const actions = await import("./appDomainActions");
     const store = createStore();
 
     store.set(atoms.appStateAtom, {
@@ -88,10 +89,10 @@ describe("appAtoms history and draft flow", () => {
       },
     });
 
-    store.set(atoms.setHistoryWindowAtom, "prev");
+    actions.setHistoryWindow("prev", store);
     expect(store.get(atoms.appStateAtom).ui.historyWindowStartISO).toBe("2026-01-02");
 
-    store.set(atoms.setHistoryWindowAtom, "next");
+    actions.setHistoryWindow("next", store);
     expect(store.get(atoms.appStateAtom).ui.historyWindowStartISO).toBe("2026-02-01");
   });
 

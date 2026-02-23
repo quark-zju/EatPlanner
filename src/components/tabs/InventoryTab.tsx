@@ -6,11 +6,11 @@ import {
   getPantryByFoodAtom,
   moveFoodsToTopAtom,
   removeFoodsAtom,
-  toggleConstraintAtom,
   updateFoodAtom,
   updateNutritionAtom,
   updateStockAtom,
 } from "../../state/appAtoms";
+import { toggleConstraint } from "../../state/appDomainActions";
 import { DEFAULT_FOOD_ICON, getFoodIcon } from "../../state/appState";
 
 export default function InventoryTab() {
@@ -22,7 +22,6 @@ export default function InventoryTab() {
   const updateFood = useSetAtom(updateFoodAtom);
   const updateNutrition = useSetAtom(updateNutritionAtom);
   const updateStock = useSetAtom(updateStockAtom);
-  const toggleConstraint = useSetAtom(toggleConstraintAtom);
   const [selectedFoodIds, setSelectedFoodIds] = useState<string[]>([]);
   const [newFood, setNewFood] = useState({
     name: "",

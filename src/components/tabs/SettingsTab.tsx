@@ -12,8 +12,8 @@ import {
   pasteFromClipboardAtom,
   saveToDriveAtom,
   loadFromDriveAtom,
-  updateGoalAtom,
 } from "../../state/appAtoms";
+import { updateGoal } from "../../state/appDomainActions";
 import { setAppError } from "../../state/appStoreActions";
 
 export default function SettingsTab() {
@@ -29,8 +29,6 @@ export default function SettingsTab() {
   const disconnectDrive = useSetAtom(disconnectDriveAtom);
   const saveToDrive = useSetAtom(saveToDriveAtom);
   const loadFromDrive = useSetAtom(loadFromDriveAtom);
-  const updateGoal = useSetAtom(updateGoalAtom);
-
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   return (
