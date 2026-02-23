@@ -94,7 +94,7 @@ export const selectPlanOptionToDraft = (
     },
   });
   s.set(errorAtom, null);
-  s.set(noticeAtom, "Plan loaded into draft editor.");
+  s.set(noticeAtom, 'Plan loaded into "What did you eat?".');
 };
 
 export const updateDraftQuantity = (

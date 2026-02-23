@@ -127,7 +127,7 @@ export default function TodayTab() {
                 }
                 type="button"
               >
-                Use This Plan
+                Use this plan
               </button>
             </article>
           ))}

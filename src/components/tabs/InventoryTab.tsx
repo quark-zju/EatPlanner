@@ -115,7 +115,6 @@ export default function InventoryTab() {
         <table className="editor-table pantry-editor-table">
           <thead>
             <tr>
-              <th aria-label="Select foods"></th>
               <th className="col-name">Name</th>
               <th className="col-icon">Icon</th>
               <th>Unit</th>
@@ -124,7 +123,7 @@ export default function InventoryTab() {
               <th>Protein</th>
               <th>Price</th>
               <th>Stock</th>
-              <th>Action</th>
+              <th>Select</th>
             </tr>
           </thead>
           <tbody>
@@ -132,13 +131,6 @@ export default function InventoryTab() {
               const stock = pantryByFood.get(food.id)?.stock ?? 0;
               return (
                 <tr key={food.id}>
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={selectedIdSet.has(food.id)}
-                      onChange={() => toggleSelected(food.id)}
-                    />
-                  </td>
                   <td className="col-name">
                     <input
                       value={food.name}
@@ -236,22 +228,17 @@ export default function InventoryTab() {
                     />
                   </td>
                   <td>
-                    <button
-                      className="ghost"
-                      type="button"
-                      onClick={() => {
-                        removeFoods([food.id]);
-                        setSelectedFoodIds((prev) => prev.filter((id) => id !== food.id));
-                      }}
-                    >
-                      Delete
-                    </button>
+                    <input
+                      type="checkbox"
+                      checked={selectedIdSet.has(food.id)}
+                      onChange={() => toggleSelected(food.id)}
+                      aria-label={`Select ${food.name}`}
+                    />
                   </td>
                 </tr>
               );
             })}
             <tr>
-              <td></td>
               <td className="col-name">
                 <input
                   value={newFood.name}
