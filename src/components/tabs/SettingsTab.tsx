@@ -1,18 +1,22 @@
 import { useRef } from "react";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtomValue } from "jotai";
 import {
   appStateAtom,
-  connectDriveAtom,
-  copyToClipboardAtom,
-  disconnectDriveAtom,
   driveBusyAtom,
   driveConnectedAtom,
-  exportToFileAtom,
-  importFromFileAtom,
-  pasteFromClipboardAtom,
-  saveToDriveAtom,
-  loadFromDriveAtom,
 } from "../../state/appAtoms";
+import {
+  copyToClipboard,
+  exportToFile,
+  importFromFile,
+  pasteFromClipboard,
+} from "../../state/appDataActions";
+import {
+  connectDrive,
+  disconnectDrive,
+  loadFromDrive,
+  saveToDrive,
+} from "../../state/appDriveActions";
 import { updateGoal } from "../../state/appDomainActions";
 import { setAppError } from "../../state/appStoreActions";
 
@@ -21,14 +25,6 @@ export default function SettingsTab() {
   const driveConnected = useAtomValue(driveConnectedAtom);
   const driveBusy = useAtomValue(driveBusyAtom);
 
-  const exportToFile = useSetAtom(exportToFileAtom);
-  const copyToClipboard = useSetAtom(copyToClipboardAtom);
-  const pasteFromClipboard = useSetAtom(pasteFromClipboardAtom);
-  const importFromFile = useSetAtom(importFromFileAtom);
-  const connectDrive = useSetAtom(connectDriveAtom);
-  const disconnectDrive = useSetAtom(disconnectDriveAtom);
-  const saveToDrive = useSetAtom(saveToDriveAtom);
-  const loadFromDrive = useSetAtom(loadFromDriveAtom);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   return (

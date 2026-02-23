@@ -44,18 +44,6 @@ export const setSelectedHistoryDate = (dateISO: LocalDateISO | undefined, store?
   });
 };
 
-export const setDraftDate = (dateISO: LocalDateISO, store?: StoreLike) => {
-  const s = withStore(store);
-  const state = s.get(appStateAtom);
-  s.set(appStateAtom, {
-    ...state,
-    todayDraft: {
-      ...state.todayDraft,
-      draftDateISO: dateISO,
-    },
-  });
-};
-
 export const updateGoal = (
   payload: { key: keyof Goal; field: "min" | "max"; value: number },
   store?: StoreLike

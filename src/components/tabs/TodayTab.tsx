@@ -1,8 +1,7 @@
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtomValue } from "jotai";
 import {
   appStateAtom,
   draftPriceSummaryAtom,
-  generatePlanOptionsAtom,
   getPantryByFoodAtom,
   planOptionsAtom,
   solvingAtom,
@@ -14,6 +13,7 @@ import {
   setDraftDate,
   submitDraftToHistory,
 } from "../../state/appDraftActions";
+import { generatePlanOptions } from "../../state/appPlannerActions";
 import { getFoodIcon } from "../../state/appState";
 
 const formatPrice = (priceLowerBound: number, hasUnknownPrice: boolean) => {
@@ -28,7 +28,7 @@ export default function TodayTab() {
   const pantryByFood = useAtomValue(getPantryByFoodAtom);
   const draftPrice = useAtomValue(draftPriceSummaryAtom);
 
-  const generatePlans = useSetAtom(generatePlanOptionsAtom);
+  const generatePlans = generatePlanOptions;
   const selectOptionToDraft = selectPlanOptionToDraft;
   const addDraftFood = addDraftFoodFromPantry;
   const removeDraft = removeDraftItem;
