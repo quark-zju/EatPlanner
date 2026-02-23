@@ -17,7 +17,7 @@ import {
   loadFromDrive,
   saveToDrive,
 } from "../../state/appDriveActions";
-import { updateGoal } from "../../state/appDomainActions";
+import { setPlanOptionLimit, updateGoal } from "../../state/appDomainActions";
 import { setAppError } from "../../state/appStoreActions";
 
 export default function SettingsTab() {
@@ -58,6 +58,19 @@ export default function SettingsTab() {
         ))}
       </div>
 
+      <h3>Plan Generation</h3>
+      <div className="goal-grid">
+        <div className="setting-row">
+          <label className="macro-label">Maximum Plan Count</label>
+          <input
+            type="number"
+            min={1}
+            value={state.planOptionLimit}
+            onChange={(event) => setPlanOptionLimit(Number(event.target.value))}
+          />
+          <span>plans</span>
+        </div>
+      </div>
       <h3>Data Controls</h3>
       <div className="storage-actions">
         <button className="ghost" onClick={() => exportToFile()} type="button">

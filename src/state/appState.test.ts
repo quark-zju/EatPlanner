@@ -14,4 +14,12 @@ describe("normalizeAppState", () => {
     expect(normalized.todayDraft.items).toEqual([]);
     expect(normalized.history.byDate).toEqual({});
   });
+
+  it("clamps planOptionLimit to at least 1", () => {
+    const normalized = normalizeAppState({
+      ...defaultAppState,
+      planOptionLimit: 0,
+    } as AppState);
+    expect(normalized.planOptionLimit).toBe(1);
+  });
 });

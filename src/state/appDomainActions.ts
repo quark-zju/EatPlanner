@@ -47,3 +47,13 @@ export const updateGoal = (
     },
   });
 };
+
+export const setPlanOptionLimit = (value: number, store?: StoreLike) => {
+  const s = withStore(store);
+  const state = s.get(appStateAtom);
+  const next = Math.max(1, Math.trunc(Number.isFinite(value) ? value : 1));
+  s.set(appStateAtom, {
+    ...state,
+    planOptionLimit: next,
+  });
+};

@@ -46,6 +46,7 @@ export type AppState = {
   foods: Food[];
   pantry: PantryItem[];
   goal: Goal;
+  planOptionLimit: number;
   todayDraft: TodayDraftState;
   history: HistoryState;
 };
@@ -54,6 +55,8 @@ export const APP_STATE_STORAGE_KEY = "eat-planner-state-v1";
 
 const isNumber = (value: unknown): value is number =>
   typeof value === "number" && Number.isFinite(value);
+const clampPlanOptionLimit = (value: number | undefined) =>
+  Math.max(1, Math.trunc(value ?? 3));
 
 const isMacroRange = (value: unknown): value is { min: number; max: number } => {
   if (!value || typeof value !== "object") {
@@ -187,6 +190,7 @@ export const isAppState = (value: unknown): value is AppState => {
     foods?: unknown;
     pantry?: unknown;
     goal?: unknown;
+    planOptionLimit?: unknown;
     todayDraft?: unknown;
     history?: unknown;
   };
@@ -239,11 +243,14 @@ export const isAppState = (value: unknown): value is AppState => {
 
   const goalOk =
     isMacroRange(goal.carbs) && isMacroRange(goal.fat) && isMacroRange(goal.protein);
+  const planOptionLimitOk =
+    obj.planOptionLimit === undefined ||
+    (isNumber(obj.planOptionLimit) && obj.planOptionLimit >= 1);
 
   const todayDraftOk = obj.todayDraft === undefined || isTodayDraftState(obj.todayDraft);
   const historyOk = obj.history === undefined || isHistoryState(obj.history);
 
-  return goalOk && todayDraftOk && historyOk;
+  return goalOk && planOptionLimitOk && todayDraftOk && historyOk;
 };
 
 export const toLocalDateISO = (date: Date): LocalDateISO => {
@@ -351,6 +358,7 @@ export const defaultAppState: AppState = {
     fat: { min: 10, max: 22 },
     protein: { min: 60, max: 90 },
   },
+  planOptionLimit: 3,
   todayDraft: {
     selectedOptionId: undefined,
     draftDateISO: toLocalDateISO(new Date()),
@@ -368,6 +376,7 @@ export const normalizeAppState = (state: AppState): AppState => {
   const merged = {
     ...defaultAppState,
     ...stateData,
+    planOptionLimit: clampPlanOptionLimit((stateData as AppState).planOptionLimit),
     todayDraft: {
       ...defaultAppState.todayDraft,
       ...(state.todayDraft ?? {}),

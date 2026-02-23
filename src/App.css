@@ -310,6 +310,13 @@
   width: 100%;
 }
 
+.setting-row {
+  display: grid;
+  grid-template-columns: minmax(80px, 1fr) minmax(120px, 180px) auto;
+  align-items: center;
+  gap: 8px;
+}
+
 .macro-label {
   text-transform: capitalize;
   font-weight: 600;

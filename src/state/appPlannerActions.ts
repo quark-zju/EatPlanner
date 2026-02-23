@@ -107,7 +107,7 @@ export const generatePlanOptions = async (
           avoidFoodIds: localAvoid,
         },
       },
-      3
+      state.planOptionLimit
     );
 
     s.set(planOptionsAtom, result);
