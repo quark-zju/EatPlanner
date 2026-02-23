@@ -10,9 +10,13 @@ Plan meals from what you already have.
 
 ## Tech Stack
 
+Choices I made:
+
 - React + TypeScript + Vite
 - Jotai + Immutable.js for state management
 - z3-solver for planning
+
+Most coding is done by an AI.
 
 <details>
 <summary>Project Structure</summary>
