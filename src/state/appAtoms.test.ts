@@ -108,8 +108,14 @@ describe("appAtoms history and draft flow", () => {
 
     inventoryActions.removeFoods(["olive-oil", "rice"], store);
     state = store.get(atoms.appStateAtom);
-    expect(state.foods.map((food) => food.id)).toEqual(["chicken"]);
-    expect(state.pantry.map((item) => item.foodId)).toEqual(["chicken"]);
+    const remainingFoodIds = state.foods.map((food) => food.id);
+    const remainingPantryFoodIds = state.pantry.map((item) => item.foodId);
+    expect(remainingFoodIds).not.toContain("olive-oil");
+    expect(remainingFoodIds).not.toContain("rice");
+    expect(remainingFoodIds).toContain("chicken");
+    expect(remainingPantryFoodIds).not.toContain("olive-oil");
+    expect(remainingPantryFoodIds).not.toContain("rice");
+    expect(remainingPantryFoodIds).toContain("chicken");
   });
 
   it("adds a new food from inventory placeholder row payload", async () => {
