@@ -43,6 +43,7 @@ export default function TodayTab() {
   const draftItemByFoodId = new Map(
     state.todayDraft.items.map((item) => [item.foodId, item])
   );
+  const hasAnySelection = state.todayDraft.items.some((item) => item.quantity > 0);
   const localAvoidSet = useMemo(() => new Set(localAvoidFoodIds), [localAvoidFoodIds]);
 
   const toggleLocalAvoid = (foodId: string) => {
@@ -152,6 +153,14 @@ export default function TodayTab() {
       <section className="card">
         <div className="card__header">
           <h2>What did you eat?</h2>
+          <button
+            className="primary"
+            onClick={() => submitDraft()}
+            type="button"
+            disabled={!hasAnySelection}
+          >
+            Save To History
+          </button>
         </div>
         <div className="draft-controls">
           <label>
@@ -205,10 +214,6 @@ export default function TodayTab() {
           <NutritionGoalStats totals={state.todayDraft.totals} goal={state.goal} />
           <p>Price: ${formatPrice(draftPrice.priceLowerBound, draftPrice.hasUnknownPrice)}</p>
         </div>
-
-        <button className="primary" onClick={() => submitDraft()} type="button">
-          Save To History
-        </button>
       </section>
 
     </>
