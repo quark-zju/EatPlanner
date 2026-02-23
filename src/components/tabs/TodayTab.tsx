@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import {
   addDraftFoodFromPantryAtom,
@@ -11,9 +10,9 @@ import {
   selectPlanOptionToDraftAtom,
   solvingAtom,
   submitDraftToHistoryAtom,
-  updateDraftQuantityAtom,
   setDraftDateAtom,
 } from "../../state/appAtoms";
+import { getFoodIcon } from "../../state/appState";
 
 const formatPrice = (priceLowerBound: number, hasUnknownPrice: boolean) => {
   const base = priceLowerBound.toFixed(2);
@@ -29,14 +28,15 @@ export default function TodayTab() {
 
   const generatePlans = useSetAtom(generatePlanOptionsAtom);
   const selectOptionToDraft = useSetAtom(selectPlanOptionToDraftAtom);
-  const updateDraftQty = useSetAtom(updateDraftQuantityAtom);
   const setDraftDate = useSetAtom(setDraftDateAtom);
   const addDraftFood = useSetAtom(addDraftFoodFromPantryAtom);
   const removeDraftItem = useSetAtom(removeDraftItemAtom);
   const submitDraft = useSetAtom(submitDraftToHistoryAtom);
 
-  const [selectedDraftFoodId, setSelectedDraftFoodId] = useState<string>("");
   const availableDraftFoods = state.foods.filter((food) => pantryByFood.has(food.id));
+  const draftItemByFoodId = new Map(
+    state.todayDraft.items.map((item) => [item.foodId, item])
+  );
 
   return (
     <>
@@ -114,86 +114,44 @@ export default function TodayTab() {
               onChange={(event) => setDraftDate(event.target.value)}
             />
           </label>
-          <label>
-            Add Pantry Food
-            <div className="inline-actions">
-              <select
-                value={selectedDraftFoodId}
-                onChange={(event) => setSelectedDraftFoodId(event.target.value)}
-              >
-                <option value="">Select food...</option>
-                {availableDraftFoods.map((food) => (
-                  <option key={food.id} value={food.id}>
-                    {food.name}
-                  </option>
-                ))}
-              </select>
-              <button
-                className="ghost"
-                type="button"
-                onClick={() => {
-                  if (!selectedDraftFoodId) {
-                    return;
-                  }
-                  addDraftFood(selectedDraftFoodId);
-                }}
-                disabled={!selectedDraftFoodId}
-              >
-                Add
-              </button>
-            </div>
-          </label>
         </div>
 
-        {state.todayDraft.items.length === 0 && (
-          <p className="hint">Select a plan option to prefill this editor.</p>
-        )}
-
-        {state.todayDraft.items.length > 0 && (
-          <div className="table-scroll">
-            <table className="editor-table draft-editor-table">
-              <thead>
-                <tr>
-                  <th>Food</th>
-                  <th>Unit</th>
-                  <th>Quantity</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {state.todayDraft.items.map((item) => (
-                  <tr key={item.foodId}>
-                    <td>{item.foodNameSnapshot}</td>
-                    <td>{item.unitSnapshot}</td>
-                    <td>
-                      <input
-                        type="number"
-                        min={0}
-                        step="0.1"
-                        value={item.quantity}
-                        onChange={(event) =>
-                          updateDraftQty({
-                            foodId: item.foodId,
-                            quantity: Number(event.target.value),
-                          })
-                        }
-                      />
-                    </td>
-                    <td>
-                      <button
-                        className="link"
-                        type="button"
-                        onClick={() => removeDraftItem(item.foodId)}
-                      >
-                        Remove
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <p className="hint">Click a food tile to add +1 unit. Use x to clear that item.</p>
+        <div className="draft-grid">
+          {availableDraftFoods.map((food) => {
+            const item = draftItemByFoodId.get(food.id);
+            const quantity = item?.quantity ?? 0;
+            return (
+              <div
+                className={`draft-tile-wrap ${quantity > 0 ? "is-selected" : ""}`}
+                key={food.id}
+              >
+                <button
+                  className="draft-tile"
+                  type="button"
+                  onClick={() => addDraftFood(food.id)}
+                  title={`Add 1 ${food.unit}`}
+                >
+                  <span className="draft-tile__icon">{getFoodIcon(item?.foodIconSnapshot ?? food.icon)}</span>
+                  <span className="draft-tile__name">{item?.foodNameSnapshot ?? food.name}</span>
+                  <span className="draft-tile__qty">
+                    {quantity} {food.unit}
+                  </span>
+                </button>
+                {quantity > 0 && (
+                  <button
+                    className="draft-tile__clear"
+                    type="button"
+                    onClick={() => removeDraftItem(food.id)}
+                    title="Clear item"
+                  >
+                    x
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
 
         <div className="draft-summary">
           <p>Carbs: {state.todayDraft.totals.carbs.toFixed(1)} g</p>

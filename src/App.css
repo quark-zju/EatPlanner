@@ -158,6 +158,63 @@
   margin: 10px 0 14px;
 }
 
+.draft-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.draft-tile-wrap {
+  position: relative;
+}
+
+.draft-tile {
+  width: 100%;
+  border: 1px solid #e8d8ca;
+  border-radius: 14px;
+  background: #fffaf3;
+  padding: 12px 8px;
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  cursor: pointer;
+}
+
+.draft-tile-wrap.is-selected .draft-tile {
+  border-color: #2d1f14;
+  background: #f7ecdf;
+}
+
+.draft-tile__icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.draft-tile__name {
+  font-weight: 600;
+  text-align: center;
+}
+
+.draft-tile__qty {
+  font-size: 12px;
+  color: #6f5d50;
+}
+
+.draft-tile__clear {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 999px;
+  background: #3b2d24;
+  color: #fff;
+  cursor: pointer;
+  line-height: 1;
+}
+
 .goal-grid {
   display: grid;
   gap: 12px;
@@ -227,6 +284,11 @@ select {
 
 .draft-editor-table {
   min-width: 520px;
+}
+
+.icon-preview {
+  margin: 6px 0 0;
+  font-size: 18px;
 }
 
 .prefs {
