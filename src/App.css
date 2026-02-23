@@ -336,11 +336,6 @@ select {
   min-width: 520px;
 }
 
-.icon-preview {
-  margin: 6px 0 0;
-  font-size: 18px;
-}
-
 .prefs {
   display: grid;
   gap: 6px;

@@ -12,7 +12,7 @@ import {
   updateNutrition,
   updateStock,
 } from "../../state/appInventoryActions";
-import { DEFAULT_FOOD_ICON, getFoodIcon } from "../../state/appState";
+import { DEFAULT_FOOD_ICON } from "../../state/appState";
 
 export default function InventoryTab() {
   const state = useAtomValue(appStateAtom);
@@ -161,7 +161,6 @@ export default function InventoryTab() {
                         })
                       }
                     />
-                    <p className="icon-preview">{getFoodIcon(food.icon)}</p>
                   </td>
                   <td>
                     <input
