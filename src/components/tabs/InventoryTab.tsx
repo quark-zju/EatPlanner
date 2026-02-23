@@ -122,6 +122,7 @@ export default function InventoryTab() {
               <th>Protein</th>
               <th>Price</th>
               <th>Stock</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -233,6 +234,7 @@ export default function InventoryTab() {
                       }}
                     />
                   </td>
+                  <td></td>
                 </tr>
               );
             })}
@@ -245,11 +247,6 @@ export default function InventoryTab() {
                   onChange={(event) =>
                     setNewFood((prev) => ({ ...prev, name: event.target.value }))
                   }
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      commitNewFood();
-                    }
-                  }}
                 />
               </td>
               <td>
@@ -260,11 +257,6 @@ export default function InventoryTab() {
                   onChange={(event) =>
                     setNewFood((prev) => ({ ...prev, icon: event.target.value }))
                   }
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      commitNewFood();
-                    }
-                  }}
                 />
               </td>
               <td>
@@ -273,11 +265,6 @@ export default function InventoryTab() {
                   onChange={(event) =>
                     setNewFood((prev) => ({ ...prev, unit: event.target.value }))
                   }
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      commitNewFood();
-                    }
-                  }}
                 />
               </td>
               <td>
@@ -287,11 +274,6 @@ export default function InventoryTab() {
                   onChange={(event) =>
                     setNewFood((prev) => ({ ...prev, carbs: event.target.value }))
                   }
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      commitNewFood();
-                    }
-                  }}
                 />
               </td>
               <td>
@@ -301,11 +283,6 @@ export default function InventoryTab() {
                   onChange={(event) =>
                     setNewFood((prev) => ({ ...prev, fat: event.target.value }))
                   }
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      commitNewFood();
-                    }
-                  }}
                 />
               </td>
               <td>
@@ -315,11 +292,6 @@ export default function InventoryTab() {
                   onChange={(event) =>
                     setNewFood((prev) => ({ ...prev, protein: event.target.value }))
                   }
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      commitNewFood();
-                    }
-                  }}
                 />
               </td>
               <td>
@@ -330,11 +302,6 @@ export default function InventoryTab() {
                   onChange={(event) =>
                     setNewFood((prev) => ({ ...prev, price: event.target.value }))
                   }
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      commitNewFood();
-                    }
-                  }}
                 />
               </td>
               <td>
@@ -344,12 +311,12 @@ export default function InventoryTab() {
                   onChange={(event) =>
                     setNewFood((prev) => ({ ...prev, stock: event.target.value }))
                   }
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      commitNewFood();
-                    }
-                  }}
                 />
+              </td>
+              <td>
+                <button className="ghost" type="button" onClick={() => commitNewFood()}>
+                  Add
+                </button>
               </td>
             </tr>
           </tbody>
