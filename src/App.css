@@ -250,9 +250,9 @@
 
 .draft-tile {
   width: 100%;
-  border: 1px solid #e8d8ca;
+  border: 1px dashed #e8d8ca;
   border-radius: 14px;
-  background: #fffaf3;
+  background: rgb(255, 252, 249);
   padding: 12px 8px;
   display: grid;
   gap: 4px;
@@ -261,6 +261,7 @@
 }
 
 .draft-tile-wrap.is-selected .draft-tile {
+  border-style: solid;
   border-color: #2d1f14;
   background: #f7ecdf;
 }
