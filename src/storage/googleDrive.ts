@@ -1,4 +1,3 @@
-const GOOGLE_IDENTITY_URL = "https://accounts.google.com/gsi/client";
 const DRIVE_API_BASE = "https://www.googleapis.com/drive/v3";
 const DRIVE_UPLOAD_BASE = "https://www.googleapis.com/upload/drive/v3";
 const OAUTH_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
@@ -13,13 +12,6 @@ const logDrive = (...args: unknown[]) => {
 export const DRIVE_FILE_NAME = "eat-planner-export.json";
 
 let accessToken: string | null = null;
-type TokenClient = {
-  callback: (response: { access_token?: string; error?: string }) => void;
-  requestAccessToken(options?: { prompt?: "consent" | "" }): void;
-};
-
-let tokenClient: TokenClient | null = null;
-let scriptPromise: Promise<void> | null = null;
 
 const buildRedirectOAuthUrl = (clientId: string, state: string) => {
   const redirectUri = `${window.location.origin}${window.location.pathname}${window.location.search}`;
@@ -80,105 +72,12 @@ const consumeRedirectTokenIfPresent = () => {
 
 consumeRedirectTokenIfPresent();
 
-const ensureGoogleIdentityScript = async () => {
-  logDrive("ensureGoogleIdentityScript:start");
-  if (scriptPromise) {
-    logDrive("ensureGoogleIdentityScript:reusePromise");
-    return scriptPromise;
-  }
-
-  scriptPromise = new Promise<void>((resolve, reject) => {
-    if (window.google?.accounts?.oauth2) {
-      logDrive("ensureGoogleIdentityScript:alreadyLoaded");
-      resolve();
-      return;
-    }
-
-    const existing = document.querySelector<HTMLScriptElement>(
-      'script[src="https://accounts.google.com/gsi/client"]'
-    );
-    if (existing) {
-      existing.addEventListener("load", () => resolve(), { once: true });
-      existing.addEventListener(
-        "error",
-        () => reject(new Error("Failed to load Google Identity script.")),
-        { once: true }
-      );
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src = GOOGLE_IDENTITY_URL;
-    script.async = true;
-    script.defer = true;
-    script.onload = () => resolve();
-    script.onerror = () =>
-      reject(new Error("Failed to load Google Identity script."));
-    document.head.appendChild(script);
-  });
-
-  return scriptPromise;
-};
-
-const ensureTokenClient = async (clientId: string) => {
-  logDrive("ensureTokenClient:start");
-  await ensureGoogleIdentityScript();
-  if (!window.google?.accounts?.oauth2) {
-    throw new Error("Google Identity SDK is unavailable.");
-  }
-
-  if (!tokenClient) {
-    logDrive("ensureTokenClient:init");
-    tokenClient = window.google.accounts.oauth2.initTokenClient({
-      client_id: clientId,
-      scope: "https://www.googleapis.com/auth/drive.appdata",
-      callback: () => undefined,
-    }) as TokenClient;
-  }
-
-  logDrive("ensureTokenClient:ready");
-  return tokenClient;
-};
-
-const requestAccessToken = async (
-  clientId: string,
-  prompt: "consent" | "",
-  timeoutMs = 15000
-): Promise<string> => {
-  logDrive("requestAccessToken:start", { prompt });
-  const client = await ensureTokenClient(clientId);
-
-  return new Promise<string>((resolve, reject) => {
-    const timer = window.setTimeout(() => {
-      logDrive("requestAccessToken:timeout");
-      reject(new Error("OAuth popup callback timed out."));
-    }, timeoutMs);
-
-    client.callback = (response: { access_token?: string; error?: string }) => {
-      window.clearTimeout(timer);
-      logDrive("requestAccessToken:callback", {
-        hasAccessToken: Boolean(response.access_token),
-        error: response.error ?? null,
-      });
-      if (response.error || !response.access_token) {
-        reject(new Error(response.error || "Failed to authorize Google Drive."));
-        return;
-      }
-      accessToken = response.access_token;
-      logDrive("requestAccessToken:tokenSet");
-      resolve(response.access_token);
-    };
-
-    logDrive("requestAccessToken:request");
-    client.requestAccessToken({ prompt });
-  });
-};
-
 const ensureAccessToken = async (clientId: string) => {
+  void clientId;
   if (accessToken) {
     return accessToken;
   }
-  return requestAccessToken(clientId, "consent");
+  throw new Error("Not connected to Google Drive. Click Connect Drive first.");
 };
 
 const fetchJson = async <T>(input: RequestInfo | URL, init: RequestInit): Promise<T> => {
