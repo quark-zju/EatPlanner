@@ -55,6 +55,10 @@ export default function AppShell({ children }: AppShellProps) {
         <a href="terms.html" target="_blank" rel="noreferrer">
           Terms
         </a>
+        <span>•</span>
+        <a href="https://github.com/quark-zju/EatPlanner" target="_blank" rel="noreferrer">
+          GitHub
+        </a>
       </footer>
     </div>
   );
