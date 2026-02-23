@@ -13,6 +13,7 @@ const toLabel = (macro: MacroKey) =>
   macro === "carbs" ? "Carbs" : macro === "fat" ? "Fat" : "Protein";
 
 const toPercent = (value: number, max: number) => Math.max(0, Math.min(100, (value / max) * 100));
+const toInt = (value: number) => Math.round(value);
 
 export default function NutritionGoalStats({ totals, goal }: NutritionGoalStatsProps) {
   return (
@@ -31,7 +32,7 @@ export default function NutritionGoalStats({ totals, goal }: NutritionGoalStatsP
             <div className="nutrition-goal-row__header">
               <strong>{toLabel(macro)}</strong>
               <span>
-                {current.toFixed(1)}g / {target.min}-{target.max}g
+                {toInt(current)}g / {toInt(target.min)}-{toInt(target.max)}g
               </span>
             </div>
             <div className="nutrition-goal-bar">
