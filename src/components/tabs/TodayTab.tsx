@@ -70,7 +70,7 @@ export default function TodayTab() {
         </div>
         {shouldShowHowToUse && (
         <p className="hint">
-          Update your <strong>Inventory</strong> and <strong>Goals</strong>, then use the
+          Update your <strong>Inventory</strong> and <strong>Settings → Goals</strong>, then use the
           <strong> Generate Plans</strong> button at the top right to find suitable meal plans.
         </p>
         )}
