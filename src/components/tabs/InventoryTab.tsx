@@ -29,6 +29,8 @@ export default function InventoryTab() {
     stock: "1",
   });
   const selectedCount = selectedFoodIds.length;
+  const hasSelection = selectedCount > 0;
+  const canAddNewFood = newFood.name.trim().length > 0;
   const selectedIdSet = useMemo(() => new Set(selectedFoodIds), [selectedFoodIds]);
 
   const toggleSelected = (foodId: string) => {
@@ -80,7 +82,7 @@ export default function InventoryTab() {
           <button
             className="ghost"
             type="button"
-            disabled={selectedCount === 0}
+            disabled={!hasSelection}
             onClick={() => setSelectedFoodIds([])}
           >
             Deselect
@@ -88,7 +90,7 @@ export default function InventoryTab() {
           <button
             className="ghost"
             type="button"
-            disabled={selectedCount === 0}
+            disabled={!hasSelection}
             onClick={() => {
               moveFoodsToTop(selectedFoodIds);
               clearMissingSelections();
@@ -99,7 +101,7 @@ export default function InventoryTab() {
           <button
             className="ghost"
             type="button"
-            disabled={selectedCount === 0}
+            disabled={!hasSelection}
             onClick={() => {
               removeFoods(selectedFoodIds);
               setSelectedFoodIds([]);
@@ -325,7 +327,12 @@ export default function InventoryTab() {
                 />
               </td>
               <td>
-                <button className="ghost" type="button" onClick={() => commitNewFood()}>
+                <button
+                  className="ghost"
+                  type="button"
+                  disabled={!canAddNewFood}
+                  onClick={() => commitNewFood()}
+                >
                   Add
                 </button>
               </td>
