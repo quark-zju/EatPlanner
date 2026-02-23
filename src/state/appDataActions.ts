@@ -3,7 +3,12 @@ import { downloadTextFile, parseImportText, serializeExport } from "../storage/e
 import { isAppState, normalizeAppState, type AppState } from "./appState";
 import { appStateAtom, errorAtom, noticeAtom, planOptionsAtom } from "./appAtoms";
 
-const EXPORT_FILENAME = "eat-planner-export.json";
+const buildExportFilename = (date = new Date()) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `eat-planner-export-${year}${month}${day}.json`;
+};
 
 type StoreLike = ReturnType<typeof getDefaultStore>;
 
@@ -13,7 +18,7 @@ const withStore = (store?: StoreLike) => store ?? defaultStore;
 export const exportToFile = (store?: StoreLike) => {
   const s = withStore(store);
   const content = serializeExport(s.get(appStateAtom));
-  downloadTextFile(EXPORT_FILENAME, content);
+  downloadTextFile(buildExportFilename(), content);
 };
 
 export const copyToClipboard = async (store?: StoreLike) => {
