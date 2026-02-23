@@ -264,15 +264,13 @@ export const connectGoogleDrive = async (
     throw new Error("Google OAuth Client ID is required.");
   }
   logDrive("connectGoogleDrive:start");
-  try {
-    await requestAccessToken(trimmed, "consent");
-    logDrive("connectGoogleDrive:done", { connected: Boolean(accessToken) });
+  if (accessToken) {
+    logDrive("connectGoogleDrive:alreadyConnected");
     return "connected";
-  } catch (error) {
-    logDrive("connectGoogleDrive:popupFailed", error);
-    beginRedirectOAuth(trimmed);
-    return "redirecting";
   }
+  logDrive("connectGoogleDrive:redirectOnly");
+  beginRedirectOAuth(trimmed);
+  return "redirecting";
 };
 
 export const disconnectGoogleDrive = () => {
