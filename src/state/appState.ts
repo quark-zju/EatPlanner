@@ -7,7 +7,7 @@ import type {
   PlanConstraints,
 } from "../core";
 
-export type UiTab = "today" | "history" | "settings";
+export type UiTab = "today" | "history" | "inventory" | "settings";
 export type LocalDateISO = string;
 
 export type DraftItem = {
@@ -159,7 +159,10 @@ const isUiState = (value: unknown): value is UiState => {
     selectedHistoryDateISO?: unknown;
   };
   const tabOk =
-    ui.activeTab === "today" || ui.activeTab === "history" || ui.activeTab === "settings";
+    ui.activeTab === "today" ||
+    ui.activeTab === "history" ||
+    ui.activeTab === "inventory" ||
+    ui.activeTab === "settings";
   const selectedOk =
     ui.selectedHistoryDateISO === undefined || typeof ui.selectedHistoryDateISO === "string";
 
