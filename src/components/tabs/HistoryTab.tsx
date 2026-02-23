@@ -6,6 +6,7 @@ import {
 } from "../../state/appAtoms";
 import { setHistoryWindow, setSelectedHistoryDate } from "../../state/appDomainActions";
 import { getFoodIcon } from "../../state/appState";
+import NutritionGoalStats from "../NutritionGoalStats";
 
 const formatPrice = (priceLowerBound: number, hasUnknownPrice: boolean) => {
   const base = priceLowerBound.toFixed(2);
@@ -54,15 +55,13 @@ export default function HistoryTab() {
                   type="button"
                 >
                   <strong>{dateISO}</strong>
-                  <span>
-                    🍞 {record.totals.carbs.toFixed(1)}g / 🧈 {record.totals.fat.toFixed(1)}g /
-                    🍗 {record.totals.protein.toFixed(1)}g
-                  </span>
+                  <span>{record.items.length} items</span>
                   <span>${formatPrice(record.priceLowerBound, record.hasUnknownPrice)}</span>
                 </button>
 
                 {selected && (
                   <div className="history-item__details">
+                    <NutritionGoalStats totals={record.totals} goal={record.goalSnapshot} />
                     <p>
                       Goal: Carbs {record.goalSnapshot.carbs.min}-{record.goalSnapshot.carbs.max} g,
                       Fat {record.goalSnapshot.fat.min}-{record.goalSnapshot.fat.max} g,
