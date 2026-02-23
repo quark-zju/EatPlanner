@@ -5,6 +5,7 @@ import {
   appStateAtom,
   draftPriceSummaryAtom,
   getPantryByFoodAtom,
+  plannerContextItemsAtom,
   plannerMessageAtom,
   planOptionsAtom,
   solvingAtom,
@@ -31,6 +32,7 @@ export default function TodayTab() {
   const options = useAtomValue(planOptionsAtom);
   const isSolving = useAtomValue(solvingAtom);
   const plannerMessage = useAtomValue(plannerMessageAtom);
+  const plannerContextItems = useAtomValue(plannerContextItemsAtom);
   const pantryByFood = useAtomValue(getPantryByFoodAtom);
   const draftPrice = useAtomValue(draftPriceSummaryAtom);
 
@@ -46,7 +48,6 @@ export default function TodayTab() {
     state.todayDraft.items.map((item) => [item.foodId, item])
   );
   const hasAnySelection = state.todayDraft.items.some((item) => item.quantity > 0);
-  const eatenItems = state.todayDraft.items.filter((item) => item.quantity > 0);
   const remainingPlan = getRemainingPlanContext(state);
   const localAvoidSet = useMemo(() => new Set(localAvoidFoodIds), [localAvoidFoodIds]);
 
@@ -78,11 +79,11 @@ export default function TodayTab() {
         </p>
         )}
         {plannerMessage && <p className="hint">{plannerMessage}</p>}
-        {(options.length > 0 || plannerMessage) && eatenItems.length > 0 && (
+        {(options.length > 0 || plannerMessage) && plannerContextItems.length > 0 && (
           <p className="hint">
             Given{" "}
-            {eatenItems.map((item, idx) => {
-              const sep = idx === eatenItems.length - 1 ? "" : ", ";
+            {plannerContextItems.map((item, idx) => {
+              const sep = idx === plannerContextItems.length - 1 ? "" : ", ";
               return (
                 <span key={item.foodId}>
                   {getFoodIcon(item.foodIconSnapshot)} {item.foodNameSnapshot} x {item.quantity}

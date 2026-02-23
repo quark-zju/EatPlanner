@@ -6,6 +6,7 @@ import {
   appStateAtom,
   errorAtom,
   noticeAtom,
+  plannerContextItemsAtom,
   plannerMessageAtom,
   planOptionsAtom,
   solvingAtom,
@@ -91,6 +92,10 @@ export const generatePlanOptions = async (
     }
 
     const state = s.get(appStateAtom);
+    const contextItems = state.todayDraft.items
+      .filter((item) => item.quantity > 0)
+      .map((item) => ({ ...item }));
+    s.set(plannerContextItemsAtom, contextItems);
     const localAvoid = Array.from(new Set(params?.localAvoidFoodIds ?? []));
     const remaining = getRemainingPlanContext(state);
     const result = await solvePlanOptions(

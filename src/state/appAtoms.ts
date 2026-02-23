@@ -13,6 +13,7 @@ import {
   toAppStateMap,
   type AppState,
   type AppStateMap,
+  type DraftItem,
   type LocalDateISO,
   type UiTab,
 } from "./appState";
@@ -62,6 +63,7 @@ export const solvingAtom = atom(false);
 export const errorAtom = atom<string | null>(null);
 export const noticeAtom = atom<string | null>(null);
 export const plannerMessageAtom = atom<string | null>(null);
+export const plannerContextItemsAtom = atom<DraftItem[]>([]);
 export const driveConnectedAtom = atom(isGoogleDriveConnected());
 export const driveBusyAtom = atom(false);
 export const activeTabAtom = atom<UiTab>("today");
