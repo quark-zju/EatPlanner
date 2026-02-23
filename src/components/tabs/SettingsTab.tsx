@@ -132,14 +132,14 @@ export default function SettingsTab() {
       </p>
       <p className="hint">
         Privacy Policy:{" "}
-        <a href="/privacy.html" target="_blank" rel="noreferrer">
-          /privacy.html
+        <a href="privacy.html" target="_blank" rel="noreferrer">
+          privacy.html
         </a>
       </p>
       <p className="hint">
         Terms of Service:{" "}
-        <a href="/terms.html" target="_blank" rel="noreferrer">
-          /terms.html
+        <a href="terms.html" target="_blank" rel="noreferrer">
+          terms.html
         </a>
       </p>
     </section>
