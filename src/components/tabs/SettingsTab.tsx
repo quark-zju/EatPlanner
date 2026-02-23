@@ -126,7 +126,10 @@ export default function SettingsTab() {
         )}
       </div>
 
-      <p className="hint">Export uses a versioned schema. Google Drive sync writes to app data.</p>
+      <p className="hint">
+        Google Drive sync uses the app's private storage area and won't touch your regular Drive
+        files.
+      </p>
       <p className="hint">
         Privacy Policy:{" "}
         <a href="/privacy.html" target="_blank" rel="noreferrer">
