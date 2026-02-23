@@ -234,7 +234,18 @@ export default function InventoryTab() {
                       }}
                     />
                   </td>
-                  <td></td>
+                  <td>
+                    <button
+                      className="ghost"
+                      type="button"
+                      onClick={() => {
+                        removeFoods([food.id]);
+                        setSelectedFoodIds((prev) => prev.filter((id) => id !== food.id));
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </td>
                 </tr>
               );
             })}
