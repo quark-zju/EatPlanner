@@ -7,7 +7,6 @@ describe("normalizeAppState", () => {
       foods: defaultAppState.foods,
       pantry: defaultAppState.pantry,
       goal: defaultAppState.goal,
-      constraints: defaultAppState.constraints,
     } as AppState;
 
     const normalized = normalizeAppState(legacy);

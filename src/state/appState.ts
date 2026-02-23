@@ -4,7 +4,6 @@ import type {
   Goal,
   Nutrition,
   PantryItem,
-  PlanConstraints,
 } from "../core";
 
 export type UiTab = "today" | "history" | "inventory" | "settings";
@@ -47,7 +46,6 @@ export type AppState = {
   foods: Food[];
   pantry: PantryItem[];
   goal: Goal;
-  constraints: PlanConstraints;
   todayDraft: TodayDraftState;
   history: HistoryState;
 };
@@ -189,7 +187,6 @@ export const isAppState = (value: unknown): value is AppState => {
     foods?: unknown;
     pantry?: unknown;
     goal?: unknown;
-    constraints?: unknown;
     todayDraft?: unknown;
     history?: unknown;
   };
@@ -243,26 +240,10 @@ export const isAppState = (value: unknown): value is AppState => {
   const goalOk =
     isMacroRange(goal.carbs) && isMacroRange(goal.fat) && isMacroRange(goal.protein);
 
-  const constraints = obj.constraints;
-  const constraintsOk =
-    constraints === undefined ||
-    (typeof constraints === "object" &&
-      constraints !== null &&
-      ((constraints as { avoidFoodIds?: unknown }).avoidFoodIds === undefined ||
-        (Array.isArray((constraints as { avoidFoodIds?: unknown }).avoidFoodIds) &&
-          (constraints as { avoidFoodIds: unknown[] }).avoidFoodIds.every(
-            (v) => typeof v === "string"
-          ))) &&
-      ((constraints as { preferFoodIds?: unknown }).preferFoodIds === undefined ||
-        (Array.isArray((constraints as { preferFoodIds?: unknown }).preferFoodIds) &&
-          (constraints as { preferFoodIds: unknown[] }).preferFoodIds.every(
-            (v) => typeof v === "string"
-          ))));
-
   const todayDraftOk = obj.todayDraft === undefined || isTodayDraftState(obj.todayDraft);
   const historyOk = obj.history === undefined || isHistoryState(obj.history);
 
-  return goalOk && constraintsOk && todayDraftOk && historyOk;
+  return goalOk && todayDraftOk && historyOk;
 };
 
 export const toLocalDateISO = (date: Date): LocalDateISO => {
@@ -330,10 +311,6 @@ export const defaultAppState: AppState = {
     fat: { min: 10, max: 22 },
     protein: { min: 60, max: 90 },
   },
-  constraints: {
-    avoidFoodIds: [],
-    preferFoodIds: [],
-  },
   todayDraft: {
     selectedOptionId: undefined,
     draftDateISO: toLocalDateISO(new Date()),
@@ -346,15 +323,11 @@ export const defaultAppState: AppState = {
 };
 
 export const normalizeAppState = (state: AppState): AppState => {
-  const stateWithoutUi = state as AppState & { ui?: unknown };
-  const { ui: _ui, ...stateData } = stateWithoutUi;
+  const stateWithoutUi = state as AppState & { ui?: unknown; constraints?: unknown };
+  const { ui: _ui, constraints: _constraints, ...stateData } = stateWithoutUi;
   const merged = {
     ...defaultAppState,
     ...stateData,
-    constraints: {
-      avoidFoodIds: state.constraints?.avoidFoodIds ?? [],
-      preferFoodIds: state.constraints?.preferFoodIds ?? [],
-    },
     todayDraft: {
       ...defaultAppState.todayDraft,
       ...(state.todayDraft ?? {}),

@@ -1,6 +1,6 @@
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
-import type { PantryItem, PlanConstraints, PlanOption } from "../core";
+import type { PantryItem, PlanOption } from "../core";
 import { isGoogleDriveConnected } from "../storage/googleDrive";
 import {
   APP_STATE_STORAGE_KEY,
@@ -121,12 +121,4 @@ export const getPantryByFoodAtom = atom((get) => {
   return map;
 });
 
-export const getConstraintsForFoodAtom = atom((get) => {
-  const constraints = get(appStateAtom).constraints;
-  return (foodId: string) => ({
-    prefer: constraints.preferFoodIds?.includes(foodId) ?? false,
-    avoid: constraints.avoidFoodIds?.includes(foodId) ?? false,
-  });
-});
-
-export type { AppState, PlanConstraints };
+export type { AppState };

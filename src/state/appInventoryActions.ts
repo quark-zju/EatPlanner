@@ -160,10 +160,6 @@ export const removeFood = (foodId: string, store?: StoreLike) => {
     ...state,
     foods: state.foods.filter((food) => food.id !== foodId),
     pantry: state.pantry.filter((item) => item.foodId !== foodId),
-    constraints: {
-      avoidFoodIds: state.constraints.avoidFoodIds?.filter((id) => id !== foodId),
-      preferFoodIds: state.constraints.preferFoodIds?.filter((id) => id !== foodId),
-    },
   });
 };
 
@@ -179,10 +175,6 @@ export const removeFoods = (foodIds: string[], store?: StoreLike) => {
     ...state,
     foods: state.foods.filter((food) => !ids.has(food.id)),
     pantry: state.pantry.filter((item) => !ids.has(item.foodId)),
-    constraints: {
-      avoidFoodIds: state.constraints.avoidFoodIds?.filter((id) => !ids.has(id)),
-      preferFoodIds: state.constraints.preferFoodIds?.filter((id) => !ids.has(id)),
-    },
   });
 };
 

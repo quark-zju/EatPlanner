@@ -47,22 +47,3 @@ export const updateGoal = (
     },
   });
 };
-
-export const toggleConstraint = (
-  payload: { type: "avoidFoodIds" | "preferFoodIds"; foodId: string },
-  store?: StoreLike
-) => {
-  const s = withStore(store);
-  const state = s.get(appStateAtom);
-  const list = new Set(state.constraints[payload.type] ?? []);
-  if (list.has(payload.foodId)) {
-    list.delete(payload.foodId);
-  } else {
-    list.add(payload.foodId);
-  }
-
-  s.set(appStateAtom, {
-    ...state,
-    constraints: { ...state.constraints, [payload.type]: Array.from(list) },
-  });
-};

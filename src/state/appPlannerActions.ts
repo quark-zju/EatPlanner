@@ -33,17 +33,14 @@ export const generatePlanOptions = async (
 
     const state = s.get(appStateAtom);
     const localAvoidSet = new Set(params?.localAvoidFoodIds ?? []);
-    const mergedAvoid = Array.from(
-      new Set([...(state.constraints.avoidFoodIds ?? []), ...localAvoidSet])
-    );
+    const localAvoid = Array.from(localAvoidSet);
     const result = await solvePlanOptions(
       {
         foods: state.foods,
         pantry: state.pantry,
         goal: state.goal,
         constraints: {
-          ...state.constraints,
-          avoidFoodIds: mergedAvoid,
+          avoidFoodIds: localAvoid,
         },
       },
       3
