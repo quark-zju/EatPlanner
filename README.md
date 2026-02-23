@@ -25,16 +25,19 @@ src/
     solver.test.ts      # Solver tests
   state/
     appState.ts         # App state model, validation, normalization, date helpers
-    appAtoms.ts         # Jotai atoms (UI, planner, draft, history, settings workflows)
+    appAtoms.ts         # Read/derived atoms + storage-backed app state
+    *Actions.ts         # Store-backed write actions (domain, inventory, draft, planner, data, drive)
+    appDraftMath.ts     # Shared draft total/price calculations
     appState.test.ts    # State normalization tests
-    appAtoms.test.ts    # Atom workflow tests (non-React)
+    appAtoms.test.ts    # State/action workflow tests (non-React)
   storage/
     exportImport.ts     # Versioned export/import envelope and parsing
     googleDrive.ts      # Browser OAuth + Drive appDataFolder integration
   components/
     AppShell.tsx        # Header/nav shell + global messages
     tabs/
-      TodayTab.tsx      # Planner + draft + pantry editor
+      TodayTab.tsx      # Planner + draft editor
+      InventoryTab.tsx  # Pantry/inventory management table
       HistoryTab.tsx    # 30-day history window UI
       SettingsTab.tsx   # Goals + data/sync controls
   App.tsx               # Root composition by active tab
