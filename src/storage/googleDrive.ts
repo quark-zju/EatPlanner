@@ -1,6 +1,8 @@
 const GOOGLE_IDENTITY_URL = "https://accounts.google.com/gsi/client";
 const DRIVE_API_BASE = "https://www.googleapis.com/drive/v3";
 const DRIVE_UPLOAD_BASE = "https://www.googleapis.com/upload/drive/v3";
+const OAUTH_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
+const REDIRECT_STATE_KEY = "eat-planner-drive-oauth-state";
 const debugDrive = import.meta.env.DEV && import.meta.env.MODE !== "test";
 const logDrive = (...args: unknown[]) => {
   if (debugDrive) {
@@ -18,6 +20,65 @@ type TokenClient = {
 
 let tokenClient: TokenClient | null = null;
 let scriptPromise: Promise<void> | null = null;
+
+const buildRedirectOAuthUrl = (clientId: string, state: string) => {
+  const redirectUri = `${window.location.origin}${window.location.pathname}${window.location.search}`;
+  const params = new URLSearchParams({
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    response_type: "token",
+    scope: OAUTH_SCOPE,
+    include_granted_scopes: "true",
+    prompt: "consent",
+    state,
+  });
+  return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+};
+
+const beginRedirectOAuth = (clientId: string) => {
+  const state = `eat-planner-${crypto.randomUUID()}`;
+  sessionStorage.setItem(REDIRECT_STATE_KEY, state);
+  const url = buildRedirectOAuthUrl(clientId, state);
+  logDrive("redirectOAuth:start", { state });
+  window.location.assign(url);
+};
+
+const consumeRedirectTokenIfPresent = () => {
+  if (typeof window === "undefined") {
+    return;
+  }
+  const hash = window.location.hash.startsWith("#")
+    ? window.location.hash.slice(1)
+    : window.location.hash;
+  if (!hash) {
+    return;
+  }
+  const params = new URLSearchParams(hash);
+  const token = params.get("access_token");
+  const returnedState = params.get("state");
+  if (!token || !returnedState) {
+    return;
+  }
+
+  const expectedState = sessionStorage.getItem(REDIRECT_STATE_KEY);
+  if (!expectedState || returnedState !== expectedState) {
+    logDrive("redirectOAuth:stateMismatch", {
+      returnedState,
+      expectedState,
+    });
+    return;
+  }
+
+  sessionStorage.removeItem(REDIRECT_STATE_KEY);
+  accessToken = token;
+  logDrive("redirectOAuth:tokenConsumed");
+
+  // Remove sensitive token from URL fragment.
+  const cleanUrl = `${window.location.origin}${window.location.pathname}${window.location.search}`;
+  window.history.replaceState({}, document.title, cleanUrl);
+};
+
+consumeRedirectTokenIfPresent();
 
 const ensureGoogleIdentityScript = async () => {
   logDrive("ensureGoogleIdentityScript:start");
@@ -81,13 +142,20 @@ const ensureTokenClient = async (clientId: string) => {
 
 const requestAccessToken = async (
   clientId: string,
-  prompt: "consent" | ""
+  prompt: "consent" | "",
+  timeoutMs = 15000
 ): Promise<string> => {
   logDrive("requestAccessToken:start", { prompt });
   const client = await ensureTokenClient(clientId);
 
   return new Promise<string>((resolve, reject) => {
+    const timer = window.setTimeout(() => {
+      logDrive("requestAccessToken:timeout");
+      reject(new Error("OAuth popup callback timed out."));
+    }, timeoutMs);
+
     client.callback = (response: { access_token?: string; error?: string }) => {
+      window.clearTimeout(timer);
       logDrive("requestAccessToken:callback", {
         hasAccessToken: Boolean(response.access_token),
         error: response.error ?? null,
@@ -188,14 +256,23 @@ const uploadFile = async (
   }
 };
 
-export const connectGoogleDrive = async (clientId: string) => {
+export const connectGoogleDrive = async (
+  clientId: string
+): Promise<"connected" | "redirecting"> => {
   const trimmed = clientId.trim();
   if (!trimmed) {
     throw new Error("Google OAuth Client ID is required.");
   }
   logDrive("connectGoogleDrive:start");
-  await requestAccessToken(trimmed, "consent");
-  logDrive("connectGoogleDrive:done", { connected: Boolean(accessToken) });
+  try {
+    await requestAccessToken(trimmed, "consent");
+    logDrive("connectGoogleDrive:done", { connected: Boolean(accessToken) });
+    return "connected";
+  } catch (error) {
+    logDrive("connectGoogleDrive:popupFailed", error);
+    beginRedirectOAuth(trimmed);
+    return "redirecting";
+  }
 };
 
 export const disconnectGoogleDrive = () => {

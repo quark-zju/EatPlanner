@@ -692,11 +692,15 @@ export const connectDriveAtom = atom(null, async (_get, set) => {
   set(errorAtom, null);
   set(noticeAtom, null);
   try {
-    await connectGoogleDrive(DEFAULT_DRIVE_CLIENT_ID);
-    logDrive("connect:googleSuccess");
-    set(driveConnectedAtom, true);
-    logDrive("connect:setConnectedTrue");
-    set(noticeAtom, "Connected to Google Drive.");
+    const status = await connectGoogleDrive(DEFAULT_DRIVE_CLIENT_ID);
+    logDrive("connect:googleStatus", status);
+    if (status === "connected") {
+      set(driveConnectedAtom, true);
+      logDrive("connect:setConnectedTrue");
+      set(noticeAtom, "Connected to Google Drive.");
+    } else {
+      set(noticeAtom, "Redirecting to Google sign-in...");
+    }
   } catch (err) {
     logDrive("connect:error", err);
     set(errorAtom, err instanceof Error ? err.message : "Google Drive connect failed.");
