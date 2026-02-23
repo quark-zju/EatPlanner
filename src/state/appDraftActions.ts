@@ -11,6 +11,7 @@ import {
   appStateAtom,
   errorAtom,
   noticeAtom,
+  plannerContextItemsAtom,
   planOptionsAtom,
   selectedHistoryDateAtom,
 } from "./appAtoms";
@@ -40,6 +41,29 @@ const toDraftItemsFromOption = (state: AppState, option: PlanOption): DraftItem[
         pricePerUnitSnapshot: food?.price,
       };
     });
+};
+
+const mergeDraftItems = (base: DraftItem[], extra: DraftItem[]): DraftItem[] => {
+  const merged = new Map<string, DraftItem>();
+
+  for (const item of base) {
+    merged.set(item.foodId, { ...item, quantity: clampNonNegative(item.quantity) });
+  }
+
+  for (const item of extra) {
+    const existing = merged.get(item.foodId);
+    if (!existing) {
+      merged.set(item.foodId, { ...item, quantity: clampNonNegative(item.quantity) });
+      continue;
+    }
+    merged.set(item.foodId, {
+      ...existing,
+      ...item,
+      quantity: clampNonNegative(existing.quantity) + clampNonNegative(item.quantity),
+    });
+  }
+
+  return Array.from(merged.values());
 };
 
 export const setDraftDate = (dateISO: LocalDateISO, store?: StoreLike) => {
@@ -78,14 +102,16 @@ export const selectPlanOptionToDraft = (
   const s = withStore(store);
   const state = s.get(appStateAtom);
   const options = s.get(planOptionsAtom);
+  const contextItems = s.get(plannerContextItemsAtom);
   const option = options[payload.optionIndex];
   if (!option) {
     s.set(errorAtom, "Selected plan option was not found.");
     return;
   }
 
-  const items = toDraftItemsFromOption(state, option);
-  if (items.length === 0) {
+  const optionItems = toDraftItemsFromOption(state, option);
+  const items = mergeDraftItems(contextItems, optionItems);
+  if (items.length === 0 && contextItems.length === 0) {
     s.set(errorAtom, "Selected plan has no items.");
     return;
   }

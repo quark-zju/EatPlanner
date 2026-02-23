@@ -80,6 +80,37 @@ describe("appAtoms history and draft flow", () => {
     expect(replaced.submittedAtISO >= firstSubmittedAt).toBe(true);
   });
 
+  it("loads plan option on top of eaten context snapshot", async () => {
+    const atoms = await import("./appAtoms");
+    const draftActions = await import("./appDraftActions");
+    const store = createStore();
+
+    store.set(atoms.appStateAtom, defaultAppState as AppState);
+    store.set(atoms.planOptionsAtom, [
+      {
+        status: "sat",
+        servings: { rice: 1, chicken: 1 },
+        totals: { carbs: 45, fat: 3.4, protein: 35 },
+        priceLowerBound: 3.7,
+        hasUnknownPrice: false,
+      },
+    ]);
+    store.set(atoms.plannerContextItemsAtom, [
+      {
+        foodId: "rice",
+        foodNameSnapshot: "Rice",
+        unitSnapshot: "serving",
+        nutritionPerUnitSnapshot: { carbs: 45, fat: 0.4, protein: 4 },
+        quantity: 2,
+      },
+    ]);
+
+    draftActions.selectPlanOptionToDraft({ optionIndex: 0 }, store);
+    const state = store.get(atoms.appStateAtom);
+    expect(state.todayDraft.items.find((i) => i.foodId === "rice")?.quantity).toBe(3);
+    expect(state.todayDraft.items.find((i) => i.foodId === "chicken")?.quantity).toBe(1);
+  });
+
   it("moves history window by 30 days", async () => {
     const atoms = await import("./appAtoms");
     const actions = await import("./appDomainActions");
