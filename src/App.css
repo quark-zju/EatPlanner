@@ -180,6 +180,10 @@
   gap: 10px;
 }
 
+.nutrition-goal-card h4 {
+  margin: 0 0 8px;
+}
+
 .nutrition-goal-row {
   display: grid;
   gap: 4px;
@@ -510,6 +514,12 @@ select {
 .history-item__details {
   padding: 10px 12px 12px;
   border-top: 1px solid #ecdccf;
+}
+
+.history-item__detail-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
 .card h3 {

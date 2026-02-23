@@ -6,7 +6,7 @@ import {
 } from "../../state/appAtoms";
 import { setHistoryWindow, setSelectedHistoryDate } from "../../state/appDomainActions";
 import { getFoodIcon } from "../../state/appState";
-import NutritionGoalStats from "../NutritionGoalStats";
+import NutritionGoalCard from "../NutritionGoalCard";
 
 const formatPrice = (priceLowerBound: number, hasUnknownPrice: boolean) => {
   const base = priceLowerBound.toFixed(2);
@@ -61,7 +61,11 @@ export default function HistoryTab() {
                   <span className="history-item__icons">
                     {headerItems.length === 0 && <span>No items</span>}
                     {headerItems.map((item) => (
-                      <span key={`${dateISO}-h-${item.foodId}`} className="history-item__icon-chip">
+                      <span
+                        key={`${dateISO}-h-${item.foodId}`}
+                        className="history-item__icon-chip"
+                        title={`${item.foodNameSnapshot}: ${item.quantity} ${item.unitSnapshot}`}
+                      >
                         {getFoodIcon(item.foodIconSnapshot)} x {item.quantity}
                       </span>
                     ))}
@@ -74,21 +78,26 @@ export default function HistoryTab() {
 
                 {selected && (
                   <div className="history-item__details">
-                    <NutritionGoalStats totals={record.totals} goal={record.goalSnapshot} />
-                    <p>
-                      Goal: Carbs {record.goalSnapshot.carbs.min}-{record.goalSnapshot.carbs.max} g,
-                      Fat {record.goalSnapshot.fat.min}-{record.goalSnapshot.fat.max} g,
-                      Protein {record.goalSnapshot.protein.min}-{record.goalSnapshot.protein.max} g
-                    </p>
-                    <p>Submitted: {new Date(record.submittedAtISO).toLocaleString()}</p>
-                    <ul>
-                      {record.items.map((item) => (
-                        <li key={`${dateISO}-${item.foodId}`}>
-                          {getFoodIcon(item.foodIconSnapshot)} {item.foodNameSnapshot}:{" "}
-                          {item.quantity} {item.unitSnapshot}
-                        </li>
-                      ))}
-                    </ul>
+                    <div className="history-item__detail-grid">
+                      <div>
+                        <p>Submitted: {new Date(record.submittedAtISO).toLocaleString()}</p>
+                        <ul>
+                          {record.items.map((item) => (
+                            <li key={`${dateISO}-${item.foodId}`}>
+                              <span title={item.foodNameSnapshot}>
+                                {getFoodIcon(item.foodIconSnapshot)}
+                              </span>{" "}
+                              {item.foodNameSnapshot}: {item.quantity} {item.unitSnapshot}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <NutritionGoalCard
+                        totals={record.totals}
+                        goal={record.goalSnapshot}
+                        title="Goal Match"
+                      />
+                    </div>
                   </div>
                 )}
               </article>

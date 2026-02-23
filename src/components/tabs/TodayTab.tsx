@@ -17,6 +17,7 @@ import {
 } from "../../state/appDraftActions";
 import { generatePlanOptions } from "../../state/appPlannerActions";
 import { getFoodIcon } from "../../state/appState";
+import NutritionGoalCard from "../NutritionGoalCard";
 import NutritionGoalStats from "../NutritionGoalStats";
 
 const formatPrice = (priceLowerBound: number, hasUnknownPrice: boolean) => {
@@ -110,7 +111,7 @@ export default function TodayTab() {
                       return (
                         <li key={foodId} className={isLocallyAvoided ? "option-food is-avoid" : "option-food"}>
                           <span className="option-food__main">
-                            <span>{getFoodIcon(food?.icon)}</span>
+                            <span title={food?.name ?? foodId}>{getFoodIcon(food?.icon)}</span>
                             <span>
                               {food?.name ?? foodId}: {amount} {food?.unit}
                             </span>
@@ -128,10 +129,7 @@ export default function TodayTab() {
                     })}
                   </ul>
                 </div>
-                <div>
-                  <h4>Totals</h4>
-                  <NutritionGoalStats totals={option.totals} goal={state.goal} />
-                </div>
+                <NutritionGoalCard totals={option.totals} goal={state.goal} title="Totals" />
               </div>
               <button
                 className="ghost"
