@@ -43,6 +43,12 @@ import {
 const DEFAULT_DRIVE_CLIENT_ID =
   "775455628972-haf8lsiavs1u6ncpui8f20ac0orkh4nf.apps.googleusercontent.com";
 const EXPORT_FILENAME = "eat-planner-export.json";
+const debugDrive = import.meta.env.DEV && import.meta.env.MODE !== "test";
+const logDrive = (...args: unknown[]) => {
+  if (debugDrive) {
+    console.log("[drive-atom]", ...args);
+  }
+};
 
 const emptyNutrition = (): Nutrition => ({
   carbs: 0,
@@ -681,24 +687,31 @@ export const pasteFromClipboardAtom = atom(null, async (_get, set) => {
 });
 
 export const connectDriveAtom = atom(null, async (_get, set) => {
+  logDrive("connect:start");
   set(driveBusyAtom, true);
   set(errorAtom, null);
   set(noticeAtom, null);
   try {
     await connectGoogleDrive(DEFAULT_DRIVE_CLIENT_ID);
+    logDrive("connect:googleSuccess");
     set(driveConnectedAtom, true);
+    logDrive("connect:setConnectedTrue");
     set(noticeAtom, "Connected to Google Drive.");
   } catch (err) {
+    logDrive("connect:error", err);
     set(errorAtom, err instanceof Error ? err.message : "Google Drive connect failed.");
   } finally {
+    logDrive("connect:done");
     set(driveBusyAtom, false);
   }
 });
 
 export const disconnectDriveAtom = atom(null, (_get, set) => {
+  logDrive("disconnect:start");
   disconnectGoogleDrive();
   set(driveConnectedAtom, false);
   set(noticeAtom, "Disconnected from Google Drive.");
+  logDrive("disconnect:done");
 });
 
 export const saveToDriveAtom = atom(null, async (get, set) => {

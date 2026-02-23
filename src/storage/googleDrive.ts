@@ -1,6 +1,12 @@
 const GOOGLE_IDENTITY_URL = "https://accounts.google.com/gsi/client";
 const DRIVE_API_BASE = "https://www.googleapis.com/drive/v3";
 const DRIVE_UPLOAD_BASE = "https://www.googleapis.com/upload/drive/v3";
+const debugDrive = import.meta.env.DEV && import.meta.env.MODE !== "test";
+const logDrive = (...args: unknown[]) => {
+  if (debugDrive) {
+    console.log("[drive]", ...args);
+  }
+};
 
 export const DRIVE_FILE_NAME = "eat-planner-export.json";
 
@@ -14,12 +20,15 @@ let tokenClient: TokenClient | null = null;
 let scriptPromise: Promise<void> | null = null;
 
 const ensureGoogleIdentityScript = async () => {
+  logDrive("ensureGoogleIdentityScript:start");
   if (scriptPromise) {
+    logDrive("ensureGoogleIdentityScript:reusePromise");
     return scriptPromise;
   }
 
   scriptPromise = new Promise<void>((resolve, reject) => {
     if (window.google?.accounts?.oauth2) {
+      logDrive("ensureGoogleIdentityScript:alreadyLoaded");
       resolve();
       return;
     }
@@ -51,12 +60,14 @@ const ensureGoogleIdentityScript = async () => {
 };
 
 const ensureTokenClient = async (clientId: string) => {
+  logDrive("ensureTokenClient:start");
   await ensureGoogleIdentityScript();
   if (!window.google?.accounts?.oauth2) {
     throw new Error("Google Identity SDK is unavailable.");
   }
 
   if (!tokenClient) {
+    logDrive("ensureTokenClient:init");
     tokenClient = window.google.accounts.oauth2.initTokenClient({
       client_id: clientId,
       scope: "https://www.googleapis.com/auth/drive.appdata",
@@ -64,6 +75,7 @@ const ensureTokenClient = async (clientId: string) => {
     }) as TokenClient;
   }
 
+  logDrive("ensureTokenClient:ready");
   return tokenClient;
 };
 
@@ -71,18 +83,25 @@ const requestAccessToken = async (
   clientId: string,
   prompt: "consent" | ""
 ): Promise<string> => {
+  logDrive("requestAccessToken:start", { prompt });
   const client = await ensureTokenClient(clientId);
 
   return new Promise<string>((resolve, reject) => {
     client.callback = (response: { access_token?: string; error?: string }) => {
+      logDrive("requestAccessToken:callback", {
+        hasAccessToken: Boolean(response.access_token),
+        error: response.error ?? null,
+      });
       if (response.error || !response.access_token) {
         reject(new Error(response.error || "Failed to authorize Google Drive."));
         return;
       }
       accessToken = response.access_token;
+      logDrive("requestAccessToken:tokenSet");
       resolve(response.access_token);
     };
 
+    logDrive("requestAccessToken:request");
     client.requestAccessToken({ prompt });
   });
 };
@@ -174,7 +193,9 @@ export const connectGoogleDrive = async (clientId: string) => {
   if (!trimmed) {
     throw new Error("Google OAuth Client ID is required.");
   }
+  logDrive("connectGoogleDrive:start");
   await requestAccessToken(trimmed, "consent");
+  logDrive("connectGoogleDrive:done", { connected: Boolean(accessToken) });
 };
 
 export const disconnectGoogleDrive = () => {
