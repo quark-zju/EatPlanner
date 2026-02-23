@@ -34,6 +34,7 @@ describe("appAtoms history and draft flow", () => {
 
   it("creates and replaces a history day record from draft submit", async () => {
     const atoms = await import("./appAtoms");
+    const draftActions = await import("./appDraftActions");
     const store = createStore();
 
     store.set(atoms.appStateAtom, defaultAppState as AppState);
@@ -47,17 +48,20 @@ describe("appAtoms history and draft flow", () => {
       },
     ]);
 
-    store.set(atoms.selectPlanOptionToDraftAtom, {
+    draftActions.selectPlanOptionToDraft(
+      {
       optionIndex: 0,
       dateISO: "2026-02-22",
-    });
+      },
+      store
+    );
 
     let state = store.get(atoms.appStateAtom);
     expect(state.todayDraft.items.length).toBe(2);
     expect(state.todayDraft.items[0].foodNameSnapshot).toBe("Rice");
 
-    store.set(atoms.updateDraftQuantityAtom, { foodId: "rice", quantity: 1.5 });
-    store.set(atoms.submitDraftToHistoryAtom);
+    draftActions.updateDraftQuantity({ foodId: "rice", quantity: 1.5 }, store);
+    draftActions.submitDraftToHistory(store);
 
     state = store.get(atoms.appStateAtom);
     expect(state.history.byDate["2026-02-22"]).toBeDefined();
@@ -67,8 +71,8 @@ describe("appAtoms history and draft flow", () => {
 
     const firstSubmittedAt = state.history.byDate["2026-02-22"].submittedAtISO;
 
-    store.set(atoms.updateDraftQuantityAtom, { foodId: "rice", quantity: 2 });
-    store.set(atoms.submitDraftToHistoryAtom);
+    draftActions.updateDraftQuantity({ foodId: "rice", quantity: 2 }, store);
+    draftActions.submitDraftToHistory(store);
 
     state = store.get(atoms.appStateAtom);
     const replaced = state.history.byDate["2026-02-22"];

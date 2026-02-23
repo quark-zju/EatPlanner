@@ -1,17 +1,19 @@
 import { useAtomValue, useSetAtom } from "jotai";
 import {
-  addDraftFoodFromPantryAtom,
   appStateAtom,
   draftPriceSummaryAtom,
   generatePlanOptionsAtom,
   getPantryByFoodAtom,
   planOptionsAtom,
-  removeDraftItemAtom,
-  selectPlanOptionToDraftAtom,
   solvingAtom,
-  submitDraftToHistoryAtom,
 } from "../../state/appAtoms";
-import { setDraftDate } from "../../state/appDomainActions";
+import {
+  addDraftFoodFromPantry,
+  removeDraftItem,
+  selectPlanOptionToDraft,
+  setDraftDate,
+  submitDraftToHistory,
+} from "../../state/appDraftActions";
 import { getFoodIcon } from "../../state/appState";
 
 const formatPrice = (priceLowerBound: number, hasUnknownPrice: boolean) => {
@@ -27,10 +29,10 @@ export default function TodayTab() {
   const draftPrice = useAtomValue(draftPriceSummaryAtom);
 
   const generatePlans = useSetAtom(generatePlanOptionsAtom);
-  const selectOptionToDraft = useSetAtom(selectPlanOptionToDraftAtom);
-  const addDraftFood = useSetAtom(addDraftFoodFromPantryAtom);
-  const removeDraftItem = useSetAtom(removeDraftItemAtom);
-  const submitDraft = useSetAtom(submitDraftToHistoryAtom);
+  const selectOptionToDraft = selectPlanOptionToDraft;
+  const addDraftFood = addDraftFoodFromPantry;
+  const removeDraft = removeDraftItem;
+  const submitDraft = submitDraftToHistory;
 
   const availableDraftFoods = state.foods.filter((food) => pantryByFood.has(food.id));
   const draftItemByFoodId = new Map(
@@ -141,7 +143,7 @@ export default function TodayTab() {
                   <button
                     className="draft-tile__clear"
                     type="button"
-                    onClick={() => removeDraftItem(food.id)}
+                    onClick={() => removeDraft(food.id)}
                     title="Clear item"
                   >
                     x
