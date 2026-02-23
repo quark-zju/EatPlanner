@@ -109,16 +109,28 @@ export default function SettingsTab() {
           </button>
         )}
         {driveConnected && (
-          <button className="ghost" onClick={() => disconnectDrive()} disabled={driveBusy}>
-            Disconnect Drive
-          </button>
+          <>
+            <button className="ghost" onClick={() => disconnectDrive()} disabled={driveBusy}>
+              Disconnect Drive
+            </button>
+            <button
+              className="ghost"
+              onClick={() => saveToDrive()}
+              disabled={driveBusy}
+              type="button"
+            >
+              Save to Drive
+            </button>
+            <button
+              className="ghost"
+              onClick={() => loadFromDrive()}
+              disabled={driveBusy}
+              type="button"
+            >
+              Load from Drive
+            </button>
+          </>
         )}
-        <button className="ghost" onClick={() => saveToDrive()} disabled={driveBusy} type="button">
-          Save to Drive
-        </button>
-        <button className="ghost" onClick={() => loadFromDrive()} disabled={driveBusy} type="button">
-          Load from Drive
-        </button>
       </div>
 
       <p className="hint">Export uses a versioned schema. Google Drive sync writes to app data.</p>
