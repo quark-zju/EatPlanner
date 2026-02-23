@@ -16,6 +16,7 @@ import {
 } from "../../state/appDraftActions";
 import { generatePlanOptions } from "../../state/appPlannerActions";
 import { getFoodIcon } from "../../state/appState";
+import NutritionGoalStats from "../NutritionGoalStats";
 
 const formatPrice = (priceLowerBound: number, hasUnknownPrice: boolean) => {
   const base = priceLowerBound.toFixed(2);
@@ -200,9 +201,7 @@ export default function TodayTab() {
         </div>
 
         <div className="draft-summary">
-          <p>Carbs: {state.todayDraft.totals.carbs.toFixed(1)} g</p>
-          <p>Fat: {state.todayDraft.totals.fat.toFixed(1)} g</p>
-          <p>Protein: {state.todayDraft.totals.protein.toFixed(1)} g</p>
+          <NutritionGoalStats totals={state.todayDraft.totals} goal={state.goal} />
           <p>Price: ${formatPrice(draftPrice.priceLowerBound, draftPrice.hasUnknownPrice)}</p>
         </div>
 

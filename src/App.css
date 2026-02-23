@@ -153,9 +153,54 @@
 
 .draft-summary {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-template-columns: 1fr;
   gap: 8px;
   margin: 10px 0 14px;
+}
+
+.nutrition-goals {
+  display: grid;
+  gap: 10px;
+}
+
+.nutrition-goal-row {
+  display: grid;
+  gap: 4px;
+}
+
+.nutrition-goal-row__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+  color: #4b3b30;
+}
+
+.nutrition-goal-bar {
+  position: relative;
+  height: 10px;
+  border-radius: 999px;
+  background: #efe3d6;
+  overflow: hidden;
+}
+
+.nutrition-goal-bar__target {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgba(54, 130, 73, 0.25);
+}
+
+.nutrition-goal-bar__value {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background: #b4693f;
+}
+
+.nutrition-goal-bar__value.is-met {
+  background: #2b7a45;
 }
 
 .draft-grid {
