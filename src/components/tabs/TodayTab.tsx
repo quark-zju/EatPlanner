@@ -149,7 +149,7 @@ export default function TodayTab() {
 
       <section className="card">
         <div className="card__header">
-          <h2>Draft Editor</h2>
+          <h2>What did you eat?</h2>
         </div>
         <div className="draft-controls">
           <label>

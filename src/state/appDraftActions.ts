@@ -39,6 +39,23 @@ const toDraftItemsFromOption = (state: AppState, option: PlanOption): DraftItem[
 export const setDraftDate = (dateISO: LocalDateISO, store?: StoreLike) => {
   const s = withStore(store);
   const state = s.get(appStateAtom);
+  const historyRecord = state.history.byDate[dateISO];
+  if (historyRecord) {
+    const items = historyRecord.items.map((item) => ({ ...item }));
+    s.set(appStateAtom, {
+      ...state,
+      todayDraft: {
+        ...state.todayDraft,
+        draftDateISO: dateISO,
+        items,
+        totals: calculateDraftTotals(items),
+      },
+    });
+    s.set(errorAtom, null);
+    s.set(noticeAtom, `Loaded saved foods for ${dateISO}.`);
+    return;
+  }
+
   s.set(appStateAtom, {
     ...state,
     todayDraft: {

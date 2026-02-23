@@ -141,4 +141,44 @@ describe("appAtoms history and draft flow", () => {
     expect(added.icon).toBe("🫐");
     expect(state.pantry[state.pantry.length - 1].stock).toBe(2);
   });
+
+  it("loads historical foods into draft when selecting a saved date", async () => {
+    const atoms = await import("./appAtoms");
+    const draftActions = await import("./appDraftActions");
+    const store = createStore();
+
+    store.set(atoms.appStateAtom, {
+      ...defaultAppState,
+      history: {
+        byDate: {
+          "2026-02-20": {
+            dateISO: "2026-02-20",
+            submittedAtISO: "2026-02-20T12:00:00.000Z",
+            goalSnapshot: defaultAppState.goal,
+            items: [
+              {
+                foodId: "rice",
+                foodNameSnapshot: "Rice",
+                unitSnapshot: "serving",
+                nutritionPerUnitSnapshot: { carbs: 45, fat: 0.4, protein: 4 },
+                quantity: 2,
+                pricePerUnitSnapshot: 1.2,
+              },
+            ],
+            totals: { carbs: 90, fat: 0.8, protein: 8 },
+            priceLowerBound: 2.4,
+            hasUnknownPrice: false,
+            source: "planner-submit",
+          },
+        },
+      },
+    });
+
+    draftActions.setDraftDate("2026-02-20", store);
+    const state = store.get(atoms.appStateAtom);
+    expect(state.todayDraft.draftDateISO).toBe("2026-02-20");
+    expect(state.todayDraft.items.length).toBe(1);
+    expect(state.todayDraft.items[0].foodId).toBe("rice");
+    expect(state.todayDraft.items[0].quantity).toBe(2);
+  });
 });
