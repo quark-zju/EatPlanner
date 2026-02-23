@@ -26,7 +26,6 @@ import {
   defaultAppStateMap,
   fromAppStateMap,
   getRollingWindowStartISO,
-  getFoodIcon,
   isAppState,
   newFoodId,
   normalizeAppState,
@@ -40,6 +39,7 @@ import {
   type LocalDateISO,
   type UiTab,
 } from "./appState";
+import { inferFoodIconFromName } from "./foodIcons";
 
 const DEFAULT_DRIVE_CLIENT_ID =
   "775455628972-haf8lsiavs1u6ncpui8f20ac0orkh4nf.apps.googleusercontent.com";
@@ -439,11 +439,31 @@ export const updateFoodAtom = atom(
   null,
   (get, set, payload: { foodId: string; updates: Partial<Food> }) => {
     const state = get(appStateAtom);
+    const hasExplicitIconUpdate = Object.prototype.hasOwnProperty.call(
+      payload.updates,
+      "icon"
+    );
     set(appStateAtom, {
       ...state,
-      foods: state.foods.map((food) =>
-        food.id === payload.foodId ? { ...food, ...payload.updates } : food
-      ),
+      foods: state.foods.map((food) => {
+        if (food.id !== payload.foodId) {
+          return food;
+        }
+
+        const merged: Food = { ...food, ...payload.updates };
+        const nameChanged =
+          typeof payload.updates.name === "string" && payload.updates.name !== food.name;
+        const iconMissing = !merged.icon || merged.icon.trim() === "";
+
+        if (nameChanged && !hasExplicitIconUpdate && iconMissing) {
+          const inferred = inferFoodIconFromName(merged.name);
+          if (inferred) {
+            merged.icon = inferred;
+          }
+        }
+
+        return merged;
+      }),
     });
   }
 );
@@ -502,7 +522,6 @@ export const addFoodAtom = atom(null, (get, set) => {
       {
         id,
         name: "New Food",
-        icon: getFoodIcon(),
         unit: "serving",
         nutritionPerUnit: { carbs: 0, fat: 0, protein: 0 },
       },
