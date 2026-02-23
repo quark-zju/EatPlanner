@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import {
-  addFoodAtom,
+  addFoodFromEditorAtom,
   appStateAtom,
   getPantryByFoodAtom,
   moveFoodsToTopAtom,
@@ -16,7 +16,7 @@ import { DEFAULT_FOOD_ICON, getFoodIcon } from "../../state/appState";
 export default function InventoryTab() {
   const state = useAtomValue(appStateAtom);
   const pantryByFood = useAtomValue(getPantryByFoodAtom);
-  const addFood = useSetAtom(addFoodAtom);
+  const addFoodFromEditor = useSetAtom(addFoodFromEditorAtom);
   const removeFoods = useSetAtom(removeFoodsAtom);
   const moveFoodsToTop = useSetAtom(moveFoodsToTopAtom);
   const updateFood = useSetAtom(updateFoodAtom);
@@ -24,6 +24,16 @@ export default function InventoryTab() {
   const updateStock = useSetAtom(updateStockAtom);
   const toggleConstraint = useSetAtom(toggleConstraintAtom);
   const [selectedFoodIds, setSelectedFoodIds] = useState<string[]>([]);
+  const [newFood, setNewFood] = useState({
+    name: "",
+    icon: "",
+    unit: "serving",
+    carbs: "0",
+    fat: "0",
+    protein: "0",
+    price: "",
+    stock: "1",
+  });
   const selectedCount = selectedFoodIds.length;
   const selectedIdSet = useMemo(() => new Set(selectedFoodIds), [selectedFoodIds]);
 
@@ -36,6 +46,36 @@ export default function InventoryTab() {
   const clearMissingSelections = () => {
     const validIds = new Set(state.foods.map((food) => food.id));
     setSelectedFoodIds((prev) => prev.filter((id) => validIds.has(id)));
+  };
+
+  const commitNewFood = () => {
+    const name = newFood.name.trim();
+    if (!name) {
+      return;
+    }
+
+    const stockValue = newFood.stock.trim().toLowerCase();
+    addFoodFromEditor({
+      name,
+      icon: newFood.icon.trim() || undefined,
+      unit: newFood.unit.trim() || "serving",
+      carbs: Number(newFood.carbs),
+      fat: Number(newFood.fat),
+      protein: Number(newFood.protein),
+      price: newFood.price.trim() === "" ? undefined : Number(newFood.price),
+      stock: stockValue === "inf" ? "inf" : Number(newFood.stock),
+    });
+
+    setNewFood({
+      name: "",
+      icon: "",
+      unit: "serving",
+      carbs: "0",
+      fat: "0",
+      protein: "0",
+      price: "",
+      stock: "1",
+    });
   };
 
   return (
@@ -72,9 +112,6 @@ export default function InventoryTab() {
             }}
           >
             Delete {selectedCount} items
-          </button>
-          <button className="ghost" onClick={() => addFood()} type="button">
-            Add Food
           </button>
         </div>
       </div>
@@ -240,6 +277,125 @@ export default function InventoryTab() {
                 </tr>
               );
             })}
+            <tr>
+              <td></td>
+              <td>
+                <input
+                  value={newFood.name}
+                  placeholder="New food name..."
+                  onChange={(event) =>
+                    setNewFood((prev) => ({ ...prev, name: event.target.value }))
+                  }
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      commitNewFood();
+                    }
+                  }}
+                />
+              </td>
+              <td>
+                <input
+                  value={newFood.icon}
+                  placeholder={DEFAULT_FOOD_ICON}
+                  maxLength={8}
+                  onChange={(event) =>
+                    setNewFood((prev) => ({ ...prev, icon: event.target.value }))
+                  }
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      commitNewFood();
+                    }
+                  }}
+                />
+              </td>
+              <td>
+                <input
+                  value={newFood.unit}
+                  onChange={(event) =>
+                    setNewFood((prev) => ({ ...prev, unit: event.target.value }))
+                  }
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      commitNewFood();
+                    }
+                  }}
+                />
+              </td>
+              <td>
+                <input
+                  type="number"
+                  value={newFood.carbs}
+                  onChange={(event) =>
+                    setNewFood((prev) => ({ ...prev, carbs: event.target.value }))
+                  }
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      commitNewFood();
+                    }
+                  }}
+                />
+              </td>
+              <td>
+                <input
+                  type="number"
+                  value={newFood.fat}
+                  onChange={(event) =>
+                    setNewFood((prev) => ({ ...prev, fat: event.target.value }))
+                  }
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      commitNewFood();
+                    }
+                  }}
+                />
+              </td>
+              <td>
+                <input
+                  type="number"
+                  value={newFood.protein}
+                  onChange={(event) =>
+                    setNewFood((prev) => ({ ...prev, protein: event.target.value }))
+                  }
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      commitNewFood();
+                    }
+                  }}
+                />
+              </td>
+              <td>
+                <input
+                  type="number"
+                  value={newFood.price}
+                  placeholder="?"
+                  onChange={(event) =>
+                    setNewFood((prev) => ({ ...prev, price: event.target.value }))
+                  }
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      commitNewFood();
+                    }
+                  }}
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  value={newFood.stock}
+                  onChange={(event) =>
+                    setNewFood((prev) => ({ ...prev, stock: event.target.value }))
+                  }
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      commitNewFood();
+                    }
+                  }}
+                />
+              </td>
+              <td>
+                <span className="hint">Press Enter to add</span>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>

@@ -110,4 +110,28 @@ describe("appAtoms history and draft flow", () => {
     expect(state.foods.map((food) => food.id)).toEqual(["chicken"]);
     expect(state.pantry.map((item) => item.foodId)).toEqual(["chicken"]);
   });
+
+  it("adds a new food from inventory placeholder row payload", async () => {
+    const atoms = await import("./appAtoms");
+    const store = createStore();
+
+    store.set(atoms.appStateAtom, defaultAppState as AppState);
+    store.set(atoms.addFoodFromEditorAtom, {
+      name: "Blueberry",
+      icon: "",
+      unit: "cup",
+      carbs: 21,
+      fat: 0.5,
+      protein: 1,
+      price: 3.2,
+      stock: 2,
+    });
+
+    const state = store.get(atoms.appStateAtom);
+    const added = state.foods[state.foods.length - 1];
+    expect(added.name).toBe("Blueberry");
+    expect(added.unit).toBe("cup");
+    expect(added.icon).toBe("🫐");
+    expect(state.pantry[state.pantry.length - 1].stock).toBe(2);
+  });
 });

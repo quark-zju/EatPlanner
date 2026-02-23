@@ -530,6 +530,61 @@ export const addFoodAtom = atom(null, (get, set) => {
   });
 });
 
+export const addFoodFromEditorAtom = atom(
+  null,
+  (
+    get,
+    set,
+    payload: {
+      name: string;
+      icon?: string;
+      unit: string;
+      carbs: number;
+      fat: number;
+      protein: number;
+      price?: number;
+      stock: PantryItem["stock"];
+    }
+  ) => {
+    const name = payload.name.trim();
+    if (!name) {
+      return;
+    }
+
+    const state = get(appStateAtom);
+    const id = newFoodId();
+    const inferredIcon = inferFoodIconFromName(name);
+    const icon = payload.icon?.trim() ? payload.icon.trim() : inferredIcon;
+    const unit = payload.unit.trim() || "serving";
+    const stock =
+      payload.stock === "inf"
+        ? "inf"
+        : Number.isFinite(payload.stock)
+          ? Math.max(0, payload.stock)
+          : 0;
+
+    set(appStateAtom, {
+      ...state,
+      foods: [
+        ...state.foods,
+        {
+          id,
+          name,
+          icon,
+          unit,
+          nutritionPerUnit: {
+            carbs: Number.isFinite(payload.carbs) ? payload.carbs : 0,
+            fat: Number.isFinite(payload.fat) ? payload.fat : 0,
+            protein: Number.isFinite(payload.protein) ? payload.protein : 0,
+          },
+          price: payload.price,
+        },
+      ],
+      pantry: [...state.pantry, { foodId: id, stock }],
+    });
+  }
+);
+
 export const removeFoodAtom = atom(null, (get, set, foodId: string) => {
   const state = get(appStateAtom);
   set(appStateAtom, {
