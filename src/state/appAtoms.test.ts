@@ -98,15 +98,16 @@ describe("appAtoms history and draft flow", () => {
 
   it("moves selected foods to top and deletes selected foods", async () => {
     const atoms = await import("./appAtoms");
+    const inventoryActions = await import("./appInventoryActions");
     const store = createStore();
 
     store.set(atoms.appStateAtom, defaultAppState as AppState);
 
-    store.set(atoms.moveFoodsToTopAtom, ["olive-oil"]);
+    inventoryActions.moveFoodsToTop(["olive-oil"], store);
     let state = store.get(atoms.appStateAtom);
     expect(state.foods[0].id).toBe("olive-oil");
 
-    store.set(atoms.removeFoodsAtom, ["olive-oil", "rice"]);
+    inventoryActions.removeFoods(["olive-oil", "rice"], store);
     state = store.get(atoms.appStateAtom);
     expect(state.foods.map((food) => food.id)).toEqual(["chicken"]);
     expect(state.pantry.map((item) => item.foodId)).toEqual(["chicken"]);
@@ -114,10 +115,11 @@ describe("appAtoms history and draft flow", () => {
 
   it("adds a new food from inventory placeholder row payload", async () => {
     const atoms = await import("./appAtoms");
+    const inventoryActions = await import("./appInventoryActions");
     const store = createStore();
 
     store.set(atoms.appStateAtom, defaultAppState as AppState);
-    store.set(atoms.addFoodFromEditorAtom, {
+    inventoryActions.addFoodFromEditor({
       name: "Blueberry",
       icon: "",
       unit: "cup",
@@ -126,7 +128,7 @@ describe("appAtoms history and draft flow", () => {
       protein: 1,
       price: 3.2,
       stock: 2,
-    });
+    }, store);
 
     const state = store.get(atoms.appStateAtom);
     const added = state.foods[state.foods.length - 1];

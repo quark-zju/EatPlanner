@@ -2,7 +2,6 @@ import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import { solvePlanOptions } from "../core";
 import type {
-  Food,
   Nutrition,
   PantryItem,
   PlanConstraints,
@@ -25,7 +24,6 @@ import {
   defaultAppStateMap,
   fromAppStateMap,
   isAppState,
-  newFoodId,
   normalizeAppState,
   shiftLocalDateISO,
   toAppStateMap,
@@ -37,7 +35,6 @@ import {
   type LocalDateISO,
   type UiTab,
 } from "./appState";
-import { inferFoodIconFromName } from "./foodIcons";
 
 const DEFAULT_DRIVE_CLIENT_ID =
   "775455628972-haf8lsiavs1u6ncpui8f20ac0orkh4nf.apps.googleusercontent.com";
@@ -385,205 +382,6 @@ export const draftPriceSummaryAtom = atom((get) => {
   return calculateDraftPrice(items);
 });
 
-export const updateFoodAtom = atom(
-  null,
-  (get, set, payload: { foodId: string; updates: Partial<Food> }) => {
-    const state = get(appStateAtom);
-    const hasExplicitIconUpdate = Object.prototype.hasOwnProperty.call(
-      payload.updates,
-      "icon"
-    );
-    set(appStateAtom, {
-      ...state,
-      foods: state.foods.map((food) => {
-        if (food.id !== payload.foodId) {
-          return food;
-        }
-
-        const merged: Food = { ...food, ...payload.updates };
-        const nameChanged =
-          typeof payload.updates.name === "string" && payload.updates.name !== food.name;
-        const iconMissing = !merged.icon || merged.icon.trim() === "";
-
-        if (nameChanged && !hasExplicitIconUpdate && iconMissing) {
-          const inferred = inferFoodIconFromName(merged.name);
-          if (inferred) {
-            merged.icon = inferred;
-          }
-        }
-
-        return merged;
-      }),
-    });
-  }
-);
-
-export const updateNutritionAtom = atom(
-  null,
-  (
-    get,
-    set,
-    payload: { foodId: string; updates: Partial<Food["nutritionPerUnit"]> }
-  ) => {
-    const state = get(appStateAtom);
-    set(appStateAtom, {
-      ...state,
-      foods: state.foods.map((food) =>
-        food.id === payload.foodId
-          ? {
-              ...food,
-              nutritionPerUnit: { ...food.nutritionPerUnit, ...payload.updates },
-            }
-          : food
-      ),
-    });
-  }
-);
-
-export const updateStockAtom = atom(
-  null,
-  (get, set, payload: { foodId: string; stock: PantryItem["stock"] }) => {
-    const state = get(appStateAtom);
-    const existing = state.pantry.find((item) => item.foodId === payload.foodId);
-    if (existing) {
-      set(appStateAtom, {
-        ...state,
-        pantry: state.pantry.map((item) =>
-          item.foodId === payload.foodId ? { ...item, stock: payload.stock } : item
-        ),
-      });
-      return;
-    }
-
-    set(appStateAtom, {
-      ...state,
-      pantry: [...state.pantry, { foodId: payload.foodId, stock: payload.stock }],
-    });
-  }
-);
-
-export const addFoodAtom = atom(null, (get, set) => {
-  const state = get(appStateAtom);
-  const id = newFoodId();
-  set(appStateAtom, {
-    ...state,
-    foods: [
-      ...state.foods,
-      {
-        id,
-        name: "New Food",
-        unit: "serving",
-        nutritionPerUnit: { carbs: 0, fat: 0, protein: 0 },
-      },
-    ],
-    pantry: [...state.pantry, { foodId: id, stock: 1 }],
-  });
-});
-
-export const addFoodFromEditorAtom = atom(
-  null,
-  (
-    get,
-    set,
-    payload: {
-      name: string;
-      icon?: string;
-      unit: string;
-      carbs: number;
-      fat: number;
-      protein: number;
-      price?: number;
-      stock: PantryItem["stock"];
-    }
-  ) => {
-    const name = payload.name.trim();
-    if (!name) {
-      return;
-    }
-
-    const state = get(appStateAtom);
-    const id = newFoodId();
-    const inferredIcon = inferFoodIconFromName(name);
-    const icon = payload.icon?.trim() ? payload.icon.trim() : inferredIcon;
-    const unit = payload.unit.trim() || "serving";
-    const stock =
-      payload.stock === "inf"
-        ? "inf"
-        : Number.isFinite(payload.stock)
-          ? Math.max(0, payload.stock)
-          : 0;
-
-    set(appStateAtom, {
-      ...state,
-      foods: [
-        ...state.foods,
-        {
-          id,
-          name,
-          icon,
-          unit,
-          nutritionPerUnit: {
-            carbs: Number.isFinite(payload.carbs) ? payload.carbs : 0,
-            fat: Number.isFinite(payload.fat) ? payload.fat : 0,
-            protein: Number.isFinite(payload.protein) ? payload.protein : 0,
-          },
-          price: payload.price,
-        },
-      ],
-      pantry: [...state.pantry, { foodId: id, stock }],
-    });
-  }
-);
-
-export const removeFoodAtom = atom(null, (get, set, foodId: string) => {
-  const state = get(appStateAtom);
-  set(appStateAtom, {
-    ...state,
-    foods: state.foods.filter((food) => food.id !== foodId),
-    pantry: state.pantry.filter((item) => item.foodId !== foodId),
-    constraints: {
-      avoidFoodIds: state.constraints.avoidFoodIds?.filter((id) => id !== foodId),
-      preferFoodIds: state.constraints.preferFoodIds?.filter((id) => id !== foodId),
-    },
-  });
-});
-
-export const removeFoodsAtom = atom(null, (get, set, foodIds: string[]) => {
-  const ids = new Set(foodIds);
-  if (ids.size === 0) {
-    return;
-  }
-
-  const state = get(appStateAtom);
-  set(appStateAtom, {
-    ...state,
-    foods: state.foods.filter((food) => !ids.has(food.id)),
-    pantry: state.pantry.filter((item) => !ids.has(item.foodId)),
-    constraints: {
-      avoidFoodIds: state.constraints.avoidFoodIds?.filter((id) => !ids.has(id)),
-      preferFoodIds: state.constraints.preferFoodIds?.filter((id) => !ids.has(id)),
-    },
-  });
-});
-
-export const moveFoodsToTopAtom = atom(null, (get, set, foodIds: string[]) => {
-  const ids = new Set(foodIds);
-  if (ids.size === 0) {
-    return;
-  }
-
-  const state = get(appStateAtom);
-  const selected = state.foods.filter((food) => ids.has(food.id));
-  if (selected.length === 0) {
-    return;
-  }
-  const unselected = state.foods.filter((food) => !ids.has(food.id));
-
-  set(appStateAtom, {
-    ...state,
-    foods: [...selected, ...unselected],
-  });
-});
 
 
 export const getPantryByFoodAtom = atom((get) => {

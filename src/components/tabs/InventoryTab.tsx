@@ -1,27 +1,23 @@
 import { useMemo, useState } from "react";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtomValue } from "jotai";
 import {
-  addFoodFromEditorAtom,
   appStateAtom,
   getPantryByFoodAtom,
-  moveFoodsToTopAtom,
-  removeFoodsAtom,
-  updateFoodAtom,
-  updateNutritionAtom,
-  updateStockAtom,
 } from "../../state/appAtoms";
+import {
+  addFoodFromEditor,
+  moveFoodsToTop,
+  removeFoods,
+  updateFood,
+  updateNutrition,
+  updateStock,
+} from "../../state/appInventoryActions";
 import { toggleConstraint } from "../../state/appDomainActions";
 import { DEFAULT_FOOD_ICON, getFoodIcon } from "../../state/appState";
 
 export default function InventoryTab() {
   const state = useAtomValue(appStateAtom);
   const pantryByFood = useAtomValue(getPantryByFoodAtom);
-  const addFoodFromEditor = useSetAtom(addFoodFromEditorAtom);
-  const removeFoods = useSetAtom(removeFoodsAtom);
-  const moveFoodsToTop = useSetAtom(moveFoodsToTopAtom);
-  const updateFood = useSetAtom(updateFoodAtom);
-  const updateNutrition = useSetAtom(updateNutritionAtom);
-  const updateStock = useSetAtom(updateStockAtom);
   const [selectedFoodIds, setSelectedFoodIds] = useState<string[]>([]);
   const [newFood, setNewFood] = useState({
     name: "",
