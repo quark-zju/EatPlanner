@@ -47,6 +47,14 @@ export default function InventoryTab() {
             className="ghost"
             type="button"
             disabled={selectedCount === 0}
+            onClick={() => setSelectedFoodIds([])}
+          >
+            Deselect
+          </button>
+          <button
+            className="ghost"
+            type="button"
+            disabled={selectedCount === 0}
             onClick={() => {
               moveFoodsToTop(selectedFoodIds);
               clearMissingSelections();
