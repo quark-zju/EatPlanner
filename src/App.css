@@ -314,6 +314,13 @@ select {
   gap: 16px;
 }
 
+.local-avoid-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 12px;
+}
+
 .option {
   border: 1px solid #f0e6dc;
   border-radius: 16px;
@@ -340,6 +347,34 @@ select {
   display: grid;
   gap: 16px;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.option-food {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.option-food__main {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.option-food__avoid {
+  border: 1px solid #d8c8b8;
+  border-radius: 999px;
+  background: #fff;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.option-food.is-avoid .option-food__main {
+  text-decoration: line-through;
+  opacity: 0.7;
 }
 
 .price {

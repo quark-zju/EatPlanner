@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import { useAtomValue } from "jotai";
 import {
   appStateAtom,
@@ -33,24 +34,54 @@ export default function TodayTab() {
   const addDraftFood = addDraftFoodFromPantry;
   const removeDraft = removeDraftItem;
   const submitDraft = submitDraftToHistory;
+  const [localAvoidFoodIds, setLocalAvoidFoodIds] = useState<string[]>([]);
 
   const availableDraftFoods = state.foods.filter((food) => pantryByFood.has(food.id));
   const draftItemByFoodId = new Map(
     state.todayDraft.items.map((item) => [item.foodId, item])
   );
+  const localAvoidSet = useMemo(() => new Set(localAvoidFoodIds), [localAvoidFoodIds]);
+
+  const toggleLocalAvoid = (foodId: string) => {
+    setLocalAvoidFoodIds((prev) =>
+      prev.includes(foodId) ? prev.filter((id) => id !== foodId) : [...prev, foodId]
+    );
+  };
 
   return (
     <>
       <section className="card">
         <div className="card__header">
           <h2>Planner</h2>
-          <button className="primary" onClick={() => generatePlans()} disabled={isSolving}>
+          <button
+            className="primary"
+            onClick={() => generatePlans({ localAvoidFoodIds })}
+            disabled={isSolving}
+          >
             {isSolving ? "Solving..." : "Generate Plans"}
           </button>
         </div>
         <p className="hint">
           Goal ranges are configured in the <strong>Settings</strong> tab.
         </p>
+        <p className="hint">Use x in results to mark local avoid items for this session.</p>
+        {localAvoidFoodIds.length > 0 && (
+          <div className="local-avoid-list">
+            {localAvoidFoodIds.map((foodId) => {
+              const food = state.foods.find((f) => f.id === foodId);
+              return (
+                <button
+                  className="ghost"
+                  key={foodId}
+                  type="button"
+                  onClick={() => toggleLocalAvoid(foodId)}
+                >
+                  {getFoodIcon(food?.icon)} {food?.name ?? foodId} x
+                </button>
+              );
+            })}
+          </div>
+        )}
         {options.length === 0 && <p className="hint">Generate plans to get suggestions.</p>}
         <div className="options">
           {options.map((option, index) => (
@@ -70,9 +101,23 @@ export default function TodayTab() {
                         return null;
                       }
                       const food = state.foods.find((f) => f.id === foodId);
+                      const isLocallyAvoided = localAvoidSet.has(foodId);
                       return (
-                        <li key={foodId}>
-                          {food?.name ?? foodId}: {amount} {food?.unit}
+                        <li key={foodId} className={isLocallyAvoided ? "option-food is-avoid" : "option-food"}>
+                          <span className="option-food__main">
+                            <span>{getFoodIcon(food?.icon)}</span>
+                            <span>
+                              {food?.name ?? foodId}: {amount} {food?.unit}
+                            </span>
+                          </span>
+                          <button
+                            className="option-food__avoid"
+                            type="button"
+                            onClick={() => toggleLocalAvoid(foodId)}
+                            title={isLocallyAvoided ? "Unmark avoid" : "Mark as avoid"}
+                          >
+                            x
+                          </button>
                         </li>
                       );
                     })}

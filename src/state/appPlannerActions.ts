@@ -7,7 +7,10 @@ type StoreLike = ReturnType<typeof getDefaultStore>;
 const defaultStore = getDefaultStore();
 const withStore = (store?: StoreLike) => store ?? defaultStore;
 
-export const generatePlanOptions = async (store?: StoreLike) => {
+export const generatePlanOptions = async (
+  params?: { localAvoidFoodIds?: string[] },
+  store?: StoreLike
+) => {
   const s = withStore(store);
   s.set(solvingAtom, true);
   s.set(errorAtom, null);
@@ -21,12 +24,19 @@ export const generatePlanOptions = async (store?: StoreLike) => {
     }
 
     const state = s.get(appStateAtom);
+    const localAvoidSet = new Set(params?.localAvoidFoodIds ?? []);
+    const mergedAvoid = Array.from(
+      new Set([...(state.constraints.avoidFoodIds ?? []), ...localAvoidSet])
+    );
     const result = await solvePlanOptions(
       {
         foods: state.foods,
         pantry: state.pantry,
         goal: state.goal,
-        constraints: state.constraints,
+        constraints: {
+          ...state.constraints,
+          avoidFoodIds: mergedAvoid,
+        },
       },
       3
     );
