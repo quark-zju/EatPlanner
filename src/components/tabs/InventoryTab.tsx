@@ -1,9 +1,11 @@
+import { useMemo, useState } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import {
   addFoodAtom,
   appStateAtom,
   getPantryByFoodAtom,
-  removeFoodAtom,
+  moveFoodsToTopAtom,
+  removeFoodsAtom,
   toggleConstraintAtom,
   updateFoodAtom,
   updateNutritionAtom,
@@ -15,24 +17,64 @@ export default function InventoryTab() {
   const state = useAtomValue(appStateAtom);
   const pantryByFood = useAtomValue(getPantryByFoodAtom);
   const addFood = useSetAtom(addFoodAtom);
-  const removeFood = useSetAtom(removeFoodAtom);
+  const removeFoods = useSetAtom(removeFoodsAtom);
+  const moveFoodsToTop = useSetAtom(moveFoodsToTopAtom);
   const updateFood = useSetAtom(updateFoodAtom);
   const updateNutrition = useSetAtom(updateNutritionAtom);
   const updateStock = useSetAtom(updateStockAtom);
   const toggleConstraint = useSetAtom(toggleConstraintAtom);
+  const [selectedFoodIds, setSelectedFoodIds] = useState<string[]>([]);
+  const selectedCount = selectedFoodIds.length;
+  const selectedIdSet = useMemo(() => new Set(selectedFoodIds), [selectedFoodIds]);
+
+  const toggleSelected = (foodId: string) => {
+    setSelectedFoodIds((prev) =>
+      prev.includes(foodId) ? prev.filter((id) => id !== foodId) : [...prev, foodId]
+    );
+  };
+
+  const clearMissingSelections = () => {
+    const validIds = new Set(state.foods.map((food) => food.id));
+    setSelectedFoodIds((prev) => prev.filter((id) => validIds.has(id)));
+  };
 
   return (
     <section className="card">
       <div className="card__header">
         <h2>Pantry Foods</h2>
-        <button className="ghost" onClick={() => addFood()}>
-          Add Food
-        </button>
+        <div className="storage-actions">
+          <button
+            className="ghost"
+            type="button"
+            disabled={selectedCount === 0}
+            onClick={() => {
+              moveFoodsToTop(selectedFoodIds);
+              clearMissingSelections();
+            }}
+          >
+            Move to top
+          </button>
+          <button
+            className="ghost"
+            type="button"
+            disabled={selectedCount === 0}
+            onClick={() => {
+              removeFoods(selectedFoodIds);
+              setSelectedFoodIds([]);
+            }}
+          >
+            Delete {selectedCount} items
+          </button>
+          <button className="ghost" onClick={() => addFood()} type="button">
+            Add Food
+          </button>
+        </div>
       </div>
       <div className="table-scroll">
         <table className="editor-table pantry-editor-table">
           <thead>
             <tr>
+              <th aria-label="Select foods"></th>
               <th>Name</th>
               <th>Icon</th>
               <th>Unit</th>
@@ -49,6 +91,13 @@ export default function InventoryTab() {
               const stock = pantryByFood.get(food.id)?.stock ?? 0;
               return (
                 <tr key={food.id}>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={selectedIdSet.has(food.id)}
+                      onChange={() => toggleSelected(food.id)}
+                    />
+                  </td>
                   <td>
                     <input
                       value={food.name}
@@ -168,7 +217,14 @@ export default function InventoryTab() {
                         />
                         Avoid
                       </label>
-                      <button className="link" onClick={() => removeFood(food.id)}>
+                      <button
+                        className="link"
+                        type="button"
+                        onClick={() => {
+                          removeFoods([food.id]);
+                          setSelectedFoodIds((prev) => prev.filter((id) => id !== food.id));
+                        }}
+                      >
                         Remove
                       </button>
                     </div>

@@ -543,6 +543,43 @@ export const removeFoodAtom = atom(null, (get, set, foodId: string) => {
   });
 });
 
+export const removeFoodsAtom = atom(null, (get, set, foodIds: string[]) => {
+  const ids = new Set(foodIds);
+  if (ids.size === 0) {
+    return;
+  }
+
+  const state = get(appStateAtom);
+  set(appStateAtom, {
+    ...state,
+    foods: state.foods.filter((food) => !ids.has(food.id)),
+    pantry: state.pantry.filter((item) => !ids.has(item.foodId)),
+    constraints: {
+      avoidFoodIds: state.constraints.avoidFoodIds?.filter((id) => !ids.has(id)),
+      preferFoodIds: state.constraints.preferFoodIds?.filter((id) => !ids.has(id)),
+    },
+  });
+});
+
+export const moveFoodsToTopAtom = atom(null, (get, set, foodIds: string[]) => {
+  const ids = new Set(foodIds);
+  if (ids.size === 0) {
+    return;
+  }
+
+  const state = get(appStateAtom);
+  const selected = state.foods.filter((food) => ids.has(food.id));
+  if (selected.length === 0) {
+    return;
+  }
+  const unselected = state.foods.filter((food) => !ids.has(food.id));
+
+  set(appStateAtom, {
+    ...state,
+    foods: [...selected, ...unselected],
+  });
+});
+
 export const updateGoalAtom = atom(
   null,
   (

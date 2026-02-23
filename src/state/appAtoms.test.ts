@@ -94,4 +94,20 @@ describe("appAtoms history and draft flow", () => {
     store.set(atoms.setHistoryWindowAtom, "next");
     expect(store.get(atoms.appStateAtom).ui.historyWindowStartISO).toBe("2026-02-01");
   });
+
+  it("moves selected foods to top and deletes selected foods", async () => {
+    const atoms = await import("./appAtoms");
+    const store = createStore();
+
+    store.set(atoms.appStateAtom, defaultAppState as AppState);
+
+    store.set(atoms.moveFoodsToTopAtom, ["olive-oil"]);
+    let state = store.get(atoms.appStateAtom);
+    expect(state.foods[0].id).toBe("olive-oil");
+
+    store.set(atoms.removeFoodsAtom, ["olive-oil", "rice"]);
+    state = store.get(atoms.appStateAtom);
+    expect(state.foods.map((food) => food.id)).toEqual(["chicken"]);
+    expect(state.pantry.map((item) => item.foodId)).toEqual(["chicken"]);
+  });
 });
