@@ -18,6 +18,7 @@ import {
   selectPlanOptionToDraft,
   setDraftDate,
   submitDraftToHistory,
+  updateDraftQuantity,
 } from "../../state/appDraftActions";
 import { generatePlanOptions } from "../../state/appPlannerActions";
 import { getFoodIcon } from "../../state/appState";
@@ -45,6 +46,7 @@ export default function TodayTab() {
   const clearDraft = clearDraftItems;
   const removeDraft = removeDraftItem;
   const submitDraft = submitDraftToHistory;
+  const updateDraftQty = updateDraftQuantity;
   const [localAvoidFoodIds, setLocalAvoidFoodIds] = useState<string[]>([]);
 
   const availableDraftFoods = state.foods.filter((food) => pantryByFood.has(food.id));
@@ -223,14 +225,29 @@ export default function TodayTab() {
                   </span>
                 </button>
                 {quantity > 0 && (
-                  <button
-                    className="draft-tile__clear"
-                    type="button"
-                    onClick={() => removeDraft(food.id)}
-                    title="Clear item"
-                  >
-                    x
-                  </button>
+                  <>
+                    <button
+                      className="draft-tile__decrement"
+                      type="button"
+                      onClick={() =>
+                        updateDraftQty({
+                          foodId: food.id,
+                          quantity: Math.max(0, quantity - 1),
+                        })
+                      }
+                      title="Reduce by 1"
+                    >
+                      -
+                    </button>
+                    <button
+                      className="draft-tile__clear"
+                      type="button"
+                      onClick={() => removeDraft(food.id)}
+                      title="Clear item"
+                    >
+                      x
+                    </button>
+                  </>
                 )}
               </div>
             );
