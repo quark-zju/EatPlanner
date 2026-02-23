@@ -7,7 +7,13 @@ import {
   type HistoryDayRecord,
   type LocalDateISO,
 } from "./appState";
-import { appStateAtom, errorAtom, noticeAtom, planOptionsAtom } from "./appAtoms";
+import {
+  appStateAtom,
+  errorAtom,
+  noticeAtom,
+  planOptionsAtom,
+  selectedHistoryDateAtom,
+} from "./appAtoms";
 import { calculateDraftPrice, calculateDraftTotals, clampNonNegative } from "./appDraftMath";
 
 type StoreLike = ReturnType<typeof getDefaultStore>;
@@ -243,16 +249,13 @@ export const submitDraftToHistory = (store?: StoreLike) => {
         [dateISO]: record,
       },
     },
-    ui: {
-      ...state.ui,
-      selectedHistoryDateISO: dateISO,
-    },
     todayDraft: {
       ...state.todayDraft,
       items,
       totals,
     },
   });
+  s.set(selectedHistoryDateAtom, dateISO);
 
   const allZero = items.every((item) => item.quantity === 0);
   s.set(errorAtom, null);

@@ -6,6 +6,7 @@ import {
   APP_STATE_STORAGE_KEY,
   defaultAppStateMap,
   fromAppStateMap,
+  getRollingWindowStartISO,
   isAppState,
   normalizeAppState,
   shiftLocalDateISO,
@@ -63,23 +64,12 @@ export const noticeAtom = atom<string | null>(null);
 export const plannerMessageAtom = atom<string | null>(null);
 export const driveConnectedAtom = atom(isGoogleDriveConnected());
 export const driveBusyAtom = atom(false);
-
-export const activeTabAtom = atom(
-  (get) => get(appStateAtom).ui.activeTab,
-  (get, set, tab: UiTab) => {
-    const state = get(appStateAtom);
-    set(appStateAtom, {
-      ...state,
-      ui: {
-        ...state.ui,
-        activeTab: tab,
-      },
-    });
-  }
-);
+export const activeTabAtom = atom<UiTab>("today");
+export const historyWindowStartAtom = atom<LocalDateISO>(getRollingWindowStartISO());
+export const selectedHistoryDateAtom = atom<LocalDateISO | undefined>(undefined);
 
 export const historyWindowRangeAtom = atom((get) => {
-  const startISO = get(appStateAtom).ui.historyWindowStartISO;
+  const startISO = get(historyWindowStartAtom);
   const endISO = shiftLocalDateISO(startISO, 29);
   return { startISO, endISO };
 });

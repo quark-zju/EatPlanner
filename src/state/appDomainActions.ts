@@ -1,7 +1,7 @@
 import { getDefaultStore } from "jotai";
 import type { Goal } from "../core";
 import { shiftLocalDateISO, getRollingWindowStartISO, type LocalDateISO } from "./appState";
-import { appStateAtom } from "./appAtoms";
+import { appStateAtom, historyWindowStartAtom, selectedHistoryDateAtom } from "./appAtoms";
 
 const defaultStore = getDefaultStore();
 type StoreLike = ReturnType<typeof getDefaultStore>;
@@ -12,8 +12,7 @@ export const setHistoryWindow = (
   store?: StoreLike
 ) => {
   const s = withStore(store);
-  const state = s.get(appStateAtom);
-  let nextStart = state.ui.historyWindowStartISO;
+  let nextStart = s.get(historyWindowStartAtom);
   if (direction === "prev") {
     nextStart = shiftLocalDateISO(nextStart, -30);
   } else if (direction === "next") {
@@ -22,26 +21,13 @@ export const setHistoryWindow = (
     nextStart = getRollingWindowStartISO();
   }
 
-  s.set(appStateAtom, {
-    ...state,
-    ui: {
-      ...state.ui,
-      historyWindowStartISO: nextStart,
-      selectedHistoryDateISO: undefined,
-    },
-  });
+  s.set(historyWindowStartAtom, nextStart);
+  s.set(selectedHistoryDateAtom, undefined);
 };
 
 export const setSelectedHistoryDate = (dateISO: LocalDateISO | undefined, store?: StoreLike) => {
   const s = withStore(store);
-  const state = s.get(appStateAtom);
-  s.set(appStateAtom, {
-    ...state,
-    ui: {
-      ...state.ui,
-      selectedHistoryDateISO: dateISO,
-    },
-  });
+  s.set(selectedHistoryDateAtom, dateISO);
 };
 
 export const updateGoal = (

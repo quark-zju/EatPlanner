@@ -85,19 +85,14 @@ describe("appAtoms history and draft flow", () => {
     const actions = await import("./appDomainActions");
     const store = createStore();
 
-    store.set(atoms.appStateAtom, {
-      ...defaultAppState,
-      ui: {
-        ...defaultAppState.ui,
-        historyWindowStartISO: "2026-02-01",
-      },
-    });
+    store.set(atoms.appStateAtom, defaultAppState as AppState);
+    store.set(atoms.historyWindowStartAtom, "2026-02-01");
 
     actions.setHistoryWindow("prev", store);
-    expect(store.get(atoms.appStateAtom).ui.historyWindowStartISO).toBe("2026-01-02");
+    expect(store.get(atoms.historyWindowStartAtom)).toBe("2026-01-02");
 
     actions.setHistoryWindow("next", store);
-    expect(store.get(atoms.appStateAtom).ui.historyWindowStartISO).toBe("2026-02-01");
+    expect(store.get(atoms.historyWindowStartAtom)).toBe("2026-02-01");
   });
 
   it("moves selected foods to top and deletes selected foods", async () => {

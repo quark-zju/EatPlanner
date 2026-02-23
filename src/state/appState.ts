@@ -32,12 +32,6 @@ export type HistoryDayRecord = {
   source: "planner-submit";
 };
 
-export type UiState = {
-  activeTab: UiTab;
-  historyWindowStartISO: LocalDateISO;
-  selectedHistoryDateISO?: LocalDateISO;
-};
-
 export type TodayDraftState = {
   selectedOptionId?: string;
   draftDateISO: LocalDateISO;
@@ -54,7 +48,6 @@ export type AppState = {
   pantry: PantryItem[];
   goal: Goal;
   constraints: PlanConstraints;
-  ui: UiState;
   todayDraft: TodayDraftState;
   history: HistoryState;
 };
@@ -154,26 +147,6 @@ const isHistoryDayRecord = (value: unknown): value is HistoryDayRecord => {
   );
 };
 
-const isUiState = (value: unknown): value is UiState => {
-  if (!value || typeof value !== "object") {
-    return false;
-  }
-  const ui = value as {
-    activeTab?: unknown;
-    historyWindowStartISO?: unknown;
-    selectedHistoryDateISO?: unknown;
-  };
-  const tabOk =
-    ui.activeTab === "today" ||
-    ui.activeTab === "history" ||
-    ui.activeTab === "inventory" ||
-    ui.activeTab === "settings";
-  const selectedOk =
-    ui.selectedHistoryDateISO === undefined || typeof ui.selectedHistoryDateISO === "string";
-
-  return tabOk && typeof ui.historyWindowStartISO === "string" && selectedOk;
-};
-
 const isTodayDraftState = (value: unknown): value is TodayDraftState => {
   if (!value || typeof value !== "object") {
     return false;
@@ -217,7 +190,6 @@ export const isAppState = (value: unknown): value is AppState => {
     pantry?: unknown;
     goal?: unknown;
     constraints?: unknown;
-    ui?: unknown;
     todayDraft?: unknown;
     history?: unknown;
   };
@@ -287,11 +259,10 @@ export const isAppState = (value: unknown): value is AppState => {
             (v) => typeof v === "string"
           ))));
 
-  const uiOk = obj.ui === undefined || isUiState(obj.ui);
   const todayDraftOk = obj.todayDraft === undefined || isTodayDraftState(obj.todayDraft);
   const historyOk = obj.history === undefined || isHistoryState(obj.history);
 
-  return goalOk && constraintsOk && uiOk && todayDraftOk && historyOk;
+  return goalOk && constraintsOk && todayDraftOk && historyOk;
 };
 
 export const toLocalDateISO = (date: Date): LocalDateISO => {
@@ -363,11 +334,6 @@ export const defaultAppState: AppState = {
     avoidFoodIds: [],
     preferFoodIds: [],
   },
-  ui: {
-    activeTab: "today",
-    historyWindowStartISO: getRollingWindowStartISO(),
-    selectedHistoryDateISO: undefined,
-  },
   todayDraft: {
     selectedOptionId: undefined,
     draftDateISO: toLocalDateISO(new Date()),
@@ -380,16 +346,14 @@ export const defaultAppState: AppState = {
 };
 
 export const normalizeAppState = (state: AppState): AppState => {
+  const stateWithoutUi = state as AppState & { ui?: unknown };
+  const { ui: _ui, ...stateData } = stateWithoutUi;
   const merged = {
     ...defaultAppState,
-    ...state,
+    ...stateData,
     constraints: {
       avoidFoodIds: state.constraints?.avoidFoodIds ?? [],
       preferFoodIds: state.constraints?.preferFoodIds ?? [],
-    },
-    ui: {
-      ...defaultAppState.ui,
-      ...(state.ui ?? {}),
     },
     todayDraft: {
       ...defaultAppState.todayDraft,

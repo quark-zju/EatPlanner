@@ -1,8 +1,8 @@
 import { useAtomValue } from "jotai";
 import {
-  appStateAtom,
   historyDaysInWindowAtom,
   historyWindowRangeAtom,
+  selectedHistoryDateAtom,
 } from "../../state/appAtoms";
 import { setHistoryWindow, setSelectedHistoryDate } from "../../state/appDomainActions";
 import { getFoodIcon } from "../../state/appState";
@@ -14,9 +14,9 @@ const formatPrice = (priceLowerBound: number, hasUnknownPrice: boolean) => {
 };
 
 export default function HistoryTab() {
-  const state = useAtomValue(appStateAtom);
   const range = useAtomValue(historyWindowRangeAtom);
   const historyDays = useAtomValue(historyDaysInWindowAtom);
+  const selectedHistoryDateISO = useAtomValue(selectedHistoryDateAtom);
 
   return (
     <>
@@ -46,7 +46,7 @@ export default function HistoryTab() {
 
         <div className="history-list">
           {historyDays.map(({ dateISO, record }) => {
-            const selected = state.ui.selectedHistoryDateISO === dateISO;
+            const selected = selectedHistoryDateISO === dateISO;
             const headerItems = record.items
               .filter((item) => item.quantity > 0)
               .slice(0, 4);
