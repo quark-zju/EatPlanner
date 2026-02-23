@@ -136,6 +136,12 @@ export default function SettingsTab() {
           /privacy.html
         </a>
       </p>
+      <p className="hint">
+        Terms of Service:{" "}
+        <a href="/terms.html" target="_blank" rel="noreferrer">
+          /terms.html
+        </a>
+      </p>
     </section>
   );
 }
