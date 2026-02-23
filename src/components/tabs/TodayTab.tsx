@@ -16,7 +16,7 @@ import {
   setDraftDate,
   submitDraftToHistory,
 } from "../../state/appDraftActions";
-import { generatePlanOptions } from "../../state/appPlannerActions";
+import { generatePlanOptions, getRemainingPlanContext } from "../../state/appPlannerActions";
 import { getFoodIcon } from "../../state/appState";
 import NutritionGoalCard from "../NutritionGoalCard";
 import NutritionGoalStats from "../NutritionGoalStats";
@@ -46,6 +46,8 @@ export default function TodayTab() {
     state.todayDraft.items.map((item) => [item.foodId, item])
   );
   const hasAnySelection = state.todayDraft.items.some((item) => item.quantity > 0);
+  const eatenItems = state.todayDraft.items.filter((item) => item.quantity > 0);
+  const remainingPlan = getRemainingPlanContext(state);
   const localAvoidSet = useMemo(() => new Set(localAvoidFoodIds), [localAvoidFoodIds]);
 
   const toggleLocalAvoid = (foodId: string) => {
@@ -76,6 +78,21 @@ export default function TodayTab() {
         </p>
         )}
         {plannerMessage && <p className="hint">{plannerMessage}</p>}
+        {(options.length > 0 || plannerMessage) && eatenItems.length > 0 && (
+          <p className="hint">
+            Given{" "}
+            {eatenItems.map((item, idx) => {
+              const sep = idx === eatenItems.length - 1 ? "" : ", ";
+              return (
+                <span key={item.foodId}>
+                  {getFoodIcon(item.foodIconSnapshot)} {item.foodNameSnapshot} x {item.quantity}
+                  {sep}
+                </span>
+              );
+            })}{" "}
+            were already eaten, plans for the rest of the day:
+          </p>
+        )}
         <div className="options">
           {options.map((option, index) => (
             <article className="option" key={`${index}-${option.priceLowerBound}`}>
@@ -116,7 +133,7 @@ export default function TodayTab() {
                     })}
                   </ul>
                 </div>
-                <NutritionGoalCard totals={option.totals} goal={state.goal} title="Totals" />
+                <NutritionGoalCard totals={option.totals} goal={remainingPlan.goal} title="Totals" />
               </div>
               <button
                 className="ghost"

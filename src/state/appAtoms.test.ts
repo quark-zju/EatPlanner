@@ -212,4 +212,38 @@ describe("appAtoms history and draft flow", () => {
     expect(state.pantry.find((p) => p.foodId === "rice")?.stock).toBe(1);
     expect(state.pantry.find((p) => p.foodId === "chicken")?.stock).toBe(2);
   });
+
+  it("computes remaining goal and pantry from what was already eaten", async () => {
+    const plannerActions = await import("./appPlannerActions");
+
+    const state: AppState = {
+      ...defaultAppState,
+      todayDraft: {
+        ...defaultAppState.todayDraft,
+        items: [
+          {
+            foodId: "rice",
+            foodNameSnapshot: "Rice",
+            unitSnapshot: "serving",
+            nutritionPerUnitSnapshot: { carbs: 45, fat: 0.4, protein: 4 },
+            quantity: 1,
+          },
+          {
+            foodId: "chicken",
+            foodNameSnapshot: "Chicken",
+            unitSnapshot: "serving",
+            nutritionPerUnitSnapshot: { carbs: 0, fat: 3, protein: 31 },
+            quantity: 1,
+          },
+        ],
+        totals: { carbs: 45, fat: 3.4, protein: 35 },
+      },
+    };
+
+    const remaining = plannerActions.getRemainingPlanContext(state);
+    expect(remaining.goal.carbs.min).toBe(45);
+    expect(remaining.goal.protein.min).toBe(25);
+    expect(remaining.pantry.find((p) => p.foodId === "rice")?.stock).toBe(2);
+    expect(remaining.pantry.find((p) => p.foodId === "chicken")?.stock).toBe(2);
+  });
 });
