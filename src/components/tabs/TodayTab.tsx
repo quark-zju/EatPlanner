@@ -13,6 +13,7 @@ import {
 } from "../../state/appAtoms";
 import {
   addDraftFoodFromPantry,
+  clearDraftItems,
   removeDraftItem,
   selectPlanOptionToDraft,
   setDraftDate,
@@ -41,6 +42,7 @@ export default function TodayTab() {
   const generatePlans = generatePlanOptions;
   const selectOptionToDraft = selectPlanOptionToDraft;
   const addDraftFood = addDraftFoodFromPantry;
+  const clearDraft = clearDraftItems;
   const removeDraft = removeDraftItem;
   const submitDraft = submitDraftToHistory;
   const [localAvoidFoodIds, setLocalAvoidFoodIds] = useState<string[]>([]);
@@ -168,14 +170,24 @@ export default function TodayTab() {
       <section className="card">
         <div className="card__header">
           <h2>What did you eat?</h2>
-          <button
-            className="primary"
-            onClick={() => submitDraft()}
-            type="button"
-            disabled={!hasAnySelection}
-          >
-            Save To History
-          </button>
+          <div className="inline-actions">
+            <button
+              className="ghost"
+              onClick={() => clearDraft()}
+              type="button"
+              disabled={!hasAnySelection}
+            >
+              Clear
+            </button>
+            <button
+              className="primary"
+              onClick={() => submitDraft()}
+              type="button"
+              disabled={!hasAnySelection}
+            >
+              Save To History
+            </button>
+          </div>
         </div>
         <div className="draft-controls">
           <label>

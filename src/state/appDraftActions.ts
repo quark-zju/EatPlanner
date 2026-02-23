@@ -203,6 +203,21 @@ export const removeDraftItem = (foodId: string, store?: StoreLike) => {
   });
 };
 
+export const clearDraftItems = (store?: StoreLike) => {
+  const s = withStore(store);
+  const state = s.get(appStateAtom);
+  s.set(appStateAtom, {
+    ...state,
+    todayDraft: {
+      ...state.todayDraft,
+      selectedOptionId: undefined,
+      items: [],
+      totals: calculateDraftTotals([]),
+    },
+  });
+  s.set(errorAtom, null);
+};
+
 export const submitDraftToHistory = (store?: StoreLike) => {
   const s = withStore(store);
   const state = s.get(appStateAtom);
