@@ -488,6 +488,21 @@ select {
   cursor: pointer;
 }
 
+.history-item__icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.history-item__icon-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #5c4a3d;
+}
+
 .history-item__header.is-active {
   background: #f6ece0;
 }

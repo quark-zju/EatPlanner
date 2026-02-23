@@ -47,6 +47,9 @@ export default function HistoryTab() {
         <div className="history-list">
           {historyDays.map(({ dateISO, record }) => {
             const selected = state.ui.selectedHistoryDateISO === dateISO;
+            const headerItems = record.items
+              .filter((item) => item.quantity > 0)
+              .slice(0, 4);
             return (
               <article className="history-item" key={dateISO}>
                 <button
@@ -55,7 +58,17 @@ export default function HistoryTab() {
                   type="button"
                 >
                   <strong>{dateISO}</strong>
-                  <span>{record.items.length} items</span>
+                  <span className="history-item__icons">
+                    {headerItems.length === 0 && <span>No items</span>}
+                    {headerItems.map((item) => (
+                      <span key={`${dateISO}-h-${item.foodId}`} className="history-item__icon-chip">
+                        {getFoodIcon(item.foodIconSnapshot)} x {item.quantity}
+                      </span>
+                    ))}
+                    {record.items.filter((item) => item.quantity > 0).length > headerItems.length && (
+                      <span>...</span>
+                    )}
+                  </span>
                   <span>${formatPrice(record.priceLowerBound, record.hasUnknownPrice)}</span>
                 </button>
 
