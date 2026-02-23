@@ -58,7 +58,6 @@
   gap: 8px;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
   color: #7d6b5f;
 }
 
@@ -388,9 +387,9 @@ select {
   gap: 6px;
 }
 
-.hint {
+.card p {
   margin-top: 12px;
-  font-size: 13px;
+  margin-bottom: 12px;
   color: #7d6b5f;
 }
 
@@ -420,7 +419,7 @@ select {
   margin-bottom: 12px;
 }
 
-.option h3 {
+.card .option h3 {
   margin: 0;
 }
 
@@ -517,7 +516,6 @@ select {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 13px;
   color: #5c4a3d;
 }
 
@@ -534,10 +532,6 @@ select {
   display: grid;
   gap: 16px;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-}
-
-.card h3 {
-  margin: 16px 0 10px;
 }
 
 .settings-note {

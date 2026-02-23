@@ -52,6 +52,8 @@ export default function TodayTab() {
       prev.includes(foodId) ? prev.filter((id) => id !== foodId) : [...prev, foodId]
     );
   };
+  
+  const shouldShowHowToUse = (plannerMessage == null && options.length === 0);
 
   return (
     <>
@@ -66,28 +68,13 @@ export default function TodayTab() {
             {isSolving ? "Solving..." : "Generate Plans"}
           </button>
         </div>
+        {shouldShowHowToUse && (
         <p className="hint">
-          First update your <strong>Inventory</strong> and <strong>Goals</strong>, then use the
-          <strong> Generate Plans</strong> button at the top right.
+          Update your <strong>Inventory</strong> and <strong>Goals</strong>, then use the
+          <strong> Generate Plans</strong> button at the top right to find suitable meal plans.
         </p>
-        {plannerMessage && <p className="hint">{plannerMessage}</p>}
-        {localAvoidFoodIds.length > 0 && (
-          <div className="local-avoid-list">
-            {localAvoidFoodIds.map((foodId) => {
-              const food = state.foods.find((f) => f.id === foodId);
-              return (
-                <button
-                  className="ghost"
-                  key={foodId}
-                  type="button"
-                  onClick={() => toggleLocalAvoid(foodId)}
-                >
-                  {getFoodIcon(food?.icon)} {food?.name ?? foodId} x
-                </button>
-              );
-            })}
-          </div>
         )}
+        {plannerMessage && <p className="hint">{plannerMessage}</p>}
         <div className="options">
           {options.map((option, index) => (
             <article className="option" key={`${index}-${option.priceLowerBound}`}>
@@ -145,8 +132,28 @@ export default function TodayTab() {
             </article>
           ))}
         </div>
+        {localAvoidFoodIds.length > 0 && (
+          <>
+            <p>Avoid:</p>
+            <div className="local-avoid-list">
+              {localAvoidFoodIds.map((foodId) => {
+                const food = state.foods.find((f) => f.id === foodId);
+                return (
+                  <button
+                    className="ghost"
+                    key={foodId}
+                    type="button"
+                    onClick={() => toggleLocalAvoid(foodId)}
+                  >
+                    {getFoodIcon(food?.icon)} {food?.name ?? foodId} x
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
         {options.length > 0 && (
-          <p className="hint">Use x in results to mark local avoid items for this session.</p>
+          <p className="hint">Use x in results to avoid items. Click <b>Generate Plans</b> to refresh options.</p>
         )}
       </section>
 
