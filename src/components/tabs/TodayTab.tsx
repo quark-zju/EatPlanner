@@ -126,9 +126,7 @@ export default function TodayTab() {
                 </div>
                 <div>
                   <h4>Totals</h4>
-                  <p>Carbs: {option.totals.carbs.toFixed(1)} g</p>
-                  <p>Fat: {option.totals.fat.toFixed(1)} g</p>
-                  <p>Protein: {option.totals.protein.toFixed(1)} g</p>
+                  <NutritionGoalStats totals={option.totals} goal={state.goal} />
                 </div>
               </div>
               <button
