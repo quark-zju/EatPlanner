@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useAtomValue } from "jotai";
+import { formatQuantityWithUnit } from "../../core";
 import {
   appStateAtom,
   draftPriceSummaryAtom,
@@ -99,7 +100,7 @@ export default function TodayTab() {
                           <span className="option-food__main">
                             <span title={food?.name ?? foodId}>{getFoodIcon(food?.icon)}</span>
                             <span>
-                              {food?.name ?? foodId}: {amount} {food?.unit}
+                              {food?.name ?? foodId}: {formatQuantityWithUnit(amount, food?.unit)}
                             </span>
                           </span>
                           <button
@@ -199,7 +200,7 @@ export default function TodayTab() {
                   <span className="draft-tile__icon">{getFoodIcon(item?.foodIconSnapshot ?? food.icon)}</span>
                   <span className="draft-tile__name">{item?.foodNameSnapshot ?? food.name}</span>
                   <span className="draft-tile__qty">
-                    {quantity} {food.unit}
+                    {formatQuantityWithUnit(quantity, food.unit)}
                   </span>
                 </button>
                 {quantity > 0 && (

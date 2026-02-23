@@ -1,4 +1,5 @@
 import { useAtomValue } from "jotai";
+import { formatQuantityWithUnit } from "../../core";
 import {
   historyDaysInWindowAtom,
   historyWindowRangeAtom,
@@ -64,7 +65,10 @@ export default function HistoryTab() {
                       <span
                         key={`${dateISO}-h-${item.foodId}`}
                         className="history-item__icon-chip"
-                        title={`${item.foodNameSnapshot}: ${item.quantity} ${item.unitSnapshot}`}
+                        title={`${item.foodNameSnapshot}: ${formatQuantityWithUnit(
+                          item.quantity,
+                          item.unitSnapshot
+                        )}`}
                       >
                         {getFoodIcon(item.foodIconSnapshot)} x {item.quantity}
                       </span>
@@ -87,7 +91,8 @@ export default function HistoryTab() {
                               <span title={item.foodNameSnapshot}>
                                 {getFoodIcon(item.foodIconSnapshot)}
                               </span>{" "}
-                              {item.foodNameSnapshot}: {item.quantity} {item.unitSnapshot}
+                              {item.foodNameSnapshot}:{" "}
+                              {formatQuantityWithUnit(item.quantity, item.unitSnapshot)}
                             </li>
                           ))}
                         </ul>
