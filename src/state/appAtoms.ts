@@ -26,6 +26,7 @@ import {
   defaultAppStateMap,
   fromAppStateMap,
   getRollingWindowStartISO,
+  getFoodIcon,
   isAppState,
   newFoodId,
   normalizeAppState,
@@ -106,6 +107,7 @@ const toDraftItemsFromOption = (state: AppState, option: PlanOption): DraftItem[
       return {
         foodId,
         foodNameSnapshot: food?.name ?? foodId,
+        foodIconSnapshot: food?.icon,
         unitSnapshot: food?.unit ?? "serving",
         nutritionPerUnitSnapshot: food?.nutritionPerUnit ?? {
           carbs: 0,
@@ -299,6 +301,7 @@ export const addDraftFoodFromPantryAtom = atom(null, (get, set, foodId: string) 
         {
           foodId: food.id,
           foodNameSnapshot: food.name,
+          foodIconSnapshot: food.icon,
           unitSnapshot: food.unit,
           nutritionPerUnitSnapshot: food.nutritionPerUnit,
           quantity: 1,
@@ -499,6 +502,7 @@ export const addFoodAtom = atom(null, (get, set) => {
       {
         id,
         name: "New Food",
+        icon: getFoodIcon(),
         unit: "serving",
         nutritionPerUnit: { carbs: 0, fat: 0, protein: 0 },
       },

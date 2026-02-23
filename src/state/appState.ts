@@ -9,10 +9,12 @@ import type {
 
 export type UiTab = "today" | "history" | "inventory" | "settings";
 export type LocalDateISO = string;
+export const DEFAULT_FOOD_ICON = "🍽️";
 
 export type DraftItem = {
   foodId: string;
   foodNameSnapshot: string;
+  foodIconSnapshot?: string;
   unitSnapshot: string;
   nutritionPerUnitSnapshot: Nutrition;
   quantity: number;
@@ -97,6 +99,7 @@ const isDraftItem = (value: unknown): value is DraftItem => {
   const item = value as {
     foodId?: unknown;
     foodNameSnapshot?: unknown;
+    foodIconSnapshot?: unknown;
     unitSnapshot?: unknown;
     nutritionPerUnitSnapshot?: unknown;
     quantity?: unknown;
@@ -104,9 +107,11 @@ const isDraftItem = (value: unknown): value is DraftItem => {
   };
   const priceOk =
     item.pricePerUnitSnapshot === undefined || isNumber(item.pricePerUnitSnapshot);
+  const iconOk = item.foodIconSnapshot === undefined || typeof item.foodIconSnapshot === "string";
   return (
     typeof item.foodId === "string" &&
     typeof item.foodNameSnapshot === "string" &&
+    iconOk &&
     typeof item.unitSnapshot === "string" &&
     isNutrition(item.nutritionPerUnitSnapshot) &&
     isNumber(item.quantity) &&
@@ -228,14 +233,17 @@ export const isAppState = (value: unknown): value is AppState => {
     const f = food as {
       id?: unknown;
       name?: unknown;
+      icon?: unknown;
       unit?: unknown;
       nutritionPerUnit?: unknown;
       price?: unknown;
     };
     const priceOk = f.price === undefined || isNumber(f.price);
+    const iconOk = f.icon === undefined || typeof f.icon === "string";
     return (
       typeof f.id === "string" &&
       typeof f.name === "string" &&
+      iconOk &&
       typeof f.unit === "string" &&
       isNutrition(f.nutritionPerUnit) &&
       priceOk
@@ -320,6 +328,7 @@ export const defaultAppState: AppState = {
     {
       id: "rice",
       name: "Rice",
+      icon: "🍚",
       unit: "serving",
       nutritionPerUnit: { carbs: 45, fat: 0.4, protein: 4 },
       price: 1.2,
@@ -327,6 +336,7 @@ export const defaultAppState: AppState = {
     {
       id: "chicken",
       name: "Chicken",
+      icon: "🍗",
       unit: "serving",
       nutritionPerUnit: { carbs: 0, fat: 3, protein: 31 },
       price: 2.5,
@@ -334,6 +344,7 @@ export const defaultAppState: AppState = {
     {
       id: "olive-oil",
       name: "Olive Oil",
+      icon: "🫒",
       unit: "tbsp",
       nutritionPerUnit: { carbs: 0, fat: 14, protein: 0 },
     },
@@ -411,3 +422,8 @@ export const newFoodId = () =>
   typeof crypto !== "undefined" && crypto.randomUUID
     ? crypto.randomUUID()
     : `food-${Date.now()}`;
+
+export const getFoodIcon = (icon?: string) => {
+  const trimmed = icon?.trim();
+  return trimmed ? trimmed : DEFAULT_FOOD_ICON;
+};

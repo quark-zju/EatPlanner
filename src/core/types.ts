@@ -22,6 +22,7 @@ export type Goal = {
 export type Food = {
   id: string;
   name: string;
+  icon?: string;
   unit: string;
   nutritionPerUnit: Nutrition;
   price?: number;

@@ -9,6 +9,7 @@ import {
   updateNutritionAtom,
   updateStockAtom,
 } from "../../state/appAtoms";
+import { DEFAULT_FOOD_ICON, getFoodIcon } from "../../state/appState";
 
 export default function InventoryTab() {
   const state = useAtomValue(appStateAtom);
@@ -33,6 +34,7 @@ export default function InventoryTab() {
           <thead>
             <tr>
               <th>Name</th>
+              <th>Icon</th>
               <th>Unit</th>
               <th>Carbs</th>
               <th>Fat</th>
@@ -54,6 +56,22 @@ export default function InventoryTab() {
                         updateFood({ foodId: food.id, updates: { name: event.target.value } })
                       }
                     />
+                  </td>
+                  <td>
+                    <input
+                      value={food.icon ?? ""}
+                      placeholder={DEFAULT_FOOD_ICON}
+                      maxLength={8}
+                      onChange={(event) =>
+                        updateFood({
+                          foodId: food.id,
+                          updates: {
+                            icon: event.target.value.trim() === "" ? undefined : event.target.value,
+                          },
+                        })
+                      }
+                    />
+                    <p className="icon-preview">{getFoodIcon(food.icon)}</p>
                   </td>
                   <td>
                     <input
