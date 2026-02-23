@@ -46,6 +46,16 @@ export default function AppShell({ children }: AppShellProps) {
       {notice && <p className="notice global-message">{notice}</p>}
 
       <main className="app__grid">{children}</main>
+
+      <footer className="app__footer">
+        <a href="privacy.html" target="_blank" rel="noreferrer">
+          Privacy
+        </a>
+        <span>•</span>
+        <a href="terms.html" target="_blank" rel="noreferrer">
+          Terms
+        </a>
+      </footer>
     </div>
   );
 }

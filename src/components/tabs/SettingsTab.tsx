@@ -130,18 +130,6 @@ export default function SettingsTab() {
         Google Drive sync uses the app's private storage area and won't touch your regular Drive
         files.
       </p>
-      <p className="hint">
-        Privacy Policy:{" "}
-        <a href="privacy.html" target="_blank" rel="noreferrer">
-          privacy.html
-        </a>
-      </p>
-      <p className="hint">
-        Terms of Service:{" "}
-        <a href="terms.html" target="_blank" rel="noreferrer">
-          terms.html
-        </a>
-      </p>
     </section>
   );
 }

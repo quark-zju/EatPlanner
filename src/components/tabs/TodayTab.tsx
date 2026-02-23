@@ -67,10 +67,10 @@ export default function TodayTab() {
           </button>
         </div>
         <p className="hint">
-          Goal ranges are configured in the <strong>Settings</strong> tab.
+          First update your <strong>Inventory</strong> and <strong>Goals</strong>, then use the
+          <strong> Generate Plans</strong> button at the top right.
         </p>
         {plannerMessage && <p className="hint">{plannerMessage}</p>}
-        <p className="hint">Use x in results to mark local avoid items for this session.</p>
         {localAvoidFoodIds.length > 0 && (
           <div className="local-avoid-list">
             {localAvoidFoodIds.map((foodId) => {
@@ -88,7 +88,6 @@ export default function TodayTab() {
             })}
           </div>
         )}
-        {options.length === 0 && <p className="hint">Generate plans to get suggestions.</p>}
         <div className="options">
           {options.map((option, index) => (
             <article className="option" key={`${index}-${option.priceLowerBound}`}>
@@ -146,6 +145,9 @@ export default function TodayTab() {
             </article>
           ))}
         </div>
+        {options.length > 0 && (
+          <p className="hint">Use x in results to mark local avoid items for this session.</p>
+        )}
       </section>
 
       <section className="card">
