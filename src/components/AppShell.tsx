@@ -9,8 +9,8 @@ type AppShellProps = {
 
 const tabs: { id: UiTab; label: string }[] = [
   { id: "today", label: "Today" },
-  { id: "history", label: "History" },
   { id: "inventory", label: "Inventory" },
+  { id: "history", label: "History" },
   { id: "settings", label: "Settings" },
 ];
 
