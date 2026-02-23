@@ -5,7 +5,8 @@ import {
   appStateAtom,
   draftPriceSummaryAtom,
   getPantryByFoodAtom,
-  plannerContextItemsAtom,
+  plannerContextMessageAtom,
+  plannerRemainingGoalAtom,
   plannerMessageAtom,
   planOptionsAtom,
   solvingAtom,
@@ -17,7 +18,7 @@ import {
   setDraftDate,
   submitDraftToHistory,
 } from "../../state/appDraftActions";
-import { generatePlanOptions, getRemainingPlanContext } from "../../state/appPlannerActions";
+import { generatePlanOptions } from "../../state/appPlannerActions";
 import { getFoodIcon } from "../../state/appState";
 import NutritionGoalCard from "../NutritionGoalCard";
 import NutritionGoalStats from "../NutritionGoalStats";
@@ -32,7 +33,8 @@ export default function TodayTab() {
   const options = useAtomValue(planOptionsAtom);
   const isSolving = useAtomValue(solvingAtom);
   const plannerMessage = useAtomValue(plannerMessageAtom);
-  const plannerContextItems = useAtomValue(plannerContextItemsAtom);
+  const plannerContextMessage = useAtomValue(plannerContextMessageAtom);
+  const plannerRemainingGoal = useAtomValue(plannerRemainingGoalAtom);
   const pantryByFood = useAtomValue(getPantryByFoodAtom);
   const draftPrice = useAtomValue(draftPriceSummaryAtom);
 
@@ -48,7 +50,6 @@ export default function TodayTab() {
     state.todayDraft.items.map((item) => [item.foodId, item])
   );
   const hasAnySelection = state.todayDraft.items.some((item) => item.quantity > 0);
-  const remainingPlan = getRemainingPlanContext(state);
   const localAvoidSet = useMemo(() => new Set(localAvoidFoodIds), [localAvoidFoodIds]);
 
   const toggleLocalAvoid = (foodId: string) => {
@@ -79,20 +80,8 @@ export default function TodayTab() {
         </p>
         )}
         {plannerMessage && <p className="hint">{plannerMessage}</p>}
-        {(options.length > 0 || plannerMessage) && plannerContextItems.length > 0 && (
-          <p className="hint">
-            Given{" "}
-            {plannerContextItems.map((item, idx) => {
-              const sep = idx === plannerContextItems.length - 1 ? "" : ", ";
-              return (
-                <span key={item.foodId}>
-                  {getFoodIcon(item.foodIconSnapshot)} {item.foodNameSnapshot} x {item.quantity}
-                  {sep}
-                </span>
-              );
-            })}{" "}
-            were already eaten, plans for the rest of the day:
-          </p>
+        {(options.length > 0 || plannerMessage) && plannerContextMessage && (
+          <p className="hint">{plannerContextMessage}</p>
         )}
         <div className="options">
           {options.map((option, index) => (
@@ -134,7 +123,7 @@ export default function TodayTab() {
                     })}
                   </ul>
                 </div>
-                <NutritionGoalCard totals={option.totals} goal={remainingPlan.goal} title="Totals" />
+                <NutritionGoalCard totals={option.totals} goal={plannerRemainingGoal} title="Totals" />
               </div>
               <button
                 className="ghost"

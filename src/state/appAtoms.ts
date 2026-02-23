@@ -1,12 +1,13 @@
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
-import type { PantryItem, PlanOption } from "../core";
+import type { Goal, PantryItem, PlanOption } from "../core";
 import { isGoogleDriveConnected } from "../storage/googleDrive";
 import {
   APP_STATE_STORAGE_KEY,
   defaultAppStateMap,
   fromAppStateMap,
   getRollingWindowStartISO,
+  getFoodIcon,
   isAppState,
   normalizeAppState,
   shiftLocalDateISO,
@@ -17,7 +18,7 @@ import {
   type LocalDateISO,
   type UiTab,
 } from "./appState";
-import { calculateDraftPrice } from "./appDraftMath";
+import { calculateDraftPrice, calculateDraftTotals } from "./appDraftMath";
 
 const appStateMapStorage = {
   getItem: (key: string, initialValue: AppStateMap): AppStateMap => {
@@ -64,6 +65,9 @@ export const errorAtom = atom<string | null>(null);
 export const noticeAtom = atom<string | null>(null);
 export const plannerMessageAtom = atom<string | null>(null);
 export const plannerContextItemsAtom = atom<DraftItem[]>([]);
+export const plannerContextDisplayItemsAtom = atom((get) =>
+  get(plannerContextItemsAtom).filter((item) => item.quantity > 0)
+);
 export const driveConnectedAtom = atom(isGoogleDriveConnected());
 export const driveBusyAtom = atom(false);
 export const activeTabAtom = atom<UiTab>("today");
@@ -107,6 +111,49 @@ export const historyAggregatesInWindowAtom = atom((get) => {
       days: 0,
     }
   );
+});
+
+const toRemainingGoal = (goal: Goal, items: DraftItem[]): Goal => {
+  const eaten = calculateDraftTotals(items);
+  const remaining = {
+    carbs: {
+      min: Math.max(0, goal.carbs.min - eaten.carbs),
+      max: goal.carbs.max - eaten.carbs,
+    },
+    fat: {
+      min: Math.max(0, goal.fat.min - eaten.fat),
+      max: goal.fat.max - eaten.fat,
+    },
+    protein: {
+      min: Math.max(0, goal.protein.min - eaten.protein),
+      max: goal.protein.max - eaten.protein,
+    },
+  } as Goal;
+
+  if (goal.calories) {
+    remaining.calories = {
+      min: Math.max(0, goal.calories.min - (eaten.calories ?? 0)),
+      max: goal.calories.max - (eaten.calories ?? 0),
+    };
+  }
+
+  return remaining;
+};
+
+export const plannerRemainingGoalAtom = atom((get) =>
+  toRemainingGoal(get(appStateAtom).goal, get(plannerContextItemsAtom))
+);
+
+export const plannerContextMessageAtom = atom((get) => {
+  const items = get(plannerContextDisplayItemsAtom);
+  if (items.length === 0) {
+    return null;
+  }
+  const parts = items.map(
+    (item) =>
+      `${getFoodIcon(item.foodIconSnapshot)} ${item.foodNameSnapshot} x ${item.quantity}`
+  );
+  return `Given ${parts.join(", ")} were already eaten, plans for the rest of the day:`;
 });
 
 export const draftPriceSummaryAtom = atom((get) => {
