@@ -12,7 +12,6 @@ import {
   updateNutrition,
   updateStock,
 } from "../../state/appInventoryActions";
-import { toggleConstraint } from "../../state/appDomainActions";
 import { DEFAULT_FOOD_ICON, getFoodIcon } from "../../state/appState";
 
 export default function InventoryTab() {
@@ -123,7 +122,6 @@ export default function InventoryTab() {
               <th>Protein</th>
               <th>Price</th>
               <th>Stock</th>
-              <th>Prefs</th>
             </tr>
           </thead>
           <tbody>
@@ -234,40 +232,6 @@ export default function InventoryTab() {
                         });
                       }}
                     />
-                  </td>
-                  <td>
-                    <div className="prefs">
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={state.constraints.preferFoodIds?.includes(food.id)}
-                          onChange={() =>
-                            toggleConstraint({ type: "preferFoodIds", foodId: food.id })
-                          }
-                        />
-                        Prefer
-                      </label>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={state.constraints.avoidFoodIds?.includes(food.id)}
-                          onChange={() =>
-                            toggleConstraint({ type: "avoidFoodIds", foodId: food.id })
-                          }
-                        />
-                        Avoid
-                      </label>
-                      <button
-                        className="link"
-                        type="button"
-                        onClick={() => {
-                          removeFoods([food.id]);
-                          setSelectedFoodIds((prev) => prev.filter((id) => id !== food.id));
-                        }}
-                      >
-                        Remove
-                      </button>
-                    </div>
                   </td>
                 </tr>
               );
@@ -386,9 +350,6 @@ export default function InventoryTab() {
                     }
                   }}
                 />
-              </td>
-              <td>
-                <span className="hint">Press Enter to add</span>
               </td>
             </tr>
           </tbody>
