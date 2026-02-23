@@ -13,6 +13,7 @@ import {
   updateStock,
 } from "../../state/appInventoryActions";
 import { DEFAULT_FOOD_ICON } from "../../state/appState";
+import { inferFoodIconFromName } from "../../state/foodIcons";
 
 export default function InventoryTab() {
   const state = useAtomValue(appStateAtom);
@@ -31,6 +32,8 @@ export default function InventoryTab() {
   const selectedCount = selectedFoodIds.length;
   const hasSelection = selectedCount > 0;
   const canAddNewFood = newFood.name.trim().length > 0;
+  const inferredNewFoodIcon = inferFoodIconFromName(newFood.name);
+  const newFoodIconPlaceholder = inferredNewFoodIcon ?? DEFAULT_FOOD_ICON;
   const selectedIdSet = useMemo(() => new Set(selectedFoodIds), [selectedFoodIds]);
 
   const toggleSelected = (foodId: string) => {
@@ -251,7 +254,7 @@ export default function InventoryTab() {
               <td className="col-icon">
                 <input
                   value={newFood.icon}
-                  placeholder={DEFAULT_FOOD_ICON}
+                  placeholder={newFoodIconPlaceholder}
                   maxLength={8}
                   onChange={(event) =>
                     setNewFood((prev) => ({ ...prev, icon: event.target.value }))
