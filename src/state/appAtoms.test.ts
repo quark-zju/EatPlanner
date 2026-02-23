@@ -181,4 +181,34 @@ describe("appAtoms history and draft flow", () => {
     expect(state.todayDraft.items[0].foodId).toBe("rice");
     expect(state.todayDraft.items[0].quantity).toBe(2);
   });
+
+  it("deducts pantry stock only when saving a new history date", async () => {
+    const atoms = await import("./appAtoms");
+    const draftActions = await import("./appDraftActions");
+    const store = createStore();
+
+    store.set(atoms.appStateAtom, defaultAppState as AppState);
+    store.set(atoms.planOptionsAtom, [
+      {
+        status: "sat",
+        servings: { rice: 2, chicken: 1, "olive-oil": 0 },
+        totals: { carbs: 90, fat: 3.8, protein: 39 },
+        priceLowerBound: 4.9,
+        hasUnknownPrice: false,
+      },
+    ]);
+
+    draftActions.selectPlanOptionToDraft({ optionIndex: 0, dateISO: "2026-02-24" }, store);
+    draftActions.submitDraftToHistory(store);
+
+    let state = store.get(atoms.appStateAtom);
+    expect(state.pantry.find((p) => p.foodId === "rice")?.stock).toBe(1);
+    expect(state.pantry.find((p) => p.foodId === "chicken")?.stock).toBe(2);
+
+    // Re-save same date should replace history without second deduction.
+    draftActions.submitDraftToHistory(store);
+    state = store.get(atoms.appStateAtom);
+    expect(state.pantry.find((p) => p.foodId === "rice")?.stock).toBe(1);
+    expect(state.pantry.find((p) => p.foodId === "chicken")?.stock).toBe(2);
+  });
 });

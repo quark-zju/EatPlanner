@@ -199,8 +199,44 @@ export const submitDraftToHistory = (store?: StoreLike) => {
     source: "planner-submit",
   };
 
+  const existingRecord = state.history.byDate[dateISO];
+
+  // Best-effort inventory deduction only for newly created day records.
+  // Re-saves for the same date replace the history record but do not deduct again.
+  let nextPantry = state.pantry;
+  let deductedCount = 0;
+  let skippedCount = 0;
+  if (!existingRecord) {
+    const stockByFood = new Map(state.pantry.map((item) => [item.foodId, item.stock]));
+    for (const item of items) {
+      const required = Math.ceil(clampNonNegative(item.quantity));
+      if (required <= 0) {
+        continue;
+      }
+
+      const currentStock = stockByFood.get(item.foodId);
+      if (currentStock === undefined) {
+        skippedCount += 1;
+        continue;
+      }
+      if (currentStock === "inf") {
+        continue;
+      }
+
+      const nextStock = Math.max(0, currentStock - required);
+      stockByFood.set(item.foodId, nextStock);
+      deductedCount += 1;
+    }
+
+    nextPantry = state.pantry.map((entry) => {
+      const nextStock = stockByFood.get(entry.foodId);
+      return nextStock === undefined ? entry : { ...entry, stock: nextStock };
+    });
+  }
+
   s.set(appStateAtom, {
     ...state,
+    pantry: nextPantry,
     history: {
       byDate: {
         ...state.history.byDate,
@@ -220,10 +256,23 @@ export const submitDraftToHistory = (store?: StoreLike) => {
 
   const allZero = items.every((item) => item.quantity === 0);
   s.set(errorAtom, null);
-  s.set(
-    noticeAtom,
-    allZero
-      ? "Saved to history. Warning: all quantities are zero."
-      : `Saved ${dateISO} to history.`
-  );
+  if (allZero) {
+    s.set(noticeAtom, "Saved to history. Warning: all quantities are zero.");
+    return;
+  }
+
+  if (existingRecord) {
+    s.set(noticeAtom, `Saved ${dateISO} to history (replaced existing day).`);
+    return;
+  }
+
+  if (skippedCount > 0) {
+    s.set(
+      noticeAtom,
+      `Saved ${dateISO} to history. Inventory updated for ${deductedCount} items, skipped ${skippedCount}.`
+    );
+    return;
+  }
+
+  s.set(noticeAtom, `Saved ${dateISO} to history. Inventory updated.`);
 };
