@@ -12,9 +12,9 @@ import {
   pasteFromClipboardAtom,
   saveToDriveAtom,
   loadFromDriveAtom,
-  setErrorAtom,
   updateGoalAtom,
 } from "../../state/appAtoms";
+import { setAppError } from "../../state/appStoreActions";
 
 export default function SettingsTab() {
   const state = useAtomValue(appStateAtom);
@@ -29,7 +29,6 @@ export default function SettingsTab() {
   const disconnectDrive = useSetAtom(disconnectDriveAtom);
   const saveToDrive = useSetAtom(saveToDriveAtom);
   const loadFromDrive = useSetAtom(loadFromDriveAtom);
-  const setError = useSetAtom(setErrorAtom);
   const updateGoal = useSetAtom(updateGoalAtom);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -94,7 +93,7 @@ export default function SettingsTab() {
           try {
             await importFromFile(file);
           } catch (err) {
-            setError(err instanceof Error ? err.message : "Import failed.");
+            setAppError(err instanceof Error ? err.message : "Import failed.");
           } finally {
             event.target.value = "";
           }

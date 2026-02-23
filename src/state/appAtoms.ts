@@ -678,35 +678,6 @@ export const toggleConstraintAtom = atom(
   }
 );
 
-export const clearMessagesAtom = atom(null, (_get, set) => {
-  set(errorAtom, null);
-  set(noticeAtom, null);
-});
-
-export const setErrorAtom = atom(null, (_get, set, message: string | null) => {
-  set(errorAtom, message);
-});
-
-export const setNoticeAtom = atom(null, (_get, set, message: string | null) => {
-  set(noticeAtom, message);
-});
-
-export const setPlanOptionsAtom = atom(null, (_get, set, options: PlanOption[]) => {
-  set(planOptionsAtom, options);
-});
-
-export const setSolvingAtom = atom(null, (_get, set, value: boolean) => {
-  set(solvingAtom, value);
-});
-
-export const setDriveConnectedAtom = atom(null, (_get, set, value: boolean) => {
-  set(driveConnectedAtom, value);
-});
-
-export const setDriveBusyAtom = atom(null, (_get, set, value: boolean) => {
-  set(driveBusyAtom, value);
-});
-
 export const getPantryByFoodAtom = atom((get) => {
   const pantry = get(appStateAtom).pantry;
   const map = new Map<string, PantryItem>();
