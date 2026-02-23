@@ -1,6 +1,13 @@
 import { getDefaultStore } from "jotai";
 import { solvePlanOptions } from "../core";
-import { appStateAtom, errorAtom, noticeAtom, planOptionsAtom, solvingAtom } from "./appAtoms";
+import {
+  appStateAtom,
+  errorAtom,
+  noticeAtom,
+  plannerMessageAtom,
+  planOptionsAtom,
+  solvingAtom,
+} from "./appAtoms";
 
 type StoreLike = ReturnType<typeof getDefaultStore>;
 
@@ -15,6 +22,7 @@ export const generatePlanOptions = async (
   s.set(solvingAtom, true);
   s.set(errorAtom, null);
   s.set(noticeAtom, null);
+  s.set(plannerMessageAtom, null);
 
   try {
     if (!window.crossOriginIsolated || typeof SharedArrayBuffer === "undefined") {
@@ -44,7 +52,7 @@ export const generatePlanOptions = async (
     s.set(planOptionsAtom, result);
     if (result.length === 0) {
       s.set(
-        errorAtom,
+        plannerMessageAtom,
         "No feasible plan found for the current goals and pantry. Try widening ranges or adding stock."
       );
     }

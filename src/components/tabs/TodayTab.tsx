@@ -4,6 +4,7 @@ import {
   appStateAtom,
   draftPriceSummaryAtom,
   getPantryByFoodAtom,
+  plannerMessageAtom,
   planOptionsAtom,
   solvingAtom,
 } from "../../state/appAtoms";
@@ -27,6 +28,7 @@ export default function TodayTab() {
   const state = useAtomValue(appStateAtom);
   const options = useAtomValue(planOptionsAtom);
   const isSolving = useAtomValue(solvingAtom);
+  const plannerMessage = useAtomValue(plannerMessageAtom);
   const pantryByFood = useAtomValue(getPantryByFoodAtom);
   const draftPrice = useAtomValue(draftPriceSummaryAtom);
 
@@ -65,6 +67,7 @@ export default function TodayTab() {
         <p className="hint">
           Goal ranges are configured in the <strong>Settings</strong> tab.
         </p>
+        {plannerMessage && <p className="hint">{plannerMessage}</p>}
         <p className="hint">Use x in results to mark local avoid items for this session.</p>
         {localAvoidFoodIds.length > 0 && (
           <div className="local-avoid-list">

@@ -60,6 +60,7 @@ export const planOptionsAtom = atom<PlanOption[]>([]);
 export const solvingAtom = atom(false);
 export const errorAtom = atom<string | null>(null);
 export const noticeAtom = atom<string | null>(null);
+export const plannerMessageAtom = atom<string | null>(null);
 export const driveConnectedAtom = atom(isGoogleDriveConnected());
 export const driveBusyAtom = atom(false);
 
