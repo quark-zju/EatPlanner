@@ -116,8 +116,8 @@ export default function InventoryTab() {
           <thead>
             <tr>
               <th aria-label="Select foods"></th>
-              <th>Name</th>
-              <th>Icon</th>
+              <th className="col-name">Name</th>
+              <th className="col-icon">Icon</th>
               <th>Unit</th>
               <th>Carbs</th>
               <th>Fat</th>
@@ -139,7 +139,7 @@ export default function InventoryTab() {
                       onChange={() => toggleSelected(food.id)}
                     />
                   </td>
-                  <td>
+                  <td className="col-name">
                     <input
                       value={food.name}
                       onChange={(event) =>
@@ -147,7 +147,7 @@ export default function InventoryTab() {
                       }
                     />
                   </td>
-                  <td>
+                  <td className="col-icon">
                     <input
                       value={food.icon ?? ""}
                       placeholder={DEFAULT_FOOD_ICON}
@@ -252,7 +252,7 @@ export default function InventoryTab() {
             })}
             <tr>
               <td></td>
-              <td>
+              <td className="col-name">
                 <input
                   value={newFood.name}
                   placeholder="New food name..."
@@ -261,7 +261,7 @@ export default function InventoryTab() {
                   }
                 />
               </td>
-              <td>
+              <td className="col-icon">
                 <input
                   value={newFood.icon}
                   placeholder={DEFAULT_FOOD_ICON}

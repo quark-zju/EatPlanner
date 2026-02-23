@@ -173,7 +173,7 @@ export default function TodayTab() {
           </label>
         </div>
 
-        <p className="hint">Click a food tile to add +1 unit. Use x to clear that item.</p>
+        <p className="hint draft-grid-hint">Click a food tile to add +1 unit. Use x to clear that item.</p>
         <div className="draft-grid">
           {availableDraftFoods.map((food) => {
             const item = draftItemByFoodId.get(food.id);
@@ -212,7 +212,10 @@ export default function TodayTab() {
 
         <div className="draft-summary">
           <NutritionGoalStats totals={state.todayDraft.totals} goal={state.goal} />
-          <p>Price: ${formatPrice(draftPrice.priceLowerBound, draftPrice.hasUnknownPrice)}</p>
+          <p className="draft-summary__price">
+            <strong>Price</strong>
+            <span>${formatPrice(draftPrice.priceLowerBound, draftPrice.hasUnknownPrice)}</span>
+          </p>
         </div>
       </section>
 

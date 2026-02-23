@@ -126,7 +126,7 @@ export default function SettingsTab() {
         )}
       </div>
 
-      <p className="hint">
+      <p className="hint settings-note">
         Google Drive sync uses the app's private storage area and won't touch your regular Drive
         files.
       </p>

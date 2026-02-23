@@ -1,11 +1,11 @@
 import { useAtomValue } from "jotai";
 import {
   appStateAtom,
-  historyAggregatesInWindowAtom,
   historyDaysInWindowAtom,
   historyWindowRangeAtom,
 } from "../../state/appAtoms";
 import { setHistoryWindow, setSelectedHistoryDate } from "../../state/appDomainActions";
+import { getFoodIcon } from "../../state/appState";
 
 const formatPrice = (priceLowerBound: number, hasUnknownPrice: boolean) => {
   const base = priceLowerBound.toFixed(2);
@@ -16,7 +16,6 @@ export default function HistoryTab() {
   const state = useAtomValue(appStateAtom);
   const range = useAtomValue(historyWindowRangeAtom);
   const historyDays = useAtomValue(historyDaysInWindowAtom);
-  const aggregate = useAtomValue(historyAggregatesInWindowAtom);
 
   return (
     <>
@@ -40,13 +39,6 @@ export default function HistoryTab() {
           Showing {range.startISO} to {range.endISO}
         </p>
 
-        <div className="history-summary">
-          <p>Days logged: {aggregate.days}</p>
-          <p>Carbs: {aggregate.carbs.toFixed(1)} g</p>
-          <p>Fat: {aggregate.fat.toFixed(1)} g</p>
-          <p>Protein: {aggregate.protein.toFixed(1)} g</p>
-        </div>
-
         {historyDays.length === 0 && (
           <p className="hint">No history entries in this 30-day window.</p>
         )}
@@ -63,8 +55,8 @@ export default function HistoryTab() {
                 >
                   <strong>{dateISO}</strong>
                   <span>
-                    Carbs {record.totals.carbs.toFixed(1)} / Fat {record.totals.fat.toFixed(1)} /
-                    Protein {record.totals.protein.toFixed(1)}
+                    🍞 {record.totals.carbs.toFixed(1)}g / 🧈 {record.totals.fat.toFixed(1)}g /
+                    🍗 {record.totals.protein.toFixed(1)}g
                   </span>
                   <span>${formatPrice(record.priceLowerBound, record.hasUnknownPrice)}</span>
                 </button>
@@ -80,7 +72,8 @@ export default function HistoryTab() {
                     <ul>
                       {record.items.map((item) => (
                         <li key={`${dateISO}-${item.foodId}`}>
-                          {item.foodNameSnapshot}: {item.quantity} {item.unitSnapshot}
+                          {getFoodIcon(item.foodIconSnapshot)} {item.foodNameSnapshot}:{" "}
+                          {item.quantity} {item.unitSnapshot}
                         </li>
                       ))}
                     </ul>
