@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useAtomValue } from "jotai";
-import { formatQuantityWithUnit } from "../../core";
+import { formatPrice, formatQuantityWithUnit } from "../../core";
 import {
   appStateAtom,
   draftPriceSummaryAtom,
@@ -25,11 +25,6 @@ import { getFoodIcon } from "../../state/appState";
 import NutritionGoalCard from "../NutritionGoalCard";
 import NutritionGoalStats from "../NutritionGoalStats";
 
-const formatPrice = (priceLowerBound: number, hasUnknownPrice: boolean) => {
-  const base = priceLowerBound.toFixed(2);
-  return hasUnknownPrice ? `${base}+` : base;
-};
-
 export default function TodayTab() {
   const state = useAtomValue(appStateAtom);
   const options = useAtomValue(planOptionsAtom);
@@ -49,9 +44,17 @@ export default function TodayTab() {
   const updateDraftQty = updateDraftQuantity;
   const [localAvoidFoodIds, setLocalAvoidFoodIds] = useState<string[]>([]);
 
-  const availableDraftFoods = state.foods.filter((food) => pantryByFood.has(food.id));
-  const draftItemByFoodId = new Map(
-    state.todayDraft.items.map((item) => [item.foodId, item])
+  const foodById = useMemo(
+    () => new Map(state.foods.map((f) => [f.id, f])),
+    [state.foods]
+  );
+  const availableDraftFoods = useMemo(
+    () => state.foods.filter((food) => pantryByFood.has(food.id)),
+    [state.foods, pantryByFood]
+  );
+  const draftItemByFoodId = useMemo(
+    () => new Map(state.todayDraft.items.map((item) => [item.foodId, item])),
+    [state.todayDraft.items]
   );
   const hasAnySelection = state.todayDraft.items.some((item) => item.quantity > 0);
   const localAvoidSet = useMemo(() => new Set(localAvoidFoodIds), [localAvoidFoodIds]);
@@ -104,7 +107,7 @@ export default function TodayTab() {
                       if (amount <= 0) {
                         return null;
                       }
-                      const food = state.foods.find((f) => f.id === foodId);
+                      const food = foodById.get(foodId);
                       const isLocallyAvoided = localAvoidSet.has(foodId);
                       return (
                         <li key={foodId} className={isLocallyAvoided ? "option-food is-avoid" : "option-food"}>
@@ -149,7 +152,7 @@ export default function TodayTab() {
             <p>Avoid:</p>
             <div className="local-avoid-list">
               {localAvoidFoodIds.map((foodId) => {
-                const food = state.foods.find((f) => f.id === foodId);
+                const food = foodById.get(foodId);
                 return (
                   <button
                     className="ghost"
