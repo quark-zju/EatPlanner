@@ -75,7 +75,7 @@ const consumeRedirectTokenIfPresent = () => {
 consumeRedirectTokenIfPresent();
 
 // Restore token from sessionStorage on page refresh (token never enters AppState or exports).
-if (!accessToken) {
+if (!accessToken && typeof sessionStorage !== "undefined") {
   const stored = sessionStorage.getItem(TOKEN_SESSION_KEY);
   if (stored) {
     accessToken = stored;
