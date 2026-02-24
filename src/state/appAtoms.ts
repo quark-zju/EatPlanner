@@ -18,7 +18,7 @@ import {
   type LocalDateISO,
   type UiTab,
 } from "./appState";
-import { calculateDraftPrice, calculateDraftTotals } from "./appDraftMath";
+import { calculateDraftPrice, calculateDraftTotals, toRemainingGoal } from "./appDraftMath";
 
 const appStateMapStorage = {
   getItem: (key: string, initialValue: AppStateMap): AppStateMap => {
@@ -112,33 +112,6 @@ export const historyAggregatesInWindowAtom = atom((get) => {
     }
   );
 });
-
-const toRemainingGoal = (goal: Goal, items: DraftItem[]): Goal => {
-  const eaten = calculateDraftTotals(items);
-  const remaining = {
-    carbs: {
-      min: Math.max(0, goal.carbs.min - eaten.carbs),
-      max: Math.max(0, goal.carbs.max - eaten.carbs),
-    },
-    fat: {
-      min: Math.max(0, goal.fat.min - eaten.fat),
-      max: Math.max(0, goal.fat.max - eaten.fat),
-    },
-    protein: {
-      min: Math.max(0, goal.protein.min - eaten.protein),
-      max: Math.max(0, goal.protein.max - eaten.protein),
-    },
-  } as Goal;
-
-  if (goal.calories) {
-    remaining.calories = {
-      min: Math.max(0, goal.calories.min - (eaten.calories ?? 0)),
-      max: Math.max(0, goal.calories.max - (eaten.calories ?? 0)),
-    };
-  }
-
-  return remaining;
-};
 
 export const plannerRemainingGoalAtom = atom((get) =>
   toRemainingGoal(get(appStateAtom).goal, get(plannerContextItemsAtom))

@@ -11,39 +11,12 @@ import {
   planOptionsAtom,
   solvingAtom,
 } from "./appAtoms";
-import { calculateDraftTotals, clampNonNegative } from "./appDraftMath";
+import { calculateDraftTotals, clampNonNegative, toRemainingGoal } from "./appDraftMath";
 
 type StoreLike = ReturnType<typeof getDefaultStore>;
 
 const defaultStore = getDefaultStore();
 const withStore = (store?: StoreLike) => store ?? defaultStore;
-
-const toRemainingGoal = (goal: Goal, draftItems: DraftItem[]): Goal => {
-  const eaten = calculateDraftTotals(draftItems);
-  const remaining = {
-    carbs: {
-      min: Math.max(0, goal.carbs.min - eaten.carbs),
-      max: Math.max(0, goal.carbs.max - eaten.carbs),
-    },
-    fat: {
-      min: Math.max(0, goal.fat.min - eaten.fat),
-      max: Math.max(0, goal.fat.max - eaten.fat),
-    },
-    protein: {
-      min: Math.max(0, goal.protein.min - eaten.protein),
-      max: Math.max(0, goal.protein.max - eaten.protein),
-    },
-  } as Goal;
-
-  if (goal.calories) {
-    remaining.calories = {
-      min: Math.max(0, goal.calories.min - (eaten.calories ?? 0)),
-      max: Math.max(0, goal.calories.max - (eaten.calories ?? 0)),
-    };
-  }
-
-  return remaining;
-};
 
 const toRemainingPantry = (pantry: PantryItem[], draftItems: DraftItem[]): PantryItem[] => {
   const consumedByFood = new Map<string, number>();
