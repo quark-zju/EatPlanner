@@ -31,6 +31,8 @@
 }
 
 .card {
+  display: grid;
+  max-width: 100%;
   padding: 20px;
   border-radius: 20px;
   background: #fff;
@@ -354,6 +356,7 @@ select {
 }
 
 .table-scroll {
+  max-width: 100%;
   overflow-x: auto;
 }
 
