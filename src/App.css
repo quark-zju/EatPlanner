@@ -397,6 +397,19 @@ select {
   min-width: 58px;
 }
 
+.pantry-editor-table .col-unit {
+  min-width: 9ch;
+}
+
+.pantry-editor-table .col-right {
+  text-align: right;
+  min-width: 8ch;
+}
+
+.pantry-editor-table .col-right input {
+  text-align: right;
+}
+
 .prefs {
   display: grid;
   gap: 6px;

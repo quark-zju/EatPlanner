@@ -139,12 +139,12 @@ export default function InventoryTab() {
             <tr>
               <th className="col-name">Name</th>
               <th className="col-icon">Icon</th>
-              <th>Unit</th>
-              <th>Carbs</th>
-              <th>Fat</th>
-              <th>Protein</th>
-              <th>Price</th>
-              <th>Stock</th>
+              <th className="col-unit">Unit</th>
+              <th className="col-right">Carbs</th>
+              <th className="col-right">Fat</th>
+              <th className="col-right">Protein</th>
+              <th className="col-right">Price</th>
+              <th className="col-right">Stock</th>
               <th>Select</th>
             </tr>
           </thead>
@@ -176,7 +176,7 @@ export default function InventoryTab() {
                       }
                     />
                   </td>
-                  <td>
+                  <td className="col-unit">
                     <input
                       value={food.unit}
                       onChange={(event) =>
@@ -184,7 +184,7 @@ export default function InventoryTab() {
                       }
                     />
                   </td>
-                  <td>
+                  <td className="col-right">
                     <input
                       type="number"
                       value={food.nutritionPerUnit.carbs}
@@ -196,7 +196,7 @@ export default function InventoryTab() {
                       }
                     />
                   </td>
-                  <td>
+                  <td className="col-right">
                     <input
                       type="number"
                       value={food.nutritionPerUnit.fat}
@@ -208,7 +208,7 @@ export default function InventoryTab() {
                       }
                     />
                   </td>
-                  <td>
+                  <td className="col-right">
                     <input
                       type="number"
                       value={food.nutritionPerUnit.protein}
@@ -220,7 +220,7 @@ export default function InventoryTab() {
                       }
                     />
                   </td>
-                  <td>
+                  <td className="col-right">
                     <input
                       type="number"
                       value={food.price ?? ""}
@@ -236,7 +236,7 @@ export default function InventoryTab() {
                       }
                     />
                   </td>
-                  <td>
+                  <td className="col-right">
                     <input
                       type="text"
                       value={stock}
@@ -280,7 +280,7 @@ export default function InventoryTab() {
                   }
                 />
               </td>
-              <td>
+              <td className="col-unit">
                 <input
                   value={newFood.unit}
                   onChange={(event) =>
@@ -288,7 +288,7 @@ export default function InventoryTab() {
                   }
                 />
               </td>
-              <td>
+              <td className="col-right">
                 <input
                   type="number"
                   value={newFood.carbs}
@@ -297,7 +297,7 @@ export default function InventoryTab() {
                   }
                 />
               </td>
-              <td>
+              <td className="col-right">
                 <input
                   type="number"
                   value={newFood.fat}
@@ -306,7 +306,7 @@ export default function InventoryTab() {
                   }
                 />
               </td>
-              <td>
+              <td className="col-right">
                 <input
                   type="number"
                   value={newFood.protein}
@@ -315,7 +315,7 @@ export default function InventoryTab() {
                   }
                 />
               </td>
-              <td>
+              <td className="col-right">
                 <input
                   type="text"
                   value={newFood.price}
@@ -325,7 +325,7 @@ export default function InventoryTab() {
                   }
                 />
               </td>
-              <td>
+              <td className="col-right">
                 <input
                   type="text"
                   value={newFood.stock}
