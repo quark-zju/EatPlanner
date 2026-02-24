@@ -15,20 +15,22 @@ import {
 import { DEFAULT_FOOD_ICON } from "../../state/appState";
 import { inferFoodIconFromName } from "../../state/foodIcons";
 
+const EMPTY_NEW_FOOD = {
+  name: "",
+  icon: "",
+  unit: "serving",
+  carbs: "0",
+  fat: "0",
+  protein: "0",
+  price: "",
+  stock: "1",
+};
+
 export default function InventoryTab() {
   const state = useAtomValue(appStateAtom);
   const pantryByFood = useAtomValue(getPantryByFoodAtom);
   const [selectedFoodIds, setSelectedFoodIds] = useState<string[]>([]);
-  const [newFood, setNewFood] = useState({
-    name: "",
-    icon: "",
-    unit: "serving",
-    carbs: "0",
-    fat: "0",
-    protein: "0",
-    price: "",
-    stock: "1",
-  });
+  const [newFood, setNewFood] = useState(EMPTY_NEW_FOOD);
   const selectedCount = selectedFoodIds.length;
   const hasSelection = selectedCount > 0;
   const canAddNewFood = newFood.name.trim().length > 0;
@@ -84,16 +86,7 @@ export default function InventoryTab() {
       stock: stockValue === "inf" ? "inf" : Number(newFood.stock),
     });
 
-    setNewFood({
-      name: "",
-      icon: "",
-      unit: "serving",
-      carbs: "0",
-      fat: "0",
-      protein: "0",
-      price: "",
-      stock: "1",
-    });
+    setNewFood(EMPTY_NEW_FOOD);
   };
 
   return (
