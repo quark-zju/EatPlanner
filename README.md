@@ -16,7 +16,7 @@ Choices I made:
 - Jotai + Immutable.js for state management
 - z3-solver for planning
 
-Most coding is done by an AI.
+Most coding is done by an AI. I was experimenting different AIs, and found they have different tastes.
 
 <details>
 <summary>Project Structure</summary>
