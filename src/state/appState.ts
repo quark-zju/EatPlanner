@@ -1,4 +1,3 @@
-import { Map, fromJS } from "immutable";
 import type {
   Food,
   Goal,
@@ -393,16 +392,6 @@ export const normalizeAppState = (state: AppState): AppState => {
 
   return merged;
 };
-
-export type AppStateMap = Map<string, unknown>;
-
-export const toAppStateMap = (state: AppState): AppStateMap =>
-  fromJS(normalizeAppState(state)) as AppStateMap;
-
-export const fromAppStateMap = (map: AppStateMap): AppState =>
-  normalizeAppState(map.toJS() as AppState);
-
-export const defaultAppStateMap = toAppStateMap(defaultAppState);
 
 export const newFoodId = () =>
   typeof crypto !== "undefined" && crypto.randomUUID

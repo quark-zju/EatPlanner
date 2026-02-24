@@ -4,24 +4,21 @@ import type { Goal, PantryItem, PlanOption } from "../core";
 import { isGoogleDriveConnected } from "../storage/googleDrive";
 import {
   APP_STATE_STORAGE_KEY,
-  defaultAppStateMap,
-  fromAppStateMap,
+  defaultAppState,
   getRollingWindowStartISO,
   getFoodIcon,
   isAppState,
   normalizeAppState,
   shiftLocalDateISO,
-  toAppStateMap,
   type AppState,
-  type AppStateMap,
   type DraftItem,
   type LocalDateISO,
   type UiTab,
 } from "./appState";
 import { calculateDraftPrice, calculateDraftTotals, toRemainingGoal } from "./appDraftMath";
 
-const appStateMapStorage = {
-  getItem: (key: string, initialValue: AppStateMap): AppStateMap => {
+const appStateStorage = {
+  getItem: (key: string, initialValue: AppState): AppState => {
     const raw = localStorage.getItem(key);
     if (!raw) {
       return initialValue;
@@ -29,33 +26,32 @@ const appStateMapStorage = {
     try {
       const parsed = JSON.parse(raw);
       if (isAppState(parsed)) {
-        return toAppStateMap(parsed);
+        return normalizeAppState(parsed);
       }
       return initialValue;
     } catch {
       return initialValue;
     }
   },
-  setItem: (key: string, newValue: AppStateMap) => {
-    const plain = fromAppStateMap(newValue);
-    localStorage.setItem(key, JSON.stringify(plain));
+  setItem: (key: string, newValue: AppState) => {
+    localStorage.setItem(key, JSON.stringify(newValue));
   },
   removeItem: (key: string) => {
     localStorage.removeItem(key);
   },
 };
 
-export const appStateMapAtom = atomWithStorage<AppStateMap>(
+const appStateStorageAtom = atomWithStorage<AppState>(
   APP_STATE_STORAGE_KEY,
-  defaultAppStateMap,
-  appStateMapStorage,
+  defaultAppState,
+  appStateStorage,
   { getOnInit: true }
 );
 
 export const appStateAtom = atom(
-  (get) => fromAppStateMap(get(appStateMapAtom)),
+  (get) => get(appStateStorageAtom),
   (_get, set, nextState: AppState) => {
-    set(appStateMapAtom, toAppStateMap(normalizeAppState(nextState)));
+    set(appStateStorageAtom, normalizeAppState(nextState));
   }
 );
 
