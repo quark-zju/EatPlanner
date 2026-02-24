@@ -1,5 +1,5 @@
 import { useAtomValue } from "jotai";
-import { formatQuantityWithUnit } from "../../core";
+import { formatPrice, formatQuantityWithUnit } from "../../core";
 import {
   historyDaysInWindowAtom,
   historyWindowRangeAtom,
@@ -8,11 +8,6 @@ import {
 import { setHistoryWindow, setSelectedHistoryDate } from "../../state/appDomainActions";
 import { getFoodIcon } from "../../state/appState";
 import NutritionGoalCard from "../NutritionGoalCard";
-
-const formatPrice = (priceLowerBound: number, hasUnknownPrice: boolean) => {
-  const base = priceLowerBound.toFixed(2);
-  return hasUnknownPrice ? `${base}+` : base;
-};
 
 export default function HistoryTab() {
   const range = useAtomValue(historyWindowRangeAtom);
