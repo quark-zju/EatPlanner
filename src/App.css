@@ -590,11 +590,6 @@ select {
 }
 
 @media (max-width: 900px) {
-  .app__header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
   .history-item__header {
     grid-template-columns: 1fr;
   }
