@@ -47,6 +47,25 @@ export default function InventoryTab() {
     setSelectedFoodIds((prev) => prev.filter((id) => validIds.has(id)));
   };
 
+  const parsePriceInput = (value: string): number | undefined => {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return undefined;
+    }
+
+    const ratioMatch = trimmed.match(
+      /^([0-9]+(?:\.[0-9]+)?)\s*\/\s*([1-9][0-9]*)$/
+    );
+    if (ratioMatch) {
+      const numerator = Number(ratioMatch[1]);
+      const denominator = Number(ratioMatch[2]);
+      return numerator / denominator;
+    }
+
+    const asNumber = Number(trimmed);
+    return Number.isFinite(asNumber) ? asNumber : undefined;
+  };
+
   const commitNewFood = () => {
     const name = newFood.name.trim();
     if (!name) {
@@ -61,7 +80,7 @@ export default function InventoryTab() {
       carbs: Number(newFood.carbs),
       fat: Number(newFood.fat),
       protein: Number(newFood.protein),
-      price: newFood.price.trim() === "" ? undefined : Number(newFood.price),
+      price: parsePriceInput(newFood.price),
       stock: stockValue === "inf" ? "inf" : Number(newFood.stock),
     });
 
@@ -298,9 +317,9 @@ export default function InventoryTab() {
               </td>
               <td>
                 <input
-                  type="number"
+                  type="text"
                   value={newFood.price}
-                  placeholder="?"
+                  placeholder="? or 3/2"
                   onChange={(event) =>
                     setNewFood((prev) => ({ ...prev, price: event.target.value }))
                   }
