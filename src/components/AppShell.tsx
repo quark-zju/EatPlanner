@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import type { ReactNode } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { activeTabAtom, errorAtom, noticeAtom } from "../state/appAtoms";
@@ -19,10 +20,35 @@ export default function AppShell({ children }: AppShellProps) {
   const setActiveTab = useSetAtom(activeTabAtom);
   const error = useAtomValue(errorAtom);
   const notice = useAtomValue(noticeAtom);
+  const iconRef = useRef<HTMLImageElement>(null);
+
+  const handleIconClick = () => {
+    const icon = iconRef.current;
+    if (!icon) return;
+
+    icon.animate(
+      [
+        { transform: "rotate(20deg)" },
+        { transform: "rotate(740deg) scale(1.1)", offset: 0.5 },
+        { transform: "rotate(20deg)" },
+      ],
+      {
+        duration: 800,
+        easing: "cubic-bezier(0.68, -0.55, 0.265, 1.55)",
+      }
+    );
+  };
 
   return (
     <div className="app">
       <header className="app__header">
+        <img
+          ref={iconRef}
+          src="icon.svg"
+          alt=""
+          className="app-icon"
+          onClick={handleIconClick}
+        />
         <div>
           <h1>Eat Planner</h1>
           <p>Plan meals around the food you already have.</p>
@@ -56,7 +82,11 @@ export default function AppShell({ children }: AppShellProps) {
           Terms
         </a>
         <span>•</span>
-        <a href="https://github.com/quark-zju/EatPlanner" target="_blank" rel="noreferrer">
+        <a
+          href="https://github.com/quark-zju/EatPlanner"
+          target="_blank"
+          rel="noreferrer"
+        >
           GitHub
         </a>
       </footer>

@@ -12,6 +12,19 @@
   margin-bottom: 24px;
 }
 
+.app-icon {
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+  transform: rotate(20deg);
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.app-icon:hover {
+  transform: rotate(30deg);
+}
+
 .app__header h1 {
   margin: 0 0 8px;
   font-size: 40px;
