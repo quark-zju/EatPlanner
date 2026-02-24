@@ -2,6 +2,7 @@ const DRIVE_API_BASE = "https://www.googleapis.com/drive/v3";
 const DRIVE_UPLOAD_BASE = "https://www.googleapis.com/upload/drive/v3";
 const OAUTH_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const REDIRECT_STATE_KEY = "eat-planner-drive-oauth-state";
+const TOKEN_SESSION_KEY = "eat-planner-drive-token";
 const debugDrive = import.meta.env.DEV && import.meta.env.MODE !== "test";
 const logDrive = (...args: unknown[]) => {
   if (debugDrive) {
@@ -63,6 +64,7 @@ const consumeRedirectTokenIfPresent = () => {
 
   sessionStorage.removeItem(REDIRECT_STATE_KEY);
   accessToken = token;
+  sessionStorage.setItem(TOKEN_SESSION_KEY, token);
   logDrive("redirectOAuth:tokenConsumed");
 
   // Remove sensitive token from URL fragment.
@@ -71,6 +73,15 @@ const consumeRedirectTokenIfPresent = () => {
 };
 
 consumeRedirectTokenIfPresent();
+
+// Restore token from sessionStorage on page refresh (token never enters AppState or exports).
+if (!accessToken) {
+  const stored = sessionStorage.getItem(TOKEN_SESSION_KEY);
+  if (stored) {
+    accessToken = stored;
+    logDrive("accessToken:restoredFromSession");
+  }
+}
 
 const ensureAccessToken = async (clientId: string) => {
   void clientId;
@@ -180,6 +191,7 @@ export const disconnectGoogleDrive = () => {
     window.google.accounts.oauth2.revoke(accessToken, () => undefined);
   }
   accessToken = null;
+  sessionStorage.removeItem(TOKEN_SESSION_KEY);
 };
 
 export const isGoogleDriveConnected = () => Boolean(accessToken);
