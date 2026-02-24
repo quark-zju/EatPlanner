@@ -13,7 +13,7 @@ Plan meals from what you already have.
 Choices I made:
 
 - React + TypeScript + Vite
-- Jotai + Immutable.js for state management
+- Jotai for state management
 - z3-solver for planning
 
 Most coding is done by an AI. I was experimenting different AIs, and found they have different tastes.
@@ -31,7 +31,7 @@ src/
     appState.ts         # App state model, validation, normalization, date helpers
     appAtoms.ts         # Read/derived atoms + storage-backed app state
     *Actions.ts         # Store-backed write actions (domain, inventory, draft, planner, data, drive)
-    appDraftMath.ts     # Shared draft total/price calculations
+    appDraftMath.ts     # Shared draft math: totals, price, remaining goal
     appState.test.ts    # State normalization tests
     appAtoms.test.ts    # State/action workflow tests (non-React)
   storage/
