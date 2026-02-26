@@ -1,5 +1,5 @@
 import { getDefaultStore } from "jotai";
-import type { Goal, PantryItem } from "../core";
+import type { PantryItem } from "../core";
 import { solvePlanOptions } from "../core";
 import type { AppState, DraftItem } from "./appState";
 import {
@@ -11,7 +11,7 @@ import {
   planOptionsAtom,
   solvingAtom,
 } from "./appAtoms";
-import { calculateDraftTotals, clampNonNegative, toRemainingGoal } from "./appDraftMath";
+import { clampNonNegative, toRemainingGoal } from "./appDraftMath";
 
 type StoreLike = ReturnType<typeof getDefaultStore>;
 

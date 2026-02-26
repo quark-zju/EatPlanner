@@ -1,6 +1,6 @@
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
-import type { Goal, PantryItem, PlanOption } from "../core";
+import type { PantryItem, PlanOption } from "../core";
 import { isGoogleDriveConnected } from "../storage/googleDrive";
 import {
   APP_STATE_STORAGE_KEY,
@@ -15,7 +15,7 @@ import {
   type LocalDateISO,
   type UiTab,
 } from "./appState";
-import { calculateDraftPrice, calculateDraftTotals, toRemainingGoal } from "./appDraftMath";
+import { calculateDraftPrice, toRemainingGoal } from "./appDraftMath";
 
 const appStateStorage = {
   getItem: (key: string, initialValue: AppState): AppState => {
