@@ -192,7 +192,7 @@ export const requestFoodVision = async (payload: {
 
   const responseAt = performance.now();
   const data = (await response.json()) as {
-    output?: Array<{ content?: Array<{ type?: string; text?: string }> }>;
+    output?: Array<{ type?: string; content?: Array<{ type?: string; text?: string }> }>;
   };
   const parsedAt = performance.now();
 
