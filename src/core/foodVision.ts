@@ -144,9 +144,9 @@ export const requestFoodVision = async (payload: {
           ],
         },
       ],
-      response_format: {
-        type: "json_schema",
-        json_schema: {
+      text: {
+        format: {
+          type: "json_schema",
           name: "food_nutrition",
           strict: true,
           schema: {
@@ -163,7 +163,7 @@ export const requestFoodVision = async (payload: {
               confidence: { type: "string", enum: ["label", "estimate"] },
               notes: { type: ["string", "null"] },
             },
-            required: ["unit", "carbs", "fat", "protein", "confidence"],
+            required: ["name", "unit", "carbs", "fat", "protein", "calories", "price", "confidence", "notes"],
           },
         },
       },
@@ -179,10 +179,22 @@ export const requestFoodVision = async (payload: {
     output?: Array<{ content?: Array<{ type?: string; text?: string }> }>;
   };
 
+  const outputItems = data.output ?? [];
+  const message = outputItems.find((item) => item.type === "message");
   const text =
-    data.output?.[0]?.content?.find((item) => item.type === "output_text")?.text ?? "";
+    message?.content?.find((item) => item.type === "output_text")?.text ??
+    message?.content?.find((item) => item.type === "text")?.text ??
+    "";
   if (!text) {
-    throw new Error("OpenAI returned no content.");
+    const requestId = response.headers.get("x-request-id") ?? "";
+    const debugPayload = {
+      requestId,
+      output: data.output ?? null,
+    };
+    console.debug("OpenAI vision response missing output_text", debugPayload);
+    throw new Error(
+      `OpenAI returned no content.${requestId ? ` request_id=${requestId}` : ""}`,
+    );
   }
   const parsed = JSON.parse(text) as unknown;
   return parseFoodVisionResult(parsed);
