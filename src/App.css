@@ -52,10 +52,6 @@
   box-shadow: 0 18px 40px rgba(24, 17, 7, 0.08);
 }
 
-.card + .card {
-  margin-top: 20px;
-}
-
 .card h2 {
   margin: 0 0 8px;
   font-size: 22px;
