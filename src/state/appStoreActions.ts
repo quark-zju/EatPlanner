@@ -1,15 +1,37 @@
 import { getDefaultStore } from "jotai";
 import type { PlanOption } from "../core";
-import {
-  driveBusyAtom,
-  driveConnectedAtom,
-  errorAtom,
-  noticeAtom,
-  planOptionsAtom,
-  solvingAtom,
-} from "./appAtoms";
+import { appStateAtom, driveBusyAtom, driveConnectedAtom, errorAtom, noticeAtom, planOptionsAtom, solvingAtom } from "./appAtoms";
+import { defaultAppState } from "./appState";
 
 const store = getDefaultStore();
+
+export const resetInventory = () => {
+  const current = store.get(appStateAtom);
+  store.set(appStateAtom, {
+    ...current,
+    foods: defaultAppState.foods,
+    pantry: defaultAppState.pantry,
+  });
+  store.set(noticeAtom, "Inventory reset to default.");
+};
+
+export const resetHistory = () => {
+  const current = store.get(appStateAtom);
+  store.set(appStateAtom, {
+    ...current,
+    history: { byDate: {} },
+  });
+  store.set(noticeAtom, "History cleared.");
+};
+
+export const resetGoals = () => {
+  const current = store.get(appStateAtom);
+  store.set(appStateAtom, {
+    ...current,
+    goal: defaultAppState.goal,
+  });
+  store.set(noticeAtom, "Goals reset to default.");
+};
 
 export const clearMessages = () => {
   store.set(errorAtom, null);

@@ -20,7 +20,7 @@ import {
   saveToDrive,
 } from "../../state/appDriveActions";
 import { setPlanOptionLimit, updateGoal } from "../../state/appDomainActions";
-import { setAppError } from "../../state/appStoreActions";
+import { resetGoals, resetHistory, resetInventory, setAppError } from "../../state/appStoreActions";
 
 export default function SettingsTab() {
   const state = useAtomValue(appStateAtom);
@@ -152,6 +152,24 @@ export default function SettingsTab() {
           <h2>Data Controls</h2>
         </div>
         <div className="settings-subsection">
+          <h3>Reset</h3>
+          <div className="storage-actions">
+            <button className="ghost" onClick={() => resetInventory()} type="button">
+              Reset Inventory
+            </button>
+            <button className="ghost" onClick={() => resetHistory()} type="button">
+              Reset History
+            </button>
+            <button className="ghost" onClick={() => resetGoals()} type="button">
+              Reset Goals
+            </button>
+          </div>
+          <p className="hint settings-note">
+            These actions only modify your browser's local data. They do not affect data stored in
+            Google Drive.
+          </p>
+        </div>
+        <div className="settings-subsection">
           <h3>Clipboard</h3>
           <div className="storage-actions">
             <button className="ghost" onClick={() => copyToClipboard()} type="button">
@@ -207,7 +225,15 @@ export default function SettingsTab() {
           </div>
           <p className="hint settings-note">
             Google Drive sync uses the app's private storage area and won't touch your regular Drive
-            files.
+            files. You can manage and delete data uploaded by this app at{" "}
+            <a
+              href="https://drive.google.com/drive/settings"
+              target="_blank"
+              rel="noreferrer"
+            >
+              drive.google.com/drive/settings
+            </a>{" "}
+            under "Manage apps".
           </p>
         </div>
         <input
