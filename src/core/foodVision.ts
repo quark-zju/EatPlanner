@@ -191,7 +191,9 @@ export const requestFoodVision = async (payload: {
       requestId,
       output: data.output ?? null,
     };
-    console.debug("OpenAI vision response missing output_text", debugPayload);
+    if (shouldLog) {
+      console.debug("OpenAI vision response missing output_text", debugPayload);
+    }
     throw new Error(
       `OpenAI returned no content.${requestId ? ` request_id=${requestId}` : ""}`,
     );
@@ -199,3 +201,4 @@ export const requestFoodVision = async (payload: {
   const parsed = JSON.parse(text) as unknown;
   return parseFoodVisionResult(parsed);
 };
+import { shouldLog } from "./debug";
