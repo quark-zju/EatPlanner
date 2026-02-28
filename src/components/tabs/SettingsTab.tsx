@@ -1,10 +1,12 @@
 import { useRef } from "react";
+import { useAtom } from "jotai";
 import { useAtomValue } from "jotai";
 import {
   appStateAtom,
   driveBusyAtom,
   driveConnectedAtom,
 } from "../../state/appAtoms";
+import { openAiKeyAtom, sanitizeOpenAiKey } from "../../state/appOpenAi";
 import {
   copyToClipboard,
   exportToFile,
@@ -24,6 +26,7 @@ export default function SettingsTab() {
   const state = useAtomValue(appStateAtom);
   const driveConnected = useAtomValue(driveConnectedAtom);
   const driveBusy = useAtomValue(driveBusyAtom);
+  const [openAiKey, setOpenAiKey] = useAtom(openAiKeyAtom);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -142,6 +145,32 @@ export default function SettingsTab() {
       <p className="hint settings-note">
         Google Drive sync uses the app's private storage area and won't touch your regular Drive
         files.
+      </p>
+
+      <h3>OpenAI Vision</h3>
+      <div className="goal-grid">
+        <label className="setting-row">
+          <span className="macro-label">OpenAI API Key</span>
+          <input
+            type="password"
+            value={openAiKey}
+            placeholder="sk-..."
+            autoComplete="off"
+            onChange={(event) => setOpenAiKey(sanitizeOpenAiKey(event.target.value))}
+          />
+          <button
+            className="ghost"
+            type="button"
+            onClick={() => setOpenAiKey("")}
+            disabled={openAiKey.length === 0}
+          >
+            Clear
+          </button>
+        </label>
+      </div>
+      <p className="hint settings-note">
+        This key stays only in your browser (localStorage) and is excluded from Google Drive sync
+        and export/import.
       </p>
     </section>
   );
