@@ -1,5 +1,5 @@
 export type FoodVisionResult = {
-  name: string;
+  name: string | null;
   unit: string;
   carbs: number;
   fat: number;
@@ -72,13 +72,14 @@ const buildPrompt = () => {
     "If the image is an actual food (no label), estimate typical nutrition for a reasonable serving.",
     "Return a single JSON object only, no Markdown.",
     "Use this schema:",
-    "{\"name\":string,\"unit\":string,\"carbs\":number,\"fat\":number,\"protein\":number,\"calories\":number|null,\"price\":number|null,\"confidence\":\"label\"|\"estimate\",\"notes\":string|null}",
+    "{\"name\":string|null,\"unit\":string,\"carbs\":number,\"fat\":number,\"protein\":number,\"calories\":number|null,\"price\":number|null,\"confidence\":\"label\"|\"estimate\",\"notes\":string|null}",
     "Rules:",
     "- Use grams for macros.",
-    "- For unit, use the serving size if visible; otherwise use \"serving\".",
+    "- For unit, use the serving size if visible (examples: \"1/4 cup\", \"20 g\"); otherwise use \"serving\".",
+    "- If multiple servings are listed, use per-serving values, not per-package totals.",
     "- If calories or price are unknown, return null.",
     "- If label data is incomplete, estimate missing parts and note it.",
-    "- Keep name concise (product name or food name).",
+    "- If the name is unknown from the label, return null; otherwise keep it concise.",
   ].join(" ");
 };
 
@@ -107,7 +108,10 @@ export const parseFoodVisionResult = (raw: unknown): FoodVisionResult => {
     obj.price === null || Number.isFinite(obj.price) ? (obj.price as number | null) : null;
 
   return {
-    name: sanitizeName(typeof obj.name === "string" ? obj.name : undefined),
+    name:
+      obj.name === null
+        ? null
+        : sanitizeName(typeof obj.name === "string" ? obj.name : undefined),
     unit: sanitizeUnit(typeof obj.unit === "string" ? obj.unit : undefined),
     carbs: clampNumber(typeof obj.carbs === "number" ? obj.carbs : undefined),
     fat: clampNumber(typeof obj.fat === "number" ? obj.fat : undefined),

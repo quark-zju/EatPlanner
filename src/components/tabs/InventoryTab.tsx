@@ -110,7 +110,7 @@ export default function InventoryTab() {
       });
       setNewFood((prev) => ({
         ...prev,
-        name: result.name,
+        name: result.name ?? prev.name,
         unit: result.unit,
         carbs: String(result.carbs ?? 0),
         fat: String(result.fat ?? 0),
