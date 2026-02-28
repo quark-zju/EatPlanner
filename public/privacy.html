@@ -93,19 +93,16 @@
             locally in your browser storage (<code>localStorage</code>) and can be exported.
           </li>
           <li>
-            <strong>Google Drive tokens:</strong> Stored only in local browser storage and are never
-            included in export/import.
+            <strong>Local file/clipboard:</strong> If you use export or import, your default app data
+            is written to local files or the clipboard as part of that manual action.
           </li>
           <li>
-            <strong>OpenAI API key:</strong> Stored only in local browser storage and is never
-            included in export/import or Google Drive sync.
+            <strong>3rd-party service credentials:</strong> Google Drive authentication token and OpenAI key
+            are stored locally in your browser and are excluded from local file/clipboard export,
+            or Google Drive sync.
           </li>
           <li>
-            <strong>Local file/clipboard:</strong> Used only when you explicitly export or import
-            data (manual action).
-          </li>
-          <li>
-            <strong>Optional Google Drive sync:</strong> If you connect Google Drive,
+            <strong>Google Drive sync:</strong> If you connect Google Drive,
             the app stores a backup JSON file in your Google Drive
             <code>appDataFolder</code>.
           </li>
@@ -118,6 +115,9 @@
         </p>
         <p>
           The app does not route this data through a developer-operated server.
+        </p>
+        <p>
+          Photos are not stored by the app locally after they are sent for recognition.
         </p>
 
         <h2>5. Google User Data and API Scope</h2>
