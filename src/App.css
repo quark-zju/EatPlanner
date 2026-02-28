@@ -636,6 +636,10 @@ select {
   color: #7d6b5f;
 }
 
+.hint a {
+  color: #7a3f1f;
+}
+
 @media (max-width: 900px) {
   .history-item__header {
     grid-template-columns: 1fr;
