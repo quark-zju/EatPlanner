@@ -64,7 +64,7 @@
   <body>
     <main>
       <h1>Privacy Policy for Eat Planner</h1>
-      <p class="muted">Last updated: February 23, 2026</p>
+      <p class="muted">Last updated: February 28, 2026</p>
       <div class="card">
         <p>
           This Privacy Policy explains what data Eat Planner processes and where it is stored.
@@ -81,6 +81,7 @@
         <p>The app can process the following data that you enter:</p>
         <ul>
           <li>Food items, nutrition values, stock, and optional prices.</li>
+          <li>Optional photos you submit for nutrition label or food recognition.</li>
           <li>Nutrition goals and planner constraints.</li>
           <li>Export/import payloads created by the app.</li>
         </ul>
@@ -90,6 +91,10 @@
           <li>
             <strong>Default:</strong> Data is stored locally in your browser storage
             (<code>localStorage</code>).
+          </li>
+          <li>
+            <strong>OpenAI API key:</strong> Stored only in <code>localStorage</code>. It is never
+            included in Google Drive sync or export/import.
           </li>
           <li>
             <strong>Optional Google Drive sync:</strong> If you connect Google Drive,
@@ -113,6 +118,11 @@
         <p>
           The app developer does not receive your planner data by default. Data is not
           transmitted to a developer-operated backend as part of normal app use.
+        </p>
+        <p>
+          If you use the photo nutrition feature, the image and prompt are sent directly from
+          your browser to OpenAI's API using your API key. No data is routed through a
+          developer-operated server.
         </p>
         <p>
           Data may be shared only when you explicitly export, copy, or upload it using
