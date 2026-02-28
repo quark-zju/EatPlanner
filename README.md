@@ -16,7 +16,7 @@ Choices I made:
 - Jotai for state management
 - z3-solver for planning
 
-Most coding is done by an AI. I was experimenting different AIs, and found they have different tastes.
+Most coding is done by AI. I was experimenting different AIs. The main AI used in this project is Codex.
 
 <details>
 <summary>Project Structure</summary>
