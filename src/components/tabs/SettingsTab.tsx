@@ -179,7 +179,8 @@ export default function SettingsTab() {
         <a href="https://platform.openai.com/settings/organization/billing/overview">
           https://platform.openai.com/settings/organization/billing/overview
         </a>
-        . Keys can expire, so topping up a few dollars is recommended.
+        . Keys can expire, so topping up a few dollars is recommended. Keep this key private and do
+        not share it with anyone.
       </p>
     </section>
   );
