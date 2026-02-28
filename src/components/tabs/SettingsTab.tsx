@@ -111,20 +111,28 @@ export default function SettingsTab() {
             </div>
           </div>
         </div>
-        <p className="hint settings-note">
-          This key stays only in your browser (localStorage) and is excluded from Google Drive sync
-          and export/import.
-        </p>
-        <p className="hint settings-note">
-          This key is used for photo-based food recognition and is billed by OpenAI. Create a key at{" "}
-          <a href="https://platform.openai.com/api-keys">https://platform.openai.com/api-keys</a> and
-          add credit at{" "}
-          <a href="https://platform.openai.com/settings/organization/billing/overview">
-            https://platform.openai.com/settings/organization/billing/overview
-          </a>
-          . Keys can expire, so topping up a few dollars is recommended. Keep this key private and do
-          not share it with anyone.
-        </p>
+        <ul className="hint settings-note">
+          <li>This key enables photo-based food recognition.</li>
+          <li>Typical day-to-day usage costs are small for most users.</li>
+          <li>
+            Create a key at{" "}
+            <a href="https://platform.openai.com/api-keys">platform.openai.com/api-keys</a> and
+            add credit at{" "}
+            <a href="https://platform.openai.com/settings/organization/billing/overview">
+              platform.openai.com/settings/organization/billing/overview
+            </a>
+            .
+          </li>
+          <li>
+            Credits can expire per <a href="https://openai.com/policies/service-credit-terms/#:~:text=expire">OpenAI’s terms</a>, so it’s best to add only a small amount.
+          </li>
+          <li>
+            This key stays only in your browser (localStorage) and is excluded from Google Drive sync and export/import.
+          </li>
+          <li>
+            Keep it private and do not share it with anyone.
+          </li>
+        </ul>
       </section>
 
       <section className="card">
