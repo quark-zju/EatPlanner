@@ -5,8 +5,25 @@ import {
 } from "workbox-precaching";
 import { registerRoute } from "workbox-routing";
 
-declare let self: ServiceWorkerGlobalScope & {
+declare const self: {
   __WB_MANIFEST: Array<{ url: string; revision: string | null }>;
+};
+
+type SWEvent = {
+  waitUntil: (promise: Promise<unknown>) => void;
+};
+
+type SWFetchEvent = SWEvent & {
+  request: Request;
+  respondWith: (promise: Promise<Response>) => void;
+};
+
+const sw = self as unknown as {
+  clients: { claim: () => Promise<void> };
+  addEventListener: (
+    type: "activate" | "fetch",
+    listener: (event: SWEvent | SWFetchEvent) => void
+  ) => void;
 };
 
 cleanupOutdatedCaches();
@@ -17,8 +34,8 @@ registerRoute(
   createHandlerBoundToURL("/index.html")
 );
 
-self.addEventListener("activate", (event) => {
-  event.waitUntil(self.clients.claim());
+sw.addEventListener("activate", (event: SWEvent) => {
+  event.waitUntil(sw.clients.claim());
 });
 
 const coepHeaders = new Headers({
@@ -27,13 +44,14 @@ const coepHeaders = new Headers({
   "Cross-Origin-Resource-Policy": "cross-origin",
 });
 
-self.addEventListener("fetch", (event) => {
-  const { request } = event;
+sw.addEventListener("fetch", (event) => {
+  const fetchEvent = event as SWFetchEvent;
+  const { request } = fetchEvent;
   if (request.cache === "only-if-cached" && request.mode !== "same-origin") {
     return;
   }
 
-  event.respondWith(
+  fetchEvent.respondWith(
     fetch(request)
       .then((response) => {
         if (!response || response.type === "opaque") {

@@ -8,10 +8,15 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "prompt",
-      srcDir: "src",
-      filename: "sw.ts",
       strategies: "injectManifest",
       injectRegister: false,
+      srcDir: "src",
+      filename: "sw.ts",
+      injectManifest: {
+        swSrc: "src/sw.ts",
+        swDest: "dist/sw.js",
+        maximumFileSizeToCacheInBytes: 50 * 1024 * 1024,
+      },
       manifest: {
         name: "Eat Planner",
         short_name: "Eat Planner",
