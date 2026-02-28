@@ -31,161 +31,178 @@ export default function SettingsTab() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   return (
-    <section className="card">
-      <div className="card__header">
-        <h2>Settings</h2>
-      </div>
+    <>
+      <section className="card">
+        <div className="card__header">
+          <h2>Goals</h2>
+        </div>
+        <div className="goal-grid">
+          {(["carbs", "fat", "protein"] as const).map((macro) => (
+            <div className="goal-row" key={macro}>
+              <label className="macro-label">{macro}</label>
+              <input
+                type="number"
+                value={state.goal[macro].min}
+                onChange={(event) =>
+                  updateGoal({ key: macro, field: "min", value: Number(event.target.value) })
+                }
+              />
+              <span>to</span>
+              <input
+                type="number"
+                value={state.goal[macro].max}
+                onChange={(event) =>
+                  updateGoal({ key: macro, field: "max", value: Number(event.target.value) })
+                }
+              />
+              <span>g</span>
+            </div>
+          ))}
+        </div>
+      </section>
 
-      <h3>Goals</h3>
-      <div className="goal-grid">
-        {(["carbs", "fat", "protein"] as const).map((macro) => (
-          <div className="goal-row" key={macro}>
-            <label className="macro-label">{macro}</label>
+      <section className="card">
+        <div className="card__header">
+          <h2>Plan Generation</h2>
+        </div>
+        <div className="goal-grid">
+          <div className="setting-row">
+            <label className="macro-label">Maximum Plan Count</label>
             <input
               type="number"
-              value={state.goal[macro].min}
-              onChange={(event) =>
-                updateGoal({ key: macro, field: "min", value: Number(event.target.value) })
-              }
+              min={1}
+              value={state.planOptionLimit}
+              onChange={(event) => setPlanOptionLimit(Number(event.target.value))}
             />
-            <span>to</span>
-            <input
-              type="number"
-              value={state.goal[macro].max}
-              onChange={(event) =>
-                updateGoal({ key: macro, field: "max", value: Number(event.target.value) })
-              }
-            />
-            <span>g</span>
+            <span>plans</span>
           </div>
-        ))}
-      </div>
-
-      <h3>Plan Generation</h3>
-      <div className="goal-grid">
-        <div className="setting-row">
-          <label className="macro-label">Maximum Plan Count</label>
-          <input
-            type="number"
-            min={1}
-            value={state.planOptionLimit}
-            onChange={(event) => setPlanOptionLimit(Number(event.target.value))}
-          />
-          <span>plans</span>
         </div>
-      </div>
-      <h3>Data Controls</h3>
-      <div className="storage-actions">
-        <button className="ghost" onClick={() => exportToFile()} type="button">
-          Export File
-        </button>
-        <button className="ghost" onClick={() => copyToClipboard()} type="button">
-          Copy JSON
-        </button>
-        <button className="ghost" onClick={() => fileInputRef.current?.click()} type="button">
-          Import File
-        </button>
-        <button className="ghost" onClick={() => pasteFromClipboard()} type="button">
-          Paste JSON
-        </button>
-      </div>
+      </section>
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".json,application/json"
-        className="hidden-input"
-        onChange={async (event) => {
-          const file = event.target.files?.[0];
-          if (!file) {
-            return;
-          }
-          try {
-            await importFromFile(file);
-          } catch (err) {
-            setAppError(err instanceof Error ? err.message : "Import failed.");
-          } finally {
-            event.target.value = "";
-          }
-        }}
-      />
-
-      <h3>Google Drive Sync</h3>
-      <div className="storage-actions">
-        {!driveConnected && (
-          <button className="ghost" onClick={() => connectDrive()} disabled={driveBusy}>
-            Connect Drive
+      <section className="card">
+        <div className="card__header">
+          <h2>Data Controls</h2>
+        </div>
+        <div className="storage-actions">
+          <button className="ghost" onClick={() => exportToFile()} type="button">
+            Export File
           </button>
-        )}
-        {driveConnected && (
-          <>
-            <button className="ghost" onClick={() => disconnectDrive()} disabled={driveBusy}>
-              Disconnect Drive
-            </button>
-            <button
-              className="ghost"
-              onClick={() => saveToDrive()}
-              disabled={driveBusy}
-              type="button"
-            >
-              Save to Drive
-            </button>
-            <button
-              className="ghost"
-              onClick={() => loadFromDrive()}
-              disabled={driveBusy}
-              type="button"
-            >
-              Load from Drive
-            </button>
-          </>
-        )}
-      </div>
-
-      <p className="hint settings-note">
-        Google Drive sync uses the app's private storage area and won't touch your regular Drive
-        files.
-      </p>
-
-      <h3>OpenAI Vision</h3>
-      <div className="goal-grid">
-        <div className="api-key-row">
-          <label className="macro-label" htmlFor="openai-api-key">
-            OpenAI API Key
-          </label>
-          <input
-            id="openai-api-key"
-            className="api-key-input"
-            type="password"
-            value={openAiKey}
-            placeholder="sk-..."
-            autoComplete="off"
-            onChange={(event) => setOpenAiKey(sanitizeOpenAiKey(event.target.value))}
-          />
-          <button
-            className="ghost"
-            type="button"
-            onClick={() => setOpenAiKey("")}
-            disabled={openAiKey.length === 0}
-          >
-            Clear
+          <button className="ghost" onClick={() => copyToClipboard()} type="button">
+            Copy JSON
+          </button>
+          <button className="ghost" onClick={() => fileInputRef.current?.click()} type="button">
+            Import File
+          </button>
+          <button className="ghost" onClick={() => pasteFromClipboard()} type="button">
+            Paste JSON
           </button>
         </div>
-      </div>
-      <p className="hint settings-note">
-        This key stays only in your browser (localStorage) and is excluded from Google Drive sync
-        and export/import.
-      </p>
-      <p className="hint settings-note">
-        This key is used for photo-based food recognition and is billed by OpenAI. Create a key at
-        <a href="https://platform.openai.com/api-keys">https://platform.openai.com/api-keys</a> and
-        add credit at
-        <a href="https://platform.openai.com/settings/organization/billing/overview">
-          https://platform.openai.com/settings/organization/billing/overview
-        </a>
-        . Keys can expire, so topping up a few dollars is recommended. Keep this key private and do
-        not share it with anyone.
-      </p>
-    </section>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json,application/json"
+          className="hidden-input"
+          onChange={async (event) => {
+            const file = event.target.files?.[0];
+            if (!file) {
+              return;
+            }
+            try {
+              await importFromFile(file);
+            } catch (err) {
+              setAppError(err instanceof Error ? err.message : "Import failed.");
+            } finally {
+              event.target.value = "";
+            }
+          }}
+        />
+      </section>
+
+      <section className="card">
+        <div className="card__header">
+          <h2>Google Drive Sync</h2>
+        </div>
+        <div className="storage-actions">
+          {!driveConnected && (
+            <button className="ghost" onClick={() => connectDrive()} disabled={driveBusy}>
+              Connect Drive
+            </button>
+          )}
+          {driveConnected && (
+            <>
+              <button className="ghost" onClick={() => disconnectDrive()} disabled={driveBusy}>
+                Disconnect Drive
+              </button>
+              <button
+                className="ghost"
+                onClick={() => saveToDrive()}
+                disabled={driveBusy}
+                type="button"
+              >
+                Save to Drive
+              </button>
+              <button
+                className="ghost"
+                onClick={() => loadFromDrive()}
+                disabled={driveBusy}
+                type="button"
+              >
+                Load from Drive
+              </button>
+            </>
+          )}
+        </div>
+
+        <p className="hint settings-note">
+          Google Drive sync uses the app's private storage area and won't touch your regular Drive
+          files.
+        </p>
+      </section>
+
+      <section className="card">
+        <div className="card__header">
+          <h2>OpenAI Vision</h2>
+        </div>
+        <div className="goal-grid">
+          <div className="api-key-row">
+            <label className="macro-label" htmlFor="openai-api-key">
+              OpenAI API Key
+            </label>
+            <input
+              id="openai-api-key"
+              className="api-key-input"
+              type="password"
+              value={openAiKey}
+              placeholder="sk-..."
+              autoComplete="off"
+              onChange={(event) => setOpenAiKey(sanitizeOpenAiKey(event.target.value))}
+            />
+            <button
+              className="ghost"
+              type="button"
+              onClick={() => setOpenAiKey("")}
+              disabled={openAiKey.length === 0}
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+        <p className="hint settings-note">
+          This key stays only in your browser (localStorage) and is excluded from Google Drive sync
+          and export/import.
+        </p>
+        <p className="hint settings-note">
+          This key is used for photo-based food recognition and is billed by OpenAI. Create a key at
+          <a href="https://platform.openai.com/api-keys">https://platform.openai.com/api-keys</a> and
+          add credit at
+          <a href="https://platform.openai.com/settings/organization/billing/overview">
+            https://platform.openai.com/settings/organization/billing/overview
+          </a>
+          . Keys can expire, so topping up a few dollars is recommended. Keep this key private and do
+          not share it with anyone.
+        </p>
+      </section>
+    </>
   );
 }
