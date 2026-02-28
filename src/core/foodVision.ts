@@ -10,7 +10,7 @@ export type FoodVisionResult = {
   notes?: string;
 };
 
-const MAX_IMAGE_EDGE = 1200;
+const MAX_IMAGE_EDGE = 768;
 
 const clampNumber = (value: number | undefined, fallback = 0) =>
   Number.isFinite(value) ? (value as number) : fallback;
