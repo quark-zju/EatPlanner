@@ -127,6 +127,14 @@ export const requestFoodVision = async (payload: {
   apiKey: string;
   dataUrl: string;
 }) => {
+  const startedAt = performance.now();
+  const imageBytes = Math.round((payload.dataUrl.length * 3) / 4);
+  if (shouldLog) {
+    console.debug("[vision] request:start", {
+      approxImageBytes: imageBytes,
+      approxImageKb: Math.round(imageBytes / 1024),
+    });
+  }
   const response = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
     headers: {
@@ -172,12 +180,21 @@ export const requestFoodVision = async (payload: {
 
   if (!response.ok) {
     const message = await response.text();
+    if (shouldLog) {
+      console.debug("[vision] request:failed", {
+        status: response.status,
+        statusText: response.statusText,
+        requestId: response.headers.get("x-request-id") ?? "",
+      });
+    }
     throw new Error(message || `OpenAI request failed (${response.status}).`);
   }
 
+  const responseAt = performance.now();
   const data = (await response.json()) as {
     output?: Array<{ content?: Array<{ type?: string; text?: string }> }>;
   };
+  const parsedAt = performance.now();
 
   const outputItems = data.output ?? [];
   const message = outputItems.find((item) => item.type === "message");
@@ -192,13 +209,23 @@ export const requestFoodVision = async (payload: {
       output: data.output ?? null,
     };
     if (shouldLog) {
-      console.debug("OpenAI vision response missing output_text", debugPayload);
+      console.debug("[vision] response:missingText", debugPayload);
     }
     throw new Error(
       `OpenAI returned no content.${requestId ? ` request_id=${requestId}` : ""}`,
     );
   }
   const parsed = JSON.parse(text) as unknown;
+  const decodedAt = performance.now();
+  if (shouldLog) {
+    console.debug("[vision] request:timing", {
+      requestMs: responseAt - startedAt,
+      jsonMs: parsedAt - responseAt,
+      parseMs: decodedAt - parsedAt,
+      totalMs: decodedAt - startedAt,
+      requestId: response.headers.get("x-request-id") ?? "",
+    });
+  }
   return parseFoodVisionResult(parsed);
 };
 import { shouldLog } from "./debug";
