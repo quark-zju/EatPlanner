@@ -127,21 +127,65 @@ export default function SettingsTab() {
         <div className="card__header">
           <h2>Data Controls</h2>
         </div>
-        <div className="storage-actions">
-          <button className="ghost" onClick={() => exportToFile()} type="button">
-            Export File
-          </button>
-          <button className="ghost" onClick={() => copyToClipboard()} type="button">
-            Copy JSON
-          </button>
-          <button className="ghost" onClick={() => fileInputRef.current?.click()} type="button">
-            Import File
-          </button>
-          <button className="ghost" onClick={() => pasteFromClipboard()} type="button">
-            Paste JSON
-          </button>
+        <div className="settings-subsection">
+          <h3>Clipboard</h3>
+          <div className="storage-actions">
+            <button className="ghost" onClick={() => copyToClipboard()} type="button">
+              Copy JSON
+            </button>
+            <button className="ghost" onClick={() => pasteFromClipboard()} type="button">
+              Paste JSON
+            </button>
+          </div>
         </div>
-
+        <div className="settings-subsection">
+          <h3>Local File</h3>
+          <div className="storage-actions">
+            <button className="ghost" onClick={() => exportToFile()} type="button">
+              Export File
+            </button>
+            <button className="ghost" onClick={() => fileInputRef.current?.click()} type="button">
+              Import File
+            </button>
+          </div>
+        </div>
+        <div className="settings-subsection">
+          <h3>Google Drive</h3>
+          <div className="storage-actions">
+            {!driveConnected && (
+              <button className="ghost" onClick={() => connectDrive()} disabled={driveBusy}>
+                Connect Drive
+              </button>
+            )}
+            {driveConnected && (
+              <>
+                <button className="ghost" onClick={() => disconnectDrive()} disabled={driveBusy}>
+                  Disconnect Drive
+                </button>
+                <button
+                  className="ghost"
+                  onClick={() => saveToDrive()}
+                  disabled={driveBusy}
+                  type="button"
+                >
+                  Save to Drive
+                </button>
+                <button
+                  className="ghost"
+                  onClick={() => loadFromDrive()}
+                  disabled={driveBusy}
+                  type="button"
+                >
+                  Load from Drive
+                </button>
+              </>
+            )}
+          </div>
+          <p className="hint settings-note">
+            Google Drive sync uses the app's private storage area and won't touch your regular Drive
+            files.
+          </p>
+        </div>
         <input
           ref={fileInputRef}
           type="file"
