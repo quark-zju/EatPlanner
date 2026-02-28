@@ -4,6 +4,7 @@ const DRIVE_API_BASE = "https://www.googleapis.com/drive/v3";
 const DRIVE_UPLOAD_BASE = "https://www.googleapis.com/upload/drive/v3";
 const OAUTH_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const REDIRECT_STATE_KEY = "eat-planner-drive-oauth-state";
+const REDIRECT_RETURN_HASH_KEY = "eat-planner-drive-oauth-return-hash";
 const TOKEN_SESSION_KEY = "eat-planner-drive-token";
 const logDrive = (...args: unknown[]) => {
   if (shouldLog) {
@@ -32,6 +33,8 @@ const buildRedirectOAuthUrl = (clientId: string, state: string) => {
 const beginRedirectOAuth = (clientId: string) => {
   const state = `eat-planner-${crypto.randomUUID()}`;
   sessionStorage.setItem(REDIRECT_STATE_KEY, state);
+  const returnHash = window.location.hash || "#settings";
+  sessionStorage.setItem(REDIRECT_RETURN_HASH_KEY, returnHash);
   const url = buildRedirectOAuthUrl(clientId, state);
   logDrive("redirectOAuth:start", { state });
   window.location.assign(url);
@@ -64,12 +67,14 @@ const consumeRedirectTokenIfPresent = () => {
   }
 
   sessionStorage.removeItem(REDIRECT_STATE_KEY);
+  const returnHash = sessionStorage.getItem(REDIRECT_RETURN_HASH_KEY) ?? "#settings";
+  sessionStorage.removeItem(REDIRECT_RETURN_HASH_KEY);
   accessToken = token;
   sessionStorage.setItem(TOKEN_SESSION_KEY, token);
   logDrive("redirectOAuth:tokenConsumed");
 
   // Remove sensitive token from URL fragment.
-  const cleanUrl = `${window.location.origin}${window.location.pathname}${window.location.search}`;
+  const cleanUrl = `${window.location.origin}${window.location.pathname}${window.location.search}${returnHash}`;
   window.history.replaceState({}, document.title, cleanUrl);
 };
 

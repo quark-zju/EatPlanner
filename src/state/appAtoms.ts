@@ -55,6 +55,42 @@ export const appStateAtom = atom(
   }
 );
 
+const DEFAULT_TAB: UiTab = "today";
+const isUiTab = (value: string): value is UiTab =>
+  value === "today" || value === "history" || value === "inventory" || value === "settings";
+const hasOAuthHash = (hash: string) => hash.includes("access_token=") || hash.includes("state=");
+const parseTabHash = (hash: string): UiTab | null => {
+  const trimmed = hash.startsWith("#") ? hash.slice(1) : hash;
+  if (!trimmed) {
+    return null;
+  }
+  if (trimmed.startsWith("tab=")) {
+    const candidate = trimmed.slice(4);
+    return isUiTab(candidate) ? candidate : null;
+  }
+  return isUiTab(trimmed) ? trimmed : null;
+};
+const getInitialTabFromHash = (): UiTab => {
+  if (typeof window === "undefined") {
+    return DEFAULT_TAB;
+  }
+  return parseTabHash(window.location.hash) ?? DEFAULT_TAB;
+};
+const setTabHash = (tab: UiTab) => {
+  if (typeof window === "undefined") {
+    return;
+  }
+  const nextHash = `#${tab}`;
+  if (window.location.hash === nextHash) {
+    return;
+  }
+  if (hasOAuthHash(window.location.hash)) {
+    return;
+  }
+  const nextUrl = `${window.location.pathname}${window.location.search}${nextHash}`;
+  window.history.replaceState({}, document.title, nextUrl);
+};
+
 export const planOptionsAtom = atom<PlanOption[]>([]);
 export const solvingAtom = atom(false);
 export const errorAtom = atom<string | null>(null);
@@ -66,7 +102,35 @@ export const plannerContextDisplayItemsAtom = atom((get) =>
 );
 export const driveConnectedAtom = atom(isGoogleDriveConnected());
 export const driveBusyAtom = atom(false);
-export const activeTabAtom = atom<UiTab>("today");
+const activeTabBaseAtom = atom<UiTab>(getInitialTabFromHash());
+
+activeTabBaseAtom.onMount = (set) => {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const maybeSetFromHash = () => {
+    const parsed = parseTabHash(window.location.hash);
+    if (parsed) {
+      set(parsed);
+    }
+  };
+
+  if (!parseTabHash(window.location.hash) && !hasOAuthHash(window.location.hash)) {
+    setTabHash(DEFAULT_TAB);
+  }
+
+  window.addEventListener("hashchange", maybeSetFromHash);
+  return () => window.removeEventListener("hashchange", maybeSetFromHash);
+};
+
+export const activeTabAtom = atom(
+  (get) => get(activeTabBaseAtom),
+  (_get, set, nextTab: UiTab) => {
+    set(activeTabBaseAtom, nextTab);
+    setTabHash(nextTab);
+  }
+);
 export const historyWindowStartAtom = atom<LocalDateISO>(getRollingWindowStartISO());
 export const selectedHistoryDateAtom = atom<LocalDateISO | undefined>(undefined);
 
