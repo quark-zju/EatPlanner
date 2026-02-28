@@ -59,7 +59,7 @@
 
 .card p {
   margin: 0;
-  color: #5e5246;
+  color: #7d6b5f;
 }
 
 .app__grid {
@@ -499,9 +499,6 @@ select {
 }
 
 .card p {
-  margin-top: 12px;
-  margin-bottom: 12px;
-  color: #7d6b5f;
 }
 
 .options {
@@ -695,7 +692,7 @@ select {
   font-size: 16px;
 }
 
-.hint {
+.hint, .card p.hint {
   font-size: 0.9em;
   color: #7d6b5f;
   margin: 8px 0;
