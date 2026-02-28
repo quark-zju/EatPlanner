@@ -18,10 +18,16 @@ export const clearMessages = () => {
 
 export const setAppError = (message: string | null) => {
   store.set(errorAtom, message);
+  if (message) {
+    store.set(noticeAtom, null);
+  }
 };
 
 export const setAppNotice = (message: string | null) => {
   store.set(noticeAtom, message);
+  if (message) {
+    store.set(errorAtom, null);
+  }
 };
 
 export const setPlanOptions = (options: PlanOption[]) => {
