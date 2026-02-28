@@ -342,21 +342,40 @@
 
 .setting-row {
   display: grid;
-  grid-template-columns: minmax(80px, 1fr) minmax(120px, 180px) auto;
+  grid-template-columns: minmax(160px, 1fr) minmax(160px, 220px);
   align-items: center;
   gap: 8px;
 }
 
+.setting-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.setting-control input {
+  min-width: 120px;
+  width: 100%;
+}
+
 .api-key-row {
   display: grid;
-  grid-template-columns: minmax(140px, 220px) minmax(220px, 1fr) auto;
+  grid-template-columns: minmax(160px, 220px) minmax(240px, 1fr);
   align-items: center;
   gap: 10px;
 }
 
+.api-key-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
 .api-key-input {
-  min-width: 220px;
-  width: 100%;
+  min-width: 0;
+  flex: 1;
 }
 
 .macro-label {
@@ -633,7 +652,8 @@ select {
     align-items: stretch;
   }
 
-  .api-key-row .ghost {
-    justify-self: start;
+  .api-key-control {
+    flex-direction: column;
+    align-items: stretch;
   }
 }

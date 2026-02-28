@@ -68,13 +68,15 @@ export default function SettingsTab() {
         <div className="goal-grid">
           <div className="setting-row">
             <label className="macro-label">Maximum Plan Count</label>
-            <input
-              type="number"
-              min={1}
-              value={state.planOptionLimit}
-              onChange={(event) => setPlanOptionLimit(Number(event.target.value))}
-            />
-            <span>plans</span>
+            <div className="setting-control">
+              <input
+                type="number"
+                min={1}
+                value={state.planOptionLimit}
+                onChange={(event) => setPlanOptionLimit(Number(event.target.value))}
+              />
+              <span>plans</span>
+            </div>
           </div>
         </div>
       </section>
@@ -88,23 +90,25 @@ export default function SettingsTab() {
             <label className="macro-label" htmlFor="openai-api-key">
               OpenAI API Key
             </label>
-            <input
-              id="openai-api-key"
-              className="api-key-input"
-              type="password"
-              value={openAiKey}
-              placeholder="sk-..."
-              autoComplete="off"
-              onChange={(event) => setOpenAiKey(sanitizeOpenAiKey(event.target.value))}
-            />
-            <button
-              className="ghost"
-              type="button"
-              onClick={() => setOpenAiKey("")}
-              disabled={openAiKey.length === 0}
-            >
-              Clear
-            </button>
+            <div className="api-key-control">
+              <input
+                id="openai-api-key"
+                className="api-key-input"
+                type="password"
+                value={openAiKey}
+                placeholder="sk-..."
+                autoComplete="off"
+                onChange={(event) => setOpenAiKey(sanitizeOpenAiKey(event.target.value))}
+              />
+              <button
+                className="ghost"
+                type="button"
+                onClick={() => setOpenAiKey("")}
+                disabled={openAiKey.length === 0}
+              >
+                Clear
+              </button>
+            </div>
           </div>
         </div>
         <p className="hint settings-note">
