@@ -112,6 +112,10 @@ export default function SettingsTab() {
         </div>
         <ul className="hint settings-note">
           <li>This key enables photo-based food recognition.</li>
+          <li>
+            For best results, capture a nutrition label. Packaging or the food itself may work but
+            can be less accurate.
+          </li>
           <li>Typical day-to-day usage costs are small for most users.</li>
           <li>
             Create a key at{" "}
