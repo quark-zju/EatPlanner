@@ -101,6 +101,8 @@ export default function InventoryTab() {
       setAppError("Add an OpenAI API key in Settings first.");
       return;
     }
+    setAppNotice(null);
+    setAppError(null);
     setVisionBusy(true);
     try {
       const resized = await resizeImageFile(file);
