@@ -1,9 +1,12 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useAtomValue } from "jotai";
 import {
   appStateAtom,
   getPantryByFoodAtom,
 } from "../../state/appAtoms";
+import { openAiKeyAtom } from "../../state/appOpenAi";
+import { requestFoodVision, resizeImageFile } from "../../core/foodVision";
+import { setAppError, setAppNotice } from "../../state/appStoreActions";
 import {
   addFoodFromEditor,
   moveFoodsToTop,
@@ -29,13 +32,17 @@ const EMPTY_NEW_FOOD = {
 export default function InventoryTab() {
   const state = useAtomValue(appStateAtom);
   const pantryByFood = useAtomValue(getPantryByFoodAtom);
+  const openAiKey = useAtomValue(openAiKeyAtom);
   const [selectedFoodIds, setSelectedFoodIds] = useState<string[]>([]);
   const [newFood, setNewFood] = useState(EMPTY_NEW_FOOD);
+  const [visionBusy, setVisionBusy] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const selectedCount = selectedFoodIds.length;
   const hasSelection = selectedCount > 0;
   const canAddNewFood = newFood.name.trim().length > 0;
   const inferredNewFoodIcon = inferFoodIconFromName(newFood.name);
   const newFoodIconPlaceholder = inferredNewFoodIcon ?? DEFAULT_FOOD_ICON;
+  const hasOpenAiKey = openAiKey.trim().length > 0;
   const selectedIdSet = useMemo(() => new Set(selectedFoodIds), [selectedFoodIds]);
 
   const toggleSelected = (foodId: string) => {
@@ -89,11 +96,71 @@ export default function InventoryTab() {
     setNewFood(EMPTY_NEW_FOOD);
   };
 
+  const handleVisionUpload = async (file: File) => {
+    if (!hasOpenAiKey) {
+      setAppError("Add an OpenAI API key in Settings first.");
+      return;
+    }
+    setVisionBusy(true);
+    try {
+      const resized = await resizeImageFile(file);
+      const result = await requestFoodVision({
+        apiKey: openAiKey.trim(),
+        dataUrl: resized.dataUrl,
+      });
+      setNewFood((prev) => ({
+        ...prev,
+        name: result.name,
+        unit: result.unit,
+        carbs: String(result.carbs ?? 0),
+        fat: String(result.fat ?? 0),
+        protein: String(result.protein ?? 0),
+        price: result.price === undefined ? prev.price : String(result.price),
+      }));
+      setAppNotice(
+        result.confidence === "label"
+          ? "Nutrition label parsed. Review and edit before adding."
+          : "Nutrition estimated from photo. Review and edit before adding."
+      );
+    } catch (err) {
+      setAppError(err instanceof Error ? err.message : "Image recognition failed.");
+    } finally {
+      setVisionBusy(false);
+    }
+  };
+
   return (
     <section className="card">
       <div className="card__header">
         <h2>Pantry Foods</h2>
         <div className="storage-actions">
+          {hasOpenAiKey && (
+            <>
+              <button
+                className="ghost"
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={visionBusy}
+              >
+                {visionBusy ? "Analyzing..." : "Add from photo"}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden-input"
+                onChange={async (event) => {
+                  const file = event.target.files?.[0];
+                  if (!file) {
+                    return;
+                  }
+                  await handleVisionUpload(file);
+                  event.target.value = "";
+                }}
+              />
+            </>
+          )}
           <button
             className="ghost"
             type="button"
