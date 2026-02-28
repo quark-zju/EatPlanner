@@ -172,6 +172,15 @@ export default function SettingsTab() {
         This key stays only in your browser (localStorage) and is excluded from Google Drive sync
         and export/import.
       </p>
+      <p className="hint settings-note">
+        This key is used for photo-based food recognition and is billed by OpenAI. Create a key at
+        <a href="https://platform.openai.com/api-keys">https://platform.openai.com/api-keys</a> and
+        add credit at
+        <a href="https://platform.openai.com/settings/organization/billing/overview">
+          https://platform.openai.com/settings/organization/billing/overview
+        </a>
+        . Keys can expire, so topping up a few dollars is recommended.
+      </p>
     </section>
   );
 }
