@@ -40,7 +40,13 @@ export const resizeImageFile = async (file: File) => {
     image.src = dataUrl;
   });
 
-  const scale = Math.min(1, MAX_IMAGE_EDGE / Math.max(img.width, img.height));
+  const maxEdge = Math.max(img.width, img.height);
+  if (maxEdge <= MAX_IMAGE_EDGE) {
+    const mimeType = file.type === "image/png" ? "image/png" : "image/jpeg";
+    return { dataUrl, width: img.width, height: img.height, mimeType };
+  }
+
+  const scale = MAX_IMAGE_EDGE / maxEdge;
   const targetWidth = Math.round(img.width * scale);
   const targetHeight = Math.round(img.height * scale);
 
