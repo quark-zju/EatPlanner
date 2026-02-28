@@ -89,12 +89,20 @@
         <h2>3. Where Data Is Stored</h2>
         <ul>
           <li>
-            <strong>Default:</strong> Data is stored locally in your browser storage
-            (<code>localStorage</code>).
+            <strong>Default app data:</strong> Food data, goals, history, and settings are stored
+            locally in your browser storage (<code>localStorage</code>) and can be exported.
           </li>
           <li>
-            <strong>OpenAI API key:</strong> Stored only in <code>localStorage</code>. It is never
-            included in Google Drive sync or export/import.
+            <strong>Google Drive tokens:</strong> Stored only in local browser storage and are never
+            included in export/import.
+          </li>
+          <li>
+            <strong>OpenAI API key:</strong> Stored only in local browser storage and is never
+            included in export/import or Google Drive sync.
+          </li>
+          <li>
+            <strong>Local file/clipboard:</strong> Used only when you explicitly export or import
+            data (manual action).
           </li>
           <li>
             <strong>Optional Google Drive sync:</strong> If you connect Google Drive,
