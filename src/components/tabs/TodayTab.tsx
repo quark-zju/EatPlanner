@@ -16,12 +16,11 @@ import {
   clearDraftItems,
   removeDraftItem,
   selectPlanOptionToDraft,
-  setDraftDate,
   submitDraftToHistory,
   updateDraftQuantity,
 } from "../../state/appDraftActions";
 import { generatePlanOptions } from "../../state/appPlannerActions";
-import { getFoodIcon } from "../../state/appState";
+import { getFoodIcon, toLocalDateISO } from "../../state/appState";
 import NutritionGoalCard from "../NutritionGoalCard";
 import NutritionGoalStats from "../NutritionGoalStats";
 
@@ -43,6 +42,7 @@ export default function TodayTab() {
   const submitDraft = submitDraftToHistory;
   const updateDraftQty = updateDraftQuantity;
   const [localAvoidFoodIds, setLocalAvoidFoodIds] = useState<string[]>([]);
+  const [localDraftDate, setLocalDraftDate] = useState(() => toLocalDateISO(new Date()));
 
   const foodById = useMemo(
     () => new Map(state.foods.map((f) => [f.id, f])),
@@ -137,7 +137,7 @@ export default function TodayTab() {
                 onClick={() =>
                   selectOptionToDraft({
                     optionIndex: index,
-                    dateISO: state.todayDraft.draftDateISO,
+                    dateISO: localDraftDate,
                   })
                 }
                 type="button"
@@ -199,8 +199,8 @@ export default function TodayTab() {
             Date
             <input
               type="date"
-              value={state.todayDraft.draftDateISO}
-              onChange={(event) => setDraftDate(event.target.value)}
+              value={localDraftDate}
+              onChange={(event) => setLocalDraftDate(event.target.value)}
             />
           </label>
         </div>
