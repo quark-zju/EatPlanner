@@ -347,6 +347,18 @@
   gap: 8px;
 }
 
+.api-key-row {
+  display: grid;
+  grid-template-columns: minmax(140px, 220px) minmax(220px, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.api-key-input {
+  min-width: 220px;
+  width: 100%;
+}
+
 .macro-label {
   text-transform: capitalize;
   font-weight: 600;
@@ -601,5 +613,16 @@ select {
 
   .editor-table {
     min-width: 640px;
+  }
+}
+
+@media (max-width: 640px) {
+  .api-key-row {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .api-key-row .ghost {
+    justify-self: start;
   }
 }

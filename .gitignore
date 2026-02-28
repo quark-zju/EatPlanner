@@ -2,6 +2,8 @@ node_modules
 .DS_Store
 dist
 *.local
+.agents
+skills-lock.json
 
 # Vite
 vite.config.ts.timestamp*

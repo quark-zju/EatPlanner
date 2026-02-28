@@ -149,9 +149,13 @@ export default function SettingsTab() {
 
       <h3>OpenAI Vision</h3>
       <div className="goal-grid">
-        <label className="setting-row">
-          <span className="macro-label">OpenAI API Key</span>
+        <div className="api-key-row">
+          <label className="macro-label" htmlFor="openai-api-key">
+            OpenAI API Key
+          </label>
           <input
+            id="openai-api-key"
+            className="api-key-input"
             type="password"
             value={openAiKey}
             placeholder="sk-..."
@@ -166,7 +170,7 @@ export default function SettingsTab() {
           >
             Clear
           </button>
-        </label>
+        </div>
       </div>
       <p className="hint settings-note">
         This key stays only in your browser (localStorage) and is excluded from Google Drive sync
