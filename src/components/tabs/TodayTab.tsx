@@ -64,7 +64,7 @@ export default function TodayTab() {
       prev.includes(foodId) ? prev.filter((id) => id !== foodId) : [...prev, foodId]
     );
   };
-  
+
   const shouldShowHowToUse = (plannerMessage == null && options.length === 0);
 
   return (
@@ -81,11 +81,20 @@ export default function TodayTab() {
           </button>
         </div>
         {shouldShowHowToUse && (
-          <p className="hint">
-            <strong>Step 1:</strong> Update your <strong>Inventory</strong> and <strong>Settings → Goals</strong>.
-            <strong> Step 2:</strong> Select what you already ate below.
-            <strong> Step 3:</strong> Click <strong>Generate Plans</strong> to see meal options.
-          </p>
+          <ul className="step-list">
+            <li className="step-item">
+              <span className="step-number">1</span>
+              <div>Review your <strong>Inventory</strong> and <strong>Settings → Goals</strong>.</div>
+            </li>
+            <li className="step-item">
+              <span className="step-number">2</span>
+              <div>(Optional) Select what you already ate below to subtract them from your goals.</div>
+            </li>
+            <li className="step-item">
+              <span className="step-number">3</span>
+              <div>Click <strong>Generate Plans</strong> to find suitable options.</div>
+            </li>
+          </ul>
         )}
         {(options.length > 0 || plannerMessage) && plannerContextMessage && (
           <p className="hint">{plannerContextMessage}</p>

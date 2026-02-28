@@ -696,9 +696,42 @@ select {
 }
 
 .hint {
-  font-size: 12px;
+  font-size: 0.9em;
   color: #7d6b5f;
+  margin: 8px 0;
 }
+
+.step-list {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: #5a4d44;
+  line-height: 1.4;
+}
+
+.step-number {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  background: #e1d5c8;
+  color: #3c2e25;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+}
+
 
 .hint a {
   color: #7a3f1f;
