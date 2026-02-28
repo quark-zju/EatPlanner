@@ -71,8 +71,8 @@ const buildPrompt = () => {
     "If the image shows a nutrition facts label, read it carefully.",
     "If the image is an actual food (no label), estimate typical nutrition for a reasonable serving.",
     "Return a single JSON object only, no Markdown.",
-    "Use this schema:",
-    "{\"name\":string|null,\"unit\":string,\"carbs\":number,\"fat\":number,\"protein\":number,\"calories\":number|null,\"price\":number|null,\"confidence\":\"label\"|\"estimate\",\"notes\":string|null}",
+    "Return JSON using these fields:",
+    "name (string|null), unit (string), carbs (number), fat (number), protein (number), calories (number|null), price (number|null), confidence (\"label\"|\"estimate\"), notes (string|null).",
     "Rules:",
     "- Use grams for macros.",
     "- For unit, use the serving size if visible (examples: \"1/4 cup\", \"20 g\"); otherwise use \"serving\".",
@@ -144,7 +144,29 @@ export const requestFoodVision = async (payload: {
           ],
         },
       ],
-      response_format: { type: "json_object" },
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "food_nutrition",
+          strict: true,
+          schema: {
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              name: { type: ["string", "null"] },
+              unit: { type: "string" },
+              carbs: { type: "number" },
+              fat: { type: "number" },
+              protein: { type: "number" },
+              calories: { type: ["number", "null"] },
+              price: { type: ["number", "null"] },
+              confidence: { type: "string", enum: ["label", "estimate"] },
+              notes: { type: ["string", "null"] },
+            },
+            required: ["unit", "carbs", "fat", "protein", "confidence"],
+          },
+        },
+      },
     }),
   });
 
