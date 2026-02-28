@@ -81,10 +81,11 @@ export default function TodayTab() {
           </button>
         </div>
         {shouldShowHowToUse && (
-        <p className="hint">
-          Update your <strong>Inventory</strong> and <strong>Settings → Goals</strong>, select what you already ate below, then use the
-          <strong> Generate Plans</strong> button at the top right to find suitable meal plans.
-        </p>
+          <p className="hint">
+            <strong>Step 1:</strong> Update your <strong>Inventory</strong> and <strong>Settings → Goals</strong>.
+            <strong> Step 2:</strong> Select what you already ate below.
+            <strong> Step 3:</strong> Click <strong>Generate Plans</strong> to see meal options.
+          </p>
         )}
         {(options.length > 0 || plannerMessage) && plannerContextMessage && (
           <p className="hint">{plannerContextMessage}</p>
