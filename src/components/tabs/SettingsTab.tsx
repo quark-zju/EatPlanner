@@ -152,18 +152,7 @@ export default function SettingsTab() {
           <h2>Data Controls</h2>
         </div>
         <div className="settings-subsection">
-          <h3>Clipboard</h3>
-          <div className="storage-actions">
-            <button className="ghost" onClick={() => copyToClipboard()} type="button">
-              Copy JSON
-            </button>
-            <button className="ghost" onClick={() => pasteFromClipboard()} type="button">
-              Paste JSON
-            </button>
-          </div>
-        </div>
-        <div className="settings-subsection">
-          <h3>Local File</h3>
+          <h3>Import / Export</h3>
           <div className="storage-actions">
             <button className="ghost" onClick={() => exportToFile()} type="button">
               Export File
@@ -171,7 +160,18 @@ export default function SettingsTab() {
             <button className="ghost" onClick={() => fileInputRef.current?.click()} type="button">
               Import File
             </button>
+            <button className="ghost" onClick={() => copyToClipboard()} type="button">
+              Copy JSON
+            </button>
+            <button className="ghost" onClick={() => pasteFromClipboard()} type="button">
+              Paste JSON
+            </button>
           </div>
+          <p className="hint settings-note">
+            Includes your <strong>Inventory</strong>, <strong>History</strong>, and{" "}
+            <strong>Goals</strong>. Importing will <strong>completely overwrite</strong> your
+            current local data (it does not merge).
+          </p>
         </div>
         <div className="settings-subsection">
           <h3>Reset</h3>
