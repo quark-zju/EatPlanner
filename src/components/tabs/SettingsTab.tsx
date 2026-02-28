@@ -75,7 +75,6 @@ export default function SettingsTab() {
                 value={state.planOptionLimit}
                 onChange={(event) => setPlanOptionLimit(Number(event.target.value))}
               />
-              <span>plans</span>
             </div>
           </div>
         </div>
@@ -119,12 +118,16 @@ export default function SettingsTab() {
             <a href="https://platform.openai.com/api-keys">platform.openai.com/api-keys</a> and
             add credit at{" "}
             <a href="https://platform.openai.com/settings/organization/billing/overview">
-              platform.openai.com/settings/organization/billing/overview
+              platform.openai.com/<wbr />settings/organization/<wbr />billing/overview
             </a>
             .
           </li>
           <li>
-            Credits can expire per <a href="https://openai.com/policies/service-credit-terms/#:~:text=expire">OpenAI’s terms</a>, so it’s best to add only a small amount.
+            Credits can expire per{" "}
+            <a href="https://openai.com/policies/service-credit-terms/#:~:text=expire">
+              OpenAI's terms
+            </a>
+            , so it’s best to add only a small amount.
           </li>
           <li>
             This key stays only in your browser (localStorage) and is excluded from Google Drive sync and export/import.

@@ -151,7 +151,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 
 .storage-actions {
@@ -349,7 +349,7 @@
 
 .setting-row {
   display: grid;
-  grid-template-columns: minmax(160px, 1fr) minmax(160px, 220px);
+  grid-template-columns: minmax(100px, 1fr) minmax(100px, 220px);
   align-items: center;
   gap: 8px;
 }
@@ -362,13 +362,13 @@
 }
 
 .setting-control input {
-  min-width: 120px;
+  min-width: 80px;
   width: 100%;
 }
 
 .api-key-row {
   display: grid;
-  grid-template-columns: minmax(160px, 220px) minmax(240px, 1fr);
+  grid-template-columns: minmax(120px, 200px) minmax(0, 1fr);
   align-items: center;
   gap: 10px;
 }
@@ -653,6 +653,11 @@ select {
 
 .hint a {
   color: #7a3f1f;
+}
+
+.settings-note a {
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 
 @media (max-width: 900px) {
