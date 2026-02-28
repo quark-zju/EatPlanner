@@ -81,87 +81,6 @@ export default function SettingsTab() {
 
       <section className="card">
         <div className="card__header">
-          <h2>Data Controls</h2>
-        </div>
-        <div className="storage-actions">
-          <button className="ghost" onClick={() => exportToFile()} type="button">
-            Export File
-          </button>
-          <button className="ghost" onClick={() => copyToClipboard()} type="button">
-            Copy JSON
-          </button>
-          <button className="ghost" onClick={() => fileInputRef.current?.click()} type="button">
-            Import File
-          </button>
-          <button className="ghost" onClick={() => pasteFromClipboard()} type="button">
-            Paste JSON
-          </button>
-        </div>
-
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".json,application/json"
-          className="hidden-input"
-          onChange={async (event) => {
-            const file = event.target.files?.[0];
-            if (!file) {
-              return;
-            }
-            try {
-              await importFromFile(file);
-            } catch (err) {
-              setAppError(err instanceof Error ? err.message : "Import failed.");
-            } finally {
-              event.target.value = "";
-            }
-          }}
-        />
-      </section>
-
-      <section className="card">
-        <div className="card__header">
-          <h2>Google Drive Sync</h2>
-        </div>
-        <div className="storage-actions">
-          {!driveConnected && (
-            <button className="ghost" onClick={() => connectDrive()} disabled={driveBusy}>
-              Connect Drive
-            </button>
-          )}
-          {driveConnected && (
-            <>
-              <button className="ghost" onClick={() => disconnectDrive()} disabled={driveBusy}>
-                Disconnect Drive
-              </button>
-              <button
-                className="ghost"
-                onClick={() => saveToDrive()}
-                disabled={driveBusy}
-                type="button"
-              >
-                Save to Drive
-              </button>
-              <button
-                className="ghost"
-                onClick={() => loadFromDrive()}
-                disabled={driveBusy}
-                type="button"
-              >
-                Load from Drive
-              </button>
-            </>
-          )}
-        </div>
-
-        <p className="hint settings-note">
-          Google Drive sync uses the app's private storage area and won't touch your regular Drive
-          files.
-        </p>
-      </section>
-
-      <section className="card">
-        <div className="card__header">
           <h2>OpenAI Vision</h2>
         </div>
         <div className="goal-grid">
@@ -202,6 +121,46 @@ export default function SettingsTab() {
           . Keys can expire, so topping up a few dollars is recommended. Keep this key private and do
           not share it with anyone.
         </p>
+      </section>
+
+      <section className="card">
+        <div className="card__header">
+          <h2>Data Controls</h2>
+        </div>
+        <div className="storage-actions">
+          <button className="ghost" onClick={() => exportToFile()} type="button">
+            Export File
+          </button>
+          <button className="ghost" onClick={() => copyToClipboard()} type="button">
+            Copy JSON
+          </button>
+          <button className="ghost" onClick={() => fileInputRef.current?.click()} type="button">
+            Import File
+          </button>
+          <button className="ghost" onClick={() => pasteFromClipboard()} type="button">
+            Paste JSON
+          </button>
+        </div>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json,application/json"
+          className="hidden-input"
+          onChange={async (event) => {
+            const file = event.target.files?.[0];
+            if (!file) {
+              return;
+            }
+            try {
+              await importFromFile(file);
+            } catch (err) {
+              setAppError(err instanceof Error ? err.message : "Import failed.");
+            } finally {
+              event.target.value = "";
+            }
+          }}
+        />
       </section>
     </>
   );
