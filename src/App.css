@@ -138,6 +138,10 @@
   cursor: not-allowed;
 }
 
+.ghost.is-disabled {
+  opacity: 0.45;
+}
+
 .link {
   border: none;
   background: none;

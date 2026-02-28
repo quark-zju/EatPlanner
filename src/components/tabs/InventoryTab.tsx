@@ -138,10 +138,16 @@ export default function InventoryTab() {
         <div className="storage-actions">
           <>
             <button
-              className="ghost"
+              className={`ghost ${!hasOpenAiKey ? "is-disabled" : ""}`}
               type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={visionBusy || !hasOpenAiKey}
+              onClick={() => {
+                if (!hasOpenAiKey) {
+                  setAppNotice("Add an OpenAI API key in Settings to use photo recognition.");
+                  return;
+                }
+                fileInputRef.current?.click();
+              }}
+              disabled={visionBusy}
             >
               {visionBusy ? "Analyzing..." : "Add from photo"}
             </button>
