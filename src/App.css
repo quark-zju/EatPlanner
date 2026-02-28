@@ -581,11 +581,38 @@ select {
 .notice {
   color: #2b6e3f;
   font-weight: 600;
-  margin-top: 10px;
 }
 
 .global-message {
   margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.message-dismiss {
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  border-radius: 999px;
+  width: 24px;
+  height: 24px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.message-dismiss:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.message-dismiss:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
 }
 
 .history-list {

@@ -2,6 +2,7 @@ import { useRef } from "react";
 import type { ReactNode } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
 import { activeTabAtom, errorAtom, noticeAtom } from "../state/appAtoms";
+import { clearMessages } from "../state/appStoreActions";
 import type { UiTab } from "../state/appState";
 
 type AppShellProps = {
@@ -68,8 +69,19 @@ export default function AppShell({ children }: AppShellProps) {
         ))}
       </nav>
 
-      {error && <p className="error global-message">{error}</p>}
-      {notice && <p className="notice global-message">{notice}</p>}
+      {(error || notice) && (
+        <div className={`global-message ${error ? "error" : "notice"}`}>
+          <span>{error ?? notice}</span>
+          <button
+            type="button"
+            className="message-dismiss"
+            aria-label="Dismiss message"
+            onClick={clearMessages}
+          >
+            x
+          </button>
+        </div>
+      )}
 
       <main className="app__grid">{children}</main>
 
