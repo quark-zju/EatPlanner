@@ -1,4 +1,5 @@
 import { init } from "z3-solver";
+import { shouldLog } from "./debug";
 import type {
   Food,
   Nutrition,
@@ -91,16 +92,14 @@ export const solvePlanOptions = async (
   input: PlanInput,
   limit = 3
 ): Promise<PlanOption[]> => {
-  const shouldLogSolver = import.meta.env.DEV && import.meta.env.MODE !== "test";
-
-  if (shouldLogSolver) {
+  if (shouldLog) {
     console.log("[solver] starting solvePlanOptions");
   }
   const { foods, pantry, goal, constraints } = input;
   const avoidSet = new Set(constraints?.avoidFoodIds ?? []);
   const preferSet = new Set(constraints?.preferFoodIds ?? []);
 
-  if (shouldLogSolver) {
+  if (shouldLog) {
     console.log("[solver] init z3");
   }
   const { Context } = await init();
@@ -189,11 +188,11 @@ export const solvePlanOptions = async (
 
   const options: PlanOption[] = [];
   for (let i = 0; i < limit; i += 1) {
-    if (shouldLogSolver) {
+    if (shouldLog) {
       console.log("[solver] checking solution", i + 1);
     }
     const status = await optimizer.check();
-    if (shouldLogSolver) {
+    if (shouldLog) {
       console.log("[solver] status", status);
     }
     if (status !== "sat") {

@@ -14,12 +14,12 @@ import {
   noticeAtom,
 } from "./appAtoms";
 import { importFromText } from "./appDataActions";
+import { shouldLog } from "../core/debug";
 
 const DEFAULT_DRIVE_CLIENT_ID =
   "775455628972-haf8lsiavs1u6ncpui8f20ac0orkh4nf.apps.googleusercontent.com";
-const debugDrive = import.meta.env.DEV && import.meta.env.MODE !== "test";
 const logDrive = (...args: unknown[]) => {
-  if (debugDrive) {
+  if (shouldLog) {
     console.log("[drive-atom]", ...args);
   }
 };

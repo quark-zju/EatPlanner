@@ -1,11 +1,12 @@
+import { shouldLog } from "../core/debug";
+
 const DRIVE_API_BASE = "https://www.googleapis.com/drive/v3";
 const DRIVE_UPLOAD_BASE = "https://www.googleapis.com/upload/drive/v3";
 const OAUTH_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const REDIRECT_STATE_KEY = "eat-planner-drive-oauth-state";
 const TOKEN_SESSION_KEY = "eat-planner-drive-token";
-const debugDrive = import.meta.env.DEV && import.meta.env.MODE !== "test";
 const logDrive = (...args: unknown[]) => {
-  if (debugDrive) {
+  if (shouldLog) {
     console.log("[drive]", ...args);
   }
 };
