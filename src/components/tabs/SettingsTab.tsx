@@ -130,6 +130,11 @@ export default function SettingsTab() {
             , so it’s best to add only a small amount.
           </li>
           <li>
+            If you have leftover credit, you can also use it at{" "}
+            <a href="https://platform.openai.com/chat">platform.openai.com/chat</a> for advanced
+            models and other features.
+          </li>
+          <li>
             This key stays only in your browser (localStorage) and is excluded from Google Drive sync and export/import.
           </li>
           <li>
