@@ -136,33 +136,31 @@ export default function InventoryTab() {
       <div className="card__header">
         <h2>Pantry Foods</h2>
         <div className="storage-actions">
-          {hasOpenAiKey && (
-            <>
-              <button
-                className="ghost"
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={visionBusy}
-              >
-                {visionBusy ? "Analyzing..." : "Add from photo"}
-              </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                capture="environment"
-                className="hidden-input"
-                onChange={async (event) => {
-                  const file = event.target.files?.[0];
-                  if (!file) {
-                    return;
-                  }
-                  await handleVisionUpload(file);
-                  event.target.value = "";
-                }}
-              />
-            </>
-          )}
+          <>
+            <button
+              className="ghost"
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={visionBusy || !hasOpenAiKey}
+            >
+              {visionBusy ? "Analyzing..." : "Add from photo"}
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden-input"
+              onChange={async (event) => {
+                const file = event.target.files?.[0];
+                if (!file) {
+                  return;
+                }
+                await handleVisionUpload(file);
+                event.target.value = "";
+              }}
+            />
+          </>
           <button
             className="ghost"
             type="button"
