@@ -193,11 +193,9 @@ export const requestOpenAiVision = async (payload: {
     throw new Error(message || `OpenAI request failed (${response.status}).`);
   }
 
-  const responseAt = performance.now();
   const data = (await response.json()) as {
     output?: Array<{ type?: string; content?: Array<{ type?: string; text?: string }> }>;
   };
-  const parsedAt = performance.now();
 
   const outputItems = data.output ?? [];
   const message = outputItems.find((item) => item.type === "message");
