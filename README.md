@@ -70,20 +70,27 @@ for chunk in raw_log.split("\x1e"):
 
 rows = sorted(stats.items(), key=lambda item: (-item[1]["commits"], item[0].lower()))
 
+total_commits = sum(d["commits"] for _, d in rows)
+total_loc = sum(d["loc"] for _, d in rows)
+
 cog.outl("| Model | Commit | LOC |")
 cog.outl("| --- | ---: | ---: |")
 for model, data in rows:
     safe_model = model.replace("|", "\\|")
-    cog.outl(f"| {safe_model} | {data['commits']} | {data['loc']} |")
+    c = data["commits"]
+    l = data["loc"]
+    cp = f"({100*c//total_commits}%)" if total_commits else "(0%)"
+    lp = f"({100*l//total_loc}%)" if total_loc else "(0%)"
+    cog.outl(f"| {safe_model} | {c} {cp} | {l} {lp} |")
 ]]] -->
 | Model | Commit | LOC |
 | --- | ---: | ---: |
-| gpt-5.3-codex | 92 | 22034 |
-| gpt-5.2-codex | 47 | 8795 |
-| manual | 18 | 462 |
-| claude-sonnet-4.6 | 10 | 236 |
-| gemini-3-flash-preview | 6 | 511 |
-| MiniMax-M2.5 | 6 | 114 |
+| gpt-5.3-codex | 92 (51%) | 22034 (68%) |
+| gpt-5.2-codex | 47 (26%) | 8795 (27%) |
+| manual | 18 (10%) | 462 (1%) |
+| claude-sonnet-4.6 | 10 (5%) | 236 (0%) |
+| gemini-3-flash-preview | 6 (3%) | 511 (1%) |
+| MiniMax-M2.5 | 6 (3%) | 114 (0%) |
 <!-- [[[end]]] -->
 
 <details>
