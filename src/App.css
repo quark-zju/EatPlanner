@@ -207,6 +207,10 @@
   .card__header .storage-actions {
     width: 100%;
   }
+
+  .option .ghost {
+    margin-top: 12px;
+  }
 }
 
 .inline-actions select {
