@@ -19,6 +19,73 @@ Choices I made:
 Most coding is done by AI. I was experimenting different AIs.
 I use `Agent-Model:` in commit message to document which AI was used.
 
+<!-- [[[cog
+import re
+import subprocess
+from collections import defaultdict
+
+import cog
+
+
+def extract_model_name(message: str) -> str:
+    match = re.search(r"^Agent-Model:\s*(\S+)", message, re.MULTILINE)
+    if not match:
+        return "manual"
+    return match.group(1).rstrip("/").split("/")[-1]
+
+
+def parse_commit_loc(line: str) -> int:
+    parts = line.split("\t", 2)
+    if len(parts) < 3 or not parts[0].isdigit() or not parts[1].isdigit():
+        return 0
+    return int(parts[0]) + int(parts[1])
+
+
+raw_log = subprocess.check_output(
+    ["git", "log", "--numstat", "--format=%x1e%B"],
+    text=True,
+    encoding="utf-8",
+    errors="replace",
+)
+
+stats = defaultdict(lambda: {"commits": 0, "loc": 0})
+
+for chunk in raw_log.split("\x1e"):
+    chunk = chunk.strip()
+    if not chunk:
+        continue
+
+    message_lines = []
+    loc = 0
+    for line in chunk.splitlines():
+        file_loc = parse_commit_loc(line)
+        if file_loc:
+            loc += file_loc
+        else:
+            message_lines.append(line)
+
+    model = extract_model_name("\n".join(message_lines))
+    stats[model]["commits"] += 1
+    stats[model]["loc"] += loc
+
+rows = sorted(stats.items(), key=lambda item: (-item[1]["commits"], item[0].lower()))
+
+cog.outl("| Model | Commit | LOC |")
+cog.outl("| --- | ---: | ---: |")
+for model, data in rows:
+    safe_model = model.replace("|", "\\|")
+    cog.outl(f"| {safe_model} | {data['commits']} | {data['loc']} |")
+]]] -->
+| Model | Commit | LOC |
+| --- | ---: | ---: |
+| gpt-5.3-codex | 92 | 22034 |
+| gpt-5.2-codex | 47 | 8795 |
+| manual | 18 | 462 |
+| claude-sonnet-4.6 | 10 | 236 |
+| gemini-3-flash-preview | 6 | 511 |
+| MiniMax-M2.5 | 6 | 114 |
+<!-- [[[end]]] -->
+
 <details>
 <summary>Project Structure</summary>
 
