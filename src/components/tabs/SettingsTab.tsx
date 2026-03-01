@@ -90,7 +90,18 @@ export default function SettingsTab() {
         <div className="card__header">
           <h2>Vision Recognition</h2>
         </div>
-        <div className="goal-grid">
+        <p className="hint">
+          Select an AI provider to enable <b>Add from Photo</b> food recognition in the <b>Inventory</b> tab.<br />
+          For best results, capture a nutrition label. Packaging or the food itself may work but can be less accurate.<br />
+        </p>
+        <div className="hint" style={{ marginTop: 10 }}>
+          Model selection tips (Last updated: Feb 2026):
+          <ul className="settings-note" style={{ marginTop: 5 }}>
+            <li>Google Gemini API has <a href='https://ai.google.dev/gemini-api/docs/pricing' target="_blank" rel="noreferrer">free and paid tiers</a>. Free tier usage can be used for training.</li>
+            <li>OpenAI GPT API is paid, although cheap. Usage is <a href='https://openai.com/api-data-privacy' target="_blank" rel="noreferrer">not used for training</a>.</li>
+          </ul>
+        </div>
+        <div className="goal-grid" style={{ marginTop: 10 }} >
           <div className="setting-row">
             <label className="macro-label">Provider</label>
             <div className="setting-control">
@@ -99,8 +110,8 @@ export default function SettingsTab() {
                 onChange={(e) => setAiProvider(e.target.value as any)}
               >
                 <option value="none">Disabled</option>
-                <option value="openai">OpenAI (GPT-5-mini)</option>
                 <option value="gemini">Google (Gemini-3-Flash)</option>
+                <option value="openai">OpenAI (GPT-5-mini)</option>
               </select>
             </div>
           </div>
@@ -162,19 +173,33 @@ export default function SettingsTab() {
 
         {aiProvider !== "none" && (
           <ul className="hint settings-note">
-            <li>This key enables photo-based food recognition.</li>
-            <li>
-              For best results, capture a nutrition label. Packaging or the food itself may work but
-              can be less accurate.
-            </li>
-            <li>Typical day-to-day usage costs are small for most users.</li>
             {aiProvider === "openai" && (
-              <li>
-                Create a key at{" "}
-                <a href="https://platform.openai.com/api-keys" target="_blank" rel="noreferrer">
-                  platform.openai.com/api-keys
-                </a>
-              </li>
+              <>
+                <li>
+                  Create a key at{" "}
+                  <a href="https://platform.openai.com/api-keys" target="_blank" rel="noreferrer">
+                    platform.openai.com/api-keys
+                  </a>
+                </li>
+                <li>
+                  Add credit at{" "}
+                  <a href="https://platform.openai.com/account/billing">
+                    platform.openai.com/<wbr />account/<wbr />billing
+                  </a>
+                </li>
+                <li>
+                  Credits can expire per{" "}
+                  <a href="https://openai.com/policies/service-credit-terms/#:~:text=expire">
+                    OpenAI's terms
+                  </a>
+                  , so it’s best to add only a small amount.
+                </li>
+                <li>
+                  If you have leftover credit, you can also use it at{" "}
+                  <a href="https://platform.openai.com/chat">platform.openai.com/chat</a> for advanced
+                  models and other features.
+                </li>
+              </>
             )}
             {aiProvider === "gemini" && (
               <li>
@@ -188,9 +213,12 @@ export default function SettingsTab() {
               This key stays only in your browser (localStorage) and is excluded from Google Drive
               sync and export/import.
             </li>
+            <li>
+              Keep the key private and do not share it with anyone.
+            </li>
           </ul>
         )}
-      </section>
+      </section >
 
       <section className="card">
         <div className="card__header">
@@ -198,6 +226,11 @@ export default function SettingsTab() {
         </div>
         <div className="settings-subsection">
           <h3>Import / Export</h3>
+          <p className="hint settings-note">
+            Includes your <strong>Inventory</strong>, <strong>History</strong>, and{" "}
+            <strong>Goals</strong>. Importing will <strong>completely overwrite</strong> your
+            current local data (it does not merge).
+          </p>
           <div className="storage-actions">
             <button className="ghost" onClick={() => exportToFile()} type="button">
               Export File
@@ -212,14 +245,13 @@ export default function SettingsTab() {
               Paste JSON
             </button>
           </div>
-          <p className="hint settings-note">
-            Includes your <strong>Inventory</strong>, <strong>History</strong>, and{" "}
-            <strong>Goals</strong>. Importing will <strong>completely overwrite</strong> your
-            current local data (it does not merge).
-          </p>
         </div>
         <div className="settings-subsection">
           <h3>Reset</h3>
+          <p className="hint settings-note">
+            These actions only modify your browser's local data. They do not affect data stored in
+            Google Drive.
+          </p>
           <div className="storage-actions">
             <button className="ghost" onClick={() => resetInventory()} type="button">
               Reset Inventory
@@ -231,13 +263,21 @@ export default function SettingsTab() {
               Reset Goals
             </button>
           </div>
-          <p className="hint settings-note">
-            These actions only modify your browser's local data. They do not affect data stored in
-            Google Drive.
-          </p>
         </div>
         <div className="settings-subsection">
           <h3>Google Drive</h3>
+          <p className="hint settings-note">
+            Google Drive sync uses the app's private storage area and won't touch your regular Drive
+            files. You can manage and delete data uploaded by this app at{" "}
+            <a
+              href="https://drive.google.com/drive/settings"
+              target="_blank"
+              rel="noreferrer"
+            >
+              drive.google.com/drive/settings
+            </a>{" "}
+            under "Manage apps".
+          </p>
           <div className="storage-actions">
             {!driveConnected && (
               <button className="ghost" onClick={() => connectDrive()} disabled={driveBusy}>
@@ -268,18 +308,6 @@ export default function SettingsTab() {
               </>
             )}
           </div>
-          <p className="hint settings-note">
-            Google Drive sync uses the app's private storage area and won't touch your regular Drive
-            files. You can manage and delete data uploaded by this app at{" "}
-            <a
-              href="https://drive.google.com/drive/settings"
-              target="_blank"
-              rel="noreferrer"
-            >
-              drive.google.com/drive/settings
-            </a>{" "}
-            under "Manage apps".
-          </p>
         </div>
         <input
           ref={fileInputRef}

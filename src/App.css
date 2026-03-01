@@ -695,7 +695,6 @@ select {
 .hint, .card p.hint {
   font-size: 0.9em;
   color: #7d6b5f;
-  margin: 8px 0;
 }
 
 .step-list {
