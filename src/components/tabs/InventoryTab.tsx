@@ -4,8 +4,9 @@ import {
   appStateAtom,
   getPantryByFoodAtom,
 } from "../../state/appAtoms";
-import { openAiKeyAtom } from "../../state/appOpenAi";
-import { requestFoodVision, resizeImageFile } from "../../core/foodVision";
+import { aiProviderAtom, activeAiKeyAtom } from "../../state/appAiConfig";
+import { resizeImageFile } from "../../core/foodVision";
+import { requestUnifiedVision } from "../../core/visionProvider";
 import { setAppError, setAppNotice } from "../../state/appStoreActions";
 import {
   addFoodFromEditor,
@@ -32,7 +33,8 @@ const EMPTY_NEW_FOOD = {
 export default function InventoryTab() {
   const state = useAtomValue(appStateAtom);
   const pantryByFood = useAtomValue(getPantryByFoodAtom);
-  const openAiKey = useAtomValue(openAiKeyAtom);
+  const aiProvider = useAtomValue(aiProviderAtom);
+  const activeAiKey = useAtomValue(activeAiKeyAtom);
   const [selectedFoodIds, setSelectedFoodIds] = useState<string[]>([]);
   const [newFood, setNewFood] = useState(EMPTY_NEW_FOOD);
   const [visionBusy, setVisionBusy] = useState(false);
@@ -42,7 +44,7 @@ export default function InventoryTab() {
   const canAddNewFood = newFood.name.trim().length > 0;
   const inferredNewFoodIcon = inferFoodIconFromName(newFood.name);
   const newFoodIconPlaceholder = inferredNewFoodIcon ?? DEFAULT_FOOD_ICON;
-  const hasOpenAiKey = openAiKey.trim().length > 0;
+  const isVisionEnabled = aiProvider !== "none" && activeAiKey.trim().length > 0;
   const selectedIdSet = useMemo(() => new Set(selectedFoodIds), [selectedFoodIds]);
 
   const toggleSelected = (foodId: string) => {
@@ -97,8 +99,8 @@ export default function InventoryTab() {
   };
 
   const handleVisionUpload = async (file: File) => {
-    if (!hasOpenAiKey) {
-      setAppError("Add an OpenAI API key in Settings first.");
+    if (!isVisionEnabled) {
+      setAppError("Enable Vision Recognition and add an API key in Settings first.");
       return;
     }
     setAppNotice(null);
@@ -106,9 +108,11 @@ export default function InventoryTab() {
     setVisionBusy(true);
     try {
       const resized = await resizeImageFile(file);
-      const result = await requestFoodVision({
-        apiKey: openAiKey.trim(),
+      const result = await requestUnifiedVision({
+        provider: aiProvider,
+        apiKey: activeAiKey,
         dataUrl: resized.dataUrl,
+        mimeType: resized.mimeType,
       });
       setNewFood((prev) => ({
         ...prev,
@@ -138,11 +142,11 @@ export default function InventoryTab() {
         <div className="storage-actions">
           <>
             <button
-              className={`ghost ${!hasOpenAiKey ? "is-disabled" : ""}`}
+              className={`ghost ${!isVisionEnabled ? "is-disabled" : ""}`}
               type="button"
               onClick={() => {
-                if (!hasOpenAiKey) {
-                  setAppNotice("Add an OpenAI API key in Settings to use photo recognition.");
+                if (!isVisionEnabled) {
+                  setAppNotice("Enable image recognition in Settings to use photo recognition.");
                   return;
                 }
                 fileInputRef.current?.click();

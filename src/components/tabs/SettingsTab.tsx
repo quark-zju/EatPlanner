@@ -6,7 +6,11 @@ import {
   driveBusyAtom,
   driveConnectedAtom,
 } from "../../state/appAtoms";
-import { openAiKeyAtom, sanitizeOpenAiKey } from "../../state/appOpenAi";
+import {
+  aiProviderAtom,
+  geminiKeyAtom,
+  openAiKeyAtom,
+} from "../../state/appAiConfig";
 import {
   copyToClipboard,
   exportToFile,
@@ -26,7 +30,9 @@ export default function SettingsTab() {
   const state = useAtomValue(appStateAtom);
   const driveConnected = useAtomValue(driveConnectedAtom);
   const driveBusy = useAtomValue(driveBusyAtom);
+  const [aiProvider, setAiProvider] = useAtom(aiProviderAtom);
   const [openAiKey, setOpenAiKey] = useAtom(openAiKeyAtom);
+  const [geminiKey, setGeminiKey] = useAtom(geminiKeyAtom);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -82,69 +88,108 @@ export default function SettingsTab() {
 
       <section className="card">
         <div className="card__header">
-          <h2>OpenAI Vision</h2>
+          <h2>Vision Recognition</h2>
         </div>
         <div className="goal-grid">
-          <div className="api-key-row">
-            <label className="macro-label" htmlFor="openai-api-key">
-              OpenAI API Key
-            </label>
-            <div className="api-key-control">
-              <input
-                id="openai-api-key"
-                className="api-key-input"
-                type="password"
-                value={openAiKey}
-                placeholder="sk-..."
-                autoComplete="off"
-                onChange={(event) => setOpenAiKey(sanitizeOpenAiKey(event.target.value))}
-              />
-              <button
-                className="ghost"
-                type="button"
-                onClick={() => setOpenAiKey("")}
-                disabled={openAiKey.length === 0}
+          <div className="setting-row">
+            <label className="macro-label">Provider</label>
+            <div className="setting-control">
+              <select
+                value={aiProvider}
+                onChange={(e) => setAiProvider(e.target.value as any)}
               >
-                Clear
-              </button>
+                <option value="none">Disabled</option>
+                <option value="openai">OpenAI (GPT-5-mini)</option>
+                <option value="gemini">Google (Gemini-3-Flash)</option>
+              </select>
             </div>
           </div>
+
+          {aiProvider === "openai" && (
+            <div className="api-key-row">
+              <label className="macro-label" htmlFor="openai-api-key">
+                OpenAI API Key
+              </label>
+              <div className="api-key-control">
+                <input
+                  id="openai-api-key"
+                  className="api-key-input"
+                  type="password"
+                  value={openAiKey}
+                  placeholder="sk-..."
+                  autoComplete="off"
+                  onChange={(event) => setOpenAiKey(event.target.value)}
+                />
+                <button
+                  className="ghost"
+                  type="button"
+                  onClick={() => setOpenAiKey("")}
+                  disabled={openAiKey.length === 0}
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+          )}
+
+          {aiProvider === "gemini" && (
+            <div className="api-key-row">
+              <label className="macro-label" htmlFor="gemini-api-key">
+                Gemini API Key
+              </label>
+              <div className="api-key-control">
+                <input
+                  id="gemini-api-key"
+                  className="api-key-input"
+                  type="password"
+                  value={geminiKey}
+                  placeholder="AIza..."
+                  autoComplete="off"
+                  onChange={(event) => setGeminiKey(event.target.value)}
+                />
+                <button
+                  className="ghost"
+                  type="button"
+                  onClick={() => setGeminiKey("")}
+                  disabled={geminiKey.length === 0}
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-        <ul className="hint settings-note">
-          <li>This key enables photo-based food recognition.</li>
-          <li>
-            For best results, capture a nutrition label. Packaging or the food itself may work but
-            can be less accurate.
-          </li>
-          <li>Typical day-to-day usage costs are small for most users.</li>
-          <li>
-            Create a key at{" "}
-            <a href="https://platform.openai.com/api-keys">platform.openai.com/api-keys</a> and
-            add credit at{" "}
-            <a href="https://platform.openai.com/settings/organization/billing/overview">
-              platform.openai.com/<wbr />settings/organization/<wbr />billing/overview
-            </a>
-            .
-          </li>
-          <li>
-            Credits can expire per{" "}
-            <a href="https://openai.com/policies/service-credit-terms/#:~:text=expire">
-              OpenAI's terms
-            </a>
-            , so it’s best to add only a small amount.
-          </li>
-          <li>
-            If you have leftover credit, you can also use it at{" "}
-            <a href="https://platform.openai.com/chat">platform.openai.com/chat</a> for advanced
-            models and other features.
-          </li>
-          <li>
-            This key stays only in your browser (localStorage) and is excluded from Google Drive sync and export/import.
-          </li>
-          <li>
-            Keep it private and do not share it with anyone.
-          </li>
-        </ul>
+
+        {aiProvider !== "none" && (
+          <ul className="hint settings-note">
+            <li>This key enables photo-based food recognition.</li>
+            <li>
+              For best results, capture a nutrition label. Packaging or the food itself may work but
+              can be less accurate.
+            </li>
+            <li>Typical day-to-day usage costs are small for most users.</li>
+            {aiProvider === "openai" && (
+              <li>
+                Create a key at{" "}
+                <a href="https://platform.openai.com/api-keys" target="_blank" rel="noreferrer">
+                  platform.openai.com/api-keys
+                </a>
+              </li>
+            )}
+            {aiProvider === "gemini" && (
+              <li>
+                Create a key at{" "}
+                <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer">
+                  aistudio.google.com/app/apikey
+                </a>
+              </li>
+            )}
+            <li>
+              This key stays only in your browser (localStorage) and is excluded from Google Drive
+              sync and export/import.
+            </li>
+          </ul>
+        )}
       </section>
 
       <section className="card">

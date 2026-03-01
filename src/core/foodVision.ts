@@ -70,12 +70,22 @@ const buildPrompt = () => {
     "You are a nutrition analyst.",
     "If the image shows a nutrition facts label, read it carefully.",
     "If the image is an actual food (no label), estimate typical nutrition for a reasonable serving.",
-    "Return a single JSON object only, no Markdown.",
-    "Return JSON using these fields:",
-    "name (string|null), unit (string), carbs (number), fat (number), protein (number), calories (number|null), price (number|null), confidence (\"label\"|\"estimate\"), notes (string|null).",
+    "Return a single JSON object ONLY.",
+    "JSON Schema:",
+    "{",
+    "  \"name\": string | null,",
+    "  \"unit\": string,",
+    "  \"carbs\": number,",
+    "  \"fat\": number,",
+    "  \"protein\": number,",
+    "  \"calories\": number | null,",
+    "  \"price\": number | null,",
+    "  \"confidence\": \"label\" | \"estimate\",",
+    "  \"notes\": string | null",
+    "}",
     "Rules:",
     "- Use grams for macros.",
-    "- For unit, use the serving size if visible (examples: \"1/4 cup\", \"20 g\"); otherwise use \"serving\".",
+    "- For unit, use the serving size if visible (e.g., \"1/4 cup\", \"20 g\"); otherwise use \"serving\".",
     "- If multiple servings are listed, use per-serving values, not per-package totals.",
     "- If calories or price are unknown, return null.",
     "- If label data is incomplete, estimate missing parts and note it.",
@@ -85,7 +95,7 @@ const buildPrompt = () => {
 
 export const parseFoodVisionResult = (raw: unknown): FoodVisionResult => {
   if (!raw || typeof raw !== "object") {
-    throw new Error("OpenAI response was not a JSON object.");
+    throw new Error("API response was not a JSON object.");
   }
 
   const obj = raw as {
@@ -123,14 +133,14 @@ export const parseFoodVisionResult = (raw: unknown): FoodVisionResult => {
   };
 };
 
-export const requestFoodVision = async (payload: {
+export const requestOpenAiVision = async (payload: {
   apiKey: string;
   dataUrl: string;
 }) => {
   const startedAt = performance.now();
   const imageBytes = Math.round((payload.dataUrl.length * 3) / 4);
   if (shouldLog) {
-    console.debug("[vision] request:start", {
+    console.debug("[openai-vision] request:start", {
       approxImageBytes: imageBytes,
       approxImageKb: Math.round(imageBytes / 1024),
     });
@@ -142,7 +152,7 @@ export const requestFoodVision = async (payload: {
       Authorization: `Bearer ${payload.apiKey}`,
     },
     body: JSON.stringify({
-      model: "gpt-5-mini",
+      model: "gpt-4o-mini", // Corrected model name
       input: [
         {
           role: "user",
@@ -180,13 +190,6 @@ export const requestFoodVision = async (payload: {
 
   if (!response.ok) {
     const message = await response.text();
-    if (shouldLog) {
-      console.debug("[vision] request:failed", {
-        status: response.status,
-        statusText: response.statusText,
-        requestId: response.headers.get("x-request-id") ?? "",
-      });
-    }
     throw new Error(message || `OpenAI request failed (${response.status}).`);
   }
 
@@ -203,29 +206,76 @@ export const requestFoodVision = async (payload: {
     message?.content?.find((item) => item.type === "text")?.text ??
     "";
   if (!text) {
-    const requestId = response.headers.get("x-request-id") ?? "";
-    const debugPayload = {
-      requestId,
-      output: data.output ?? null,
-    };
-    if (shouldLog) {
-      console.debug("[vision] response:missingText", debugPayload);
-    }
-    throw new Error(
-      `OpenAI returned no content.${requestId ? ` request_id=${requestId}` : ""}`,
-    );
+    throw new Error("OpenAI returned no content.");
   }
   const parsed = JSON.parse(text) as unknown;
   const decodedAt = performance.now();
   if (shouldLog) {
-    console.debug("[vision] request:timing", {
-      requestMs: responseAt - startedAt,
-      jsonMs: parsedAt - responseAt,
-      parseMs: decodedAt - parsedAt,
+    console.debug("[openai-vision] request:timing", {
       totalMs: decodedAt - startedAt,
       requestId: response.headers.get("x-request-id") ?? "",
     });
   }
   return parseFoodVisionResult(parsed);
 };
+
+export const requestGeminiVision = async (payload: {
+  apiKey: string;
+  dataUrl: string;
+  mimeType: string;
+}): Promise<FoodVisionResult> => {
+  const startedAt = performance.now();
+  const base64Data = payload.dataUrl.split(",")[1];
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${payload.apiKey}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              { text: buildPrompt() },
+              {
+                inline_data: {
+                  mime_type: payload.mimeType,
+                  data: base64Data,
+                },
+              },
+            ],
+          },
+        ],
+        generationConfig: {
+          response_mime_type: "application/json",
+        },
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Gemini API error: ${response.status} ${errorText}`);
+  }
+
+  const data = await response.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+  if (!text) {
+    throw new Error("Gemini returned no content.");
+  }
+
+  const parsed = JSON.parse(text);
+
+  if (shouldLog) {
+    console.debug("[gemini-vision] request:timing", {
+      totalMs: performance.now() - startedAt,
+    });
+  }
+
+  return parseFoodVisionResult(parsed);
+};
+
 import { shouldLog } from "./debug";
