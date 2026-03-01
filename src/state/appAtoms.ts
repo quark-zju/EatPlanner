@@ -62,7 +62,7 @@ const hasOAuthHash = (hash: string) => hash.includes("access_token=") || hash.in
 const parseTabHash = (hash: string): UiTab | null => {
   const trimmed = hash.startsWith("#") ? hash.slice(1) : hash;
   if (!trimmed) {
-    return null;
+    return "today";
   }
   if (trimmed.startsWith("tab=")) {
     const candidate = trimmed.slice(4);
@@ -80,11 +80,16 @@ const setTabHash = (tab: UiTab) => {
   if (typeof window === "undefined") {
     return;
   }
-  const nextHash = `#${tab}`;
-  if (window.location.hash === nextHash) {
+  if (hasOAuthHash(window.location.hash)) {
     return;
   }
-  if (hasOAuthHash(window.location.hash)) {
+  if (tab === "today") {
+    const baseUrl = `${window.location.pathname}${window.location.search}`;
+    window.history.replaceState({}, document.title, baseUrl);
+    return;
+  }
+  const nextHash = `#${tab}`;
+  if (window.location.hash === nextHash) {
     return;
   }
   const nextUrl = `${window.location.pathname}${window.location.search}${nextHash}`;
@@ -117,7 +122,7 @@ activeTabBaseAtom.onMount = (set) => {
   };
 
   if (!parseTabHash(window.location.hash) && !hasOAuthHash(window.location.hash)) {
-    setTabHash(DEFAULT_TAB);
+    set(DEFAULT_TAB);
   }
 
   window.addEventListener("hashchange", maybeSetFromHash);
