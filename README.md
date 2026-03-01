@@ -27,11 +27,12 @@ src/
     types.ts            # Domain types for foods/goals/plan I/O
     solver.ts           # Z3 planner and option generation
     solver.test.ts      # Solver tests
-    foodVision.ts       # OpenAI photo-based food nutrition recognition
+    foodVision.ts       # AI photo-based food nutrition recognition (OpenAI/Gemini)
+    visionProvider.ts   # Unified AI vision provider interface
   state/
     appState.ts         # App state model, validation, normalization, date helpers
     appAtoms.ts         # Read/derived atoms + storage-backed app state
-    appOpenAi.ts        # OpenAI key storage (localStorage only, excluded from sync)
+    appAiConfig.ts      # AI provider and key storage (localStorage only)
     *Actions.ts         # Store-backed write actions (domain, inventory, draft, planner, data, drive)
     appDraftMath.ts     # Shared draft math: totals, price, remaining goal
     appState.test.ts    # State normalization tests
