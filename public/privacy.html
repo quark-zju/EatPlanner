@@ -97,7 +97,7 @@
             is written to local files or the clipboard as part of that manual action.
           </li>
           <li>
-            <strong>3rd-party service credentials:</strong> Google Drive authentication token and OpenAI key
+            <strong>3rd-party service credentials:</strong> Google Drive authentication token and API keys (OpenAI, Gemini)
             are stored locally in your browser and are excluded from local file/clipboard export,
             or Google Drive sync.
           </li>
@@ -108,16 +108,20 @@
           </li>
         </ul>
 
-        <h2>4. OpenAI API Use</h2>
+        <h2>4. AI API Use (OpenAI and Gemini)</h2>
         <p>
-          If enabled by you, the app sends the image and prompt directly from your browser to
-          OpenAI's API using your API key to extract nutrition details.
+          If enabled by you, the app sends the image and prompt directly from your browser to the chosen
+          API provider (OpenAI or Google Gemini) using your respective API key to extract nutrition details.
         </p>
         <p>
           The app does not route this data through a developer-operated server.
         </p>
         <p>
           Photos are not stored by the app locally after they are sent for recognition.
+        </p>
+        <p>
+          Please note that Google Gemini's <b>Free Tier</b> may use your data for model improvement as per their
+          <a href="https://ai.google.dev/gemini-api/terms#free-tier-data-usage" target="_blank" rel="noreferrer">Terms of Service</a>.
         </p>
 
         <h2>5. Google User Data and API Scope</h2>
@@ -159,8 +163,8 @@
           runtime state.
         </p>
         <p>
-          OpenAI API keys are stored only in your browser storage and requests are sent directly
-          from your browser to OpenAI.
+          OpenAI and Gemini API keys are stored only in your browser storage and requests are sent directly
+          from your browser to the respective providers.
         </p>
         <p>
           No internet-facing system is perfectly secure, but the app follows a minimal
@@ -192,14 +196,23 @@
           adhere to the
           <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, including the Limited Use requirements.
         </p>
-        <h2>13. OpenAI Services Disclosure</h2>
+        <h2>13. Third-Party AI Services Disclosure</h2>
         <p>
-          If you use the photo nutrition feature, your use of OpenAI services is subject to
-          OpenAI's terms and privacy policy:
-          <a href="https://openai.com/policies/terms-of-use">https://openai.com/policies/terms-of-use</a>
-          and
-          <a href="https://openai.com/policies/privacy-policy">https://openai.com/policies/privacy-policy</a>.
+          If you use the photo nutrition feature, your use of OpenAI or Google Gemini services is subject
+          to the respective provider's terms and privacy policies:
         </p>
+        <ul>
+          <li>
+            <strong>OpenAI:</strong>
+            <a href="https://openai.com/policies/terms-of-use" target="_blank" rel="noreferrer">Terms of Use</a> and
+            <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noreferrer">Privacy Policy</a>.
+          </li>
+          <li>
+            <strong>Google Gemini:</strong>
+            <a href="https://ai.google.dev/gemini-api/terms" target="_blank" rel="noreferrer">Gemini API Additional Terms of Service</a> and
+            <a href="https://developers.google.com/terms" target="_blank" rel="noreferrer">Google APIs Terms of Service</a>.
+          </li>
+        </ul>
     </main>
   </body>
 </html>
