@@ -17,7 +17,7 @@ Choices I made:
 - z3-solver for planning
 
 Most coding is done by AI. I was experimenting different AIs.
-I use `Agent-Model:` in commit message to document which AI was used.
+I use `Agent-Model:` in commit message to track which AI was used.
 
 <!-- [[[cog
 import re
@@ -40,6 +40,11 @@ def parse_commit_loc(line: str) -> int:
         return 0
     return int(parts[0]) + int(parts[1])
 
+
+last_commit_date = subprocess.check_output(
+    ["git", "log", "-1", "--format=%ci"],
+    text=True,
+).strip().split()[0]
 
 raw_log = subprocess.check_output(
     ["git", "log", "--numstat", "--format=%x1e%B"],
@@ -73,6 +78,8 @@ rows = sorted(stats.items(), key=lambda item: (-item[1]["commits"], item[0].lowe
 total_commits = sum(d["commits"] for _, d in rows)
 total_loc = sum(d["loc"] for _, d in rows)
 
+cog.outl(f"AI models sorted by contribution (Last updated: {last_commit_date}):")
+cog.outl("")
 cog.outl("| Model | Commit | LOC |")
 cog.outl("| --- | ---: | ---: |")
 for model, data in rows:
@@ -83,14 +90,16 @@ for model, data in rows:
     lp = f"({100*l//total_loc}%)" if total_loc else "(0%)"
     cog.outl(f"| {safe_model} | {c} {cp} | {l} {lp} |")
 ]]] -->
+AI models sorted by contribution (Last updated: 2026-03-01):
+
 | Model | Commit | LOC |
 | --- | ---: | ---: |
 | gpt-5.3-codex | 92 (51%) | 22034 (68%) |
 | gpt-5.2-codex | 47 (26%) | 8795 (27%) |
 | manual | 18 (10%) | 462 (1%) |
 | claude-sonnet-4.6 | 10 (5%) | 236 (0%) |
+| MiniMax-M2.5 | 7 (3%) | 135 (0%) |
 | gemini-3-flash-preview | 6 (3%) | 511 (1%) |
-| MiniMax-M2.5 | 6 (3%) | 114 (0%) |
 <!-- [[[end]]] -->
 
 <details>
