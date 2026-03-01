@@ -23,7 +23,10 @@ export const updateFood = (
         return food;
       }
 
-      const merged: Food = { ...food, ...payload.updates };
+      let merged: Food = { ...food, ...payload.updates };
+      if (typeof merged.unit === "string" && merged.unit.startsWith("1 ")) {
+        merged.unit = merged.unit.substring(2);
+      }
       const nameChanged =
         typeof payload.updates.name === "string" && payload.updates.name !== food.name;
       const iconMissing = !merged.icon || merged.icon.trim() === "";
@@ -124,7 +127,10 @@ export const addFoodFromEditor = (
   const id = newFoodId();
   const inferredIcon = inferFoodIconFromName(name);
   const icon = payload.icon?.trim() ? payload.icon.trim() : inferredIcon;
-  const unit = payload.unit.trim() || "serving";
+  let unit = payload.unit.trim() || "serving";
+  if (unit.startsWith("1 ")) {
+    unit = unit.substring(2);
+  }
   const stock =
     payload.stock === "inf"
       ? "inf"
