@@ -117,18 +117,28 @@ export default function SettingsTab() {
           </div>
 
           {aiProvider === "openai" && (
-            <div className="api-key-row">
+            <form className="api-key-row" onSubmit={(e) => e.preventDefault()}>
+              {/* Invisible username field to help browser password managers */}
+              <input
+                type="text"
+                name="username"
+                value="OpenAI API Key"
+                readOnly
+                autoComplete="username"
+                style={{ display: "none" }}
+              />
               <label className="macro-label" htmlFor="openai-api-key">
                 OpenAI API Key
               </label>
               <div className="api-key-control">
                 <input
                   id="openai-api-key"
+                  name="password"
                   className="api-key-input"
                   type="password"
                   value={openAiKey}
                   placeholder="sk-..."
-                  autoComplete="off"
+                  autoComplete="current-password"
                   onChange={(event) => setOpenAiKey(event.target.value)}
                 />
                 <button
@@ -140,22 +150,32 @@ export default function SettingsTab() {
                   Clear
                 </button>
               </div>
-            </div>
+            </form>
           )}
 
           {aiProvider === "gemini" && (
-            <div className="api-key-row">
+            <form className="api-key-row" onSubmit={(e) => e.preventDefault()}>
+              {/* Invisible username field to help browser password managers */}
+              <input
+                type="text"
+                name="username"
+                value="Gemini API Key"
+                readOnly
+                autoComplete="username"
+                style={{ display: "none" }}
+              />
               <label className="macro-label" htmlFor="gemini-api-key">
                 Gemini API Key
               </label>
               <div className="api-key-control">
                 <input
                   id="gemini-api-key"
+                  name="password"
                   className="api-key-input"
                   type="password"
                   value={geminiKey}
                   placeholder="AIza..."
-                  autoComplete="off"
+                  autoComplete="current-password"
                   onChange={(event) => setGeminiKey(event.target.value)}
                 />
                 <button
@@ -167,7 +187,7 @@ export default function SettingsTab() {
                   Clear
                 </button>
               </div>
-            </div>
+            </form>
           )}
         </div>
 
