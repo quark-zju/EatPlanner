@@ -58,12 +58,6 @@ export const generatePlanOptions = async (
   s.set(plannerMessageAtom, null);
 
   try {
-    if (!window.crossOriginIsolated || typeof SharedArrayBuffer === "undefined") {
-      throw new Error(
-        "SharedArrayBuffer is unavailable. Reload after service worker registration or ensure COOP/COEP headers."
-      );
-    }
-
     const state = s.get(appStateAtom);
     const contextItems = state.todayDraft.items
       .filter((item) => item.quantity > 0)
