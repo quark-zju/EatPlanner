@@ -44,6 +44,9 @@ for chunk in raw_log.split("\x1e"):
     message_lines = []
     loc = 0
     for line in chunk.splitlines():
+        parts = line.split("\t", 2)
+        if len(parts) >= 3 and parts[2].startswith("public/z3-built."):
+            continue
         file_loc = parse_commit_loc(line)
         if file_loc:
             loc += file_loc
@@ -75,10 +78,10 @@ AI models sorted by contribution (Last updated: 2026-03-01):
 
 | Model | Commit | LOC |
 | --- | ---: | ---: |
-| gpt-5.3-codex | 92 (46%) | 22034 (58%) |
-| gpt-5.2-codex | 47 (23%) | 8795 (23%) |
-| manual | 23 (11%) | 5600 (14%) |
-| MiniMax-M2.5 | 18 (9%) | 447 (1%) |
-| claude-sonnet-4.6 | 10 (5%) | 236 (0%) |
-| gemini-3-flash-preview | 6 (3%) | 511 (1%) |
+| gpt-5.3-codex | 96 (47%) | 14298 (54%) |
+| gpt-5.2-codex | 47 (23%) | 8795 (33%) |
+| manual | 23 (11%) | 2084 (7%) |
+| MiniMax-M2.5 | 19 (9%) | 455 (1%) |
+| claude-sonnet-4.6 | 10 (4%) | 236 (0%) |
+| gemini-3-flash-preview | 6 (2%) | 511 (1%) |
 <!-- [[[end]]] -->
