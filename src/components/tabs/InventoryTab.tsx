@@ -22,7 +22,7 @@ import { inferFoodIconFromName } from "../../state/foodIcons";
 const EMPTY_NEW_FOOD = {
   name: "",
   icon: "",
-  unit: "serving",
+  unit: "",
   carbs: "0",
   fat: "0",
   protein: "0",
@@ -353,6 +353,7 @@ export default function InventoryTab() {
               <td className="col-unit">
                 <input
                   value={newFood.unit}
+                  placeholder="serving"
                   onChange={(event) =>
                     setNewFood((prev) => ({ ...prev, unit: event.target.value }))
                   }
