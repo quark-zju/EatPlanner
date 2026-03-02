@@ -58,7 +58,6 @@ public/
   privacy.html          # Privacy policy page for users/OAuth review
   terms.html            # Terms of service page
   z3-built.js|wasm      # Browser Z3 runtime assets
-  coi-serviceworker.min.js  # COOP/COEP helper for static hosting
 ```
 
 </details>
