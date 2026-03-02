@@ -437,8 +437,8 @@ input {
 }
 
 input::placeholder {
-  color: #999;
-  opacity: 1;
+  color: #666;
+  opacity: 0.5;
 }
 
 select {
