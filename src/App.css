@@ -436,6 +436,11 @@ input {
   font-size: 14px;
 }
 
+input::placeholder {
+  color: #999;
+  opacity: 1;
+}
+
 select {
   border: 1px solid #e4dacf;
   border-radius: 10px;
