@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "postinstall": "node scripts/copy-z3.js && node scripts/copy-coi.js",
+    "postinstall": "node scripts/copy-coi.js",
     "test": "vitest run",
     "test:watch": "vitest"
   },
