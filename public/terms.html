@@ -49,9 +49,46 @@
       ul {
         padding-left: 22px;
       }
+      body.show-pwa-close {
+        padding-top: 54px;
+      }
+      .pwa-close-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 54px;
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 14px;
+        border-bottom: 1px solid #e8ddd0;
+        background: #fffaf5;
+        box-sizing: border-box;
+      }
+      .pwa-close-bar__title {
+        font-size: 14px;
+        color: #5a493b;
+      }
+      .pwa-close-bar__button {
+        appearance: none;
+        width: 34px;
+        height: 34px;
+        border: 1px solid #d9c8b6;
+        border-radius: 999px;
+        background: #fff;
+        color: #5a493b;
+        font-size: 20px;
+        line-height: 1;
+        cursor: pointer;
+      }
     </style>
   </head>
   <body>
+    <div class="pwa-close-bar" id="pwa-close-bar">
+      <div class="pwa-close-bar__title">Terms of Service</div>
+      <button class="pwa-close-bar__button" id="pwa-close-button" aria-label="Close page">x</button>
+    </div>
     <main>
       <h1>Eat Planner Terms of Service</h1>
       <p class="muted">Last updated: February 28, 2026</p>
@@ -157,5 +194,28 @@
         For questions about these Terms, use <a href="https://github.com/quark-zju/EatPlanner/issues">GitHub issues</a> to contact the project maintainer.
       </p>
     </main>
+    <script>
+      (() => {
+        const isStandalone =
+          window.matchMedia("(display-mode: standalone)").matches ||
+          Boolean(window.navigator.standalone);
+        const hasBackHistory = window.history.length > 1;
+        if (!isStandalone || hasBackHistory) return;
+
+        document.body.classList.add("show-pwa-close");
+        const bar = document.getElementById("pwa-close-bar");
+        const closeButton = document.getElementById("pwa-close-button");
+        if (!bar || !closeButton) return;
+        bar.style.display = "flex";
+        closeButton.addEventListener("click", () => {
+          const sameOriginReferrer = document.referrer.startsWith(window.location.origin);
+          if (sameOriginReferrer && window.history.length > 1) {
+            window.history.back();
+            return;
+          }
+          window.location.assign("/");
+        });
+      })();
+    </script>
   </body>
 </html>
