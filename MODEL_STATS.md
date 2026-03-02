@@ -75,10 +75,10 @@ AI models sorted by contribution (Last updated: 2026-03-01):
 
 | Model | Commit | LOC |
 | --- | ---: | ---: |
-| gpt-5.3-codex | 92 (50%) | 22034 (68%) |
-| gpt-5.2-codex | 47 (25%) | 8795 (27%) |
-| manual | 18 (9%) | 462 (1%) |
+| gpt-5.3-codex | 92 (46%) | 22034 (58%) |
+| gpt-5.2-codex | 47 (23%) | 8795 (23%) |
+| manual | 23 (11%) | 5600 (14%) |
+| MiniMax-M2.5 | 18 (9%) | 447 (1%) |
 | claude-sonnet-4.6 | 10 (5%) | 236 (0%) |
-| MiniMax-M2.5 | 8 (4%) | 148 (0%) |
 | gemini-3-flash-preview | 6 (3%) | 511 (1%) |
 <!-- [[[end]]] -->
