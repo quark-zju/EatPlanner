@@ -70,7 +70,7 @@ const consumeRedirectTokenIfPresent = () => {
   const returnHash = sessionStorage.getItem(REDIRECT_RETURN_HASH_KEY) ?? "#settings";
   sessionStorage.removeItem(REDIRECT_RETURN_HASH_KEY);
   accessToken = token;
-  sessionStorage.setItem(TOKEN_SESSION_KEY, token);
+  localStorage.setItem(TOKEN_SESSION_KEY, token);
   logDrive("redirectOAuth:tokenConsumed");
 
   // Remove sensitive token from URL fragment.
@@ -80,12 +80,12 @@ const consumeRedirectTokenIfPresent = () => {
 
 consumeRedirectTokenIfPresent();
 
-// Restore token from sessionStorage on page refresh (token never enters AppState or exports).
-if (!accessToken && typeof sessionStorage !== "undefined") {
-  const stored = sessionStorage.getItem(TOKEN_SESSION_KEY);
+// Restore token from localStorage on page refresh (token never enters AppState or exports).
+if (!accessToken && typeof localStorage !== "undefined") {
+  const stored = localStorage.getItem(TOKEN_SESSION_KEY);
   if (stored) {
     accessToken = stored;
-    logDrive("accessToken:restoredFromSession");
+    logDrive("accessToken:restoredFromLocal");
   }
 }
 
@@ -197,7 +197,7 @@ export const disconnectGoogleDrive = () => {
     window.google.accounts.oauth2.revoke(accessToken, () => undefined);
   }
   accessToken = null;
-  sessionStorage.removeItem(TOKEN_SESSION_KEY);
+  localStorage.removeItem(TOKEN_SESSION_KEY);
 };
 
 export const isGoogleDriveConnected = () => Boolean(accessToken);
