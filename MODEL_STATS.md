@@ -45,8 +45,10 @@ for chunk in raw_log.split("\x1e"):
     loc = 0
     for line in chunk.splitlines():
         parts = line.split("\t", 2)
-        if len(parts) >= 3 and parts[2].startswith("public/z3-built."):
-            continue
+        if len(parts) >= 3:
+            filepath = parts[2]
+            if filepath.startswith("public/z3-built.") or filepath == "package-lock.json":
+                continue
         file_loc = parse_commit_loc(line)
         if file_loc:
             loc += file_loc
@@ -74,14 +76,14 @@ for model, data in rows:
     lp = f"({100*l//total_loc}%)" if total_loc else "(0%)"
     cog.outl(f"| {safe_model} | {c} {cp} | {l} {lp} |")
 ]]] -->
-AI models sorted by contribution (Last updated: 2026-03-01):
+AI models sorted by contribution (Last updated: 2026-03-02):
 
 | Model | Commit | LOC |
 | --- | ---: | ---: |
-| gpt-5.3-codex | 96 (47%) | 14298 (54%) |
-| gpt-5.2-codex | 47 (23%) | 8795 (33%) |
-| manual | 23 (11%) | 2084 (7%) |
-| MiniMax-M2.5 | 19 (9%) | 455 (1%) |
-| claude-sonnet-4.6 | 10 (4%) | 236 (0%) |
-| gemini-3-flash-preview | 6 (2%) | 511 (1%) |
+| gpt-5.3-codex | 96 (47%) | 12005 (75%) |
+| gpt-5.2-codex | 47 (23%) | 1847 (11%) |
+| manual | 23 (11%) | 843 (5%) |
+| MiniMax-M2.5 | 20 (9%) | 463 (2%) |
+| claude-sonnet-4.6 | 10 (4%) | 229 (1%) |
+| gemini-3-flash-preview | 6 (2%) | 511 (3%) |
 <!-- [[[end]]] -->
