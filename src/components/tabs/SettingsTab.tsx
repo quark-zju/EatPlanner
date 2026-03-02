@@ -273,13 +273,37 @@ export default function SettingsTab() {
             Google Drive.
           </p>
           <div className="storage-actions">
-            <button className="ghost" onClick={() => resetInventory()} type="button">
+            <button
+              className="ghost"
+              onClick={() => {
+                if (window.confirm("Are you sure you want to reset your inventory? This will delete all items.")) {
+                  resetInventory();
+                }
+              }}
+              type="button"
+            >
               Reset Inventory
             </button>
-            <button className="ghost" onClick={() => resetHistory()} type="button">
+            <button
+              className="ghost"
+              onClick={() => {
+                if (window.confirm("Are you sure you want to reset your history? This will delete all meal records.")) {
+                  resetHistory();
+                }
+              }}
+              type="button"
+            >
               Reset History
             </button>
-            <button className="ghost" onClick={() => resetGoals()} type="button">
+            <button
+              className="ghost"
+              onClick={() => {
+                if (window.confirm("Are you sure you want to reset your goals? This will restore default goals.")) {
+                  resetGoals();
+                }
+              }}
+              type="button"
+            >
               Reset Goals
             </button>
           </div>
