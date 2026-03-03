@@ -23,6 +23,9 @@
     "typescript": "^5.5.4",
     "vite": "^5.4.1",
     "vite-plugin-pwa": "^1.2.0",
-    "vitest": "^2.1.4"
+    "vitest": "^2.1.4",
+    "workbox-precaching": "^7.4.0",
+    "workbox-routing": "^7.4.0",
+    "workbox-window": "^7.4.0"
   }
 }
