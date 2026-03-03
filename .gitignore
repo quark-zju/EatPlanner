@@ -7,7 +7,6 @@ dist
 skills-lock.json
 package-lock.json
 yarn.lock
-pnpm-lock.yaml
 
 # Vite
 vite.config.ts.timestamp*
