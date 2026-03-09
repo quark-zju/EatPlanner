@@ -7,9 +7,11 @@ import {
 } from "../../state/appAtoms";
 import { setHistoryWindow, setSelectedHistoryDate } from "../../state/appDomainActions";
 import { getFoodIcon } from "../../state/appState";
+import { useTranslation } from "../../i18n";
 import NutritionGoalCard from "../NutritionGoalCard";
 
 export default function HistoryTab() {
+  const t = useTranslation();
   const range = useAtomValue(historyWindowRangeAtom);
   const historyDays = useAtomValue(historyDaysInWindowAtom);
   const selectedHistoryDateISO = useAtomValue(selectedHistoryDateAtom);
@@ -18,26 +20,26 @@ export default function HistoryTab() {
     <>
       <section className="card">
         <div className="card__header">
-          <h2>History</h2>
+          <h2>{t.history.History}</h2>
           <div className="storage-actions">
             <button className="ghost" onClick={() => setHistoryWindow("prev")} type="button">
-              Previous 30 days
+              {t.history.Previous30Days}
             </button>
             <button className="ghost" onClick={() => setHistoryWindow("next")} type="button">
-              Next 30 days
+              {t.history.Next30Days}
             </button>
             <button className="ghost" onClick={() => setHistoryWindow("today")} type="button">
-              Jump To Current
+              {t.history.JumpToCurrent}
             </button>
           </div>
         </div>
 
         <p className="hint">
-          Showing {range.startISO} to {range.endISO}
+          {t.history.ShowingRange(range.startISO, range.endISO)}
         </p>
 
         {historyDays.length === 0 && (
-          <p className="hint">No history entries in this 30-day window.</p>
+          <p className="hint">{t.history.NoHistoryInWindow}</p>
         )}
 
         <div className="history-list">
@@ -54,8 +56,8 @@ export default function HistoryTab() {
                   type="button"
                 >
                   <strong>{dateISO}</strong>
-                  <span className="history-item__icons">
-                    {headerItems.length === 0 && <span>No items</span>}
+<span className="history-item__icons">
+                      {headerItems.length === 0 && <span>{t.history.NoItems}</span>}
                     {headerItems.map((item) => (
                       <span
                         key={`${dateISO}-h-${item.foodId}`}
@@ -79,7 +81,7 @@ export default function HistoryTab() {
                   <div className="history-item__details">
                     <div className="history-item__detail-grid">
                       <div>
-                        <p>Submitted: {new Date(record.submittedAtISO).toLocaleString()}</p>
+                        <p>{t.history.Submitted}: {new Date(record.submittedAtISO).toLocaleString()}</p>
                         <ul>
                           {record.items.map((item) => (
                             <li key={`${dateISO}-${item.foodId}`}>
@@ -95,7 +97,7 @@ export default function HistoryTab() {
                       <NutritionGoalCard
                         totals={record.totals}
                         goal={record.goalSnapshot}
-                        title="Goal Match"
+                        title={t.history.GoalMatch}
                       />
                     </div>
                   </div>

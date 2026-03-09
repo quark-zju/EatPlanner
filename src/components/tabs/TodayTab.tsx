@@ -21,10 +21,12 @@ import {
 } from "../../state/appDraftActions";
 import { generatePlanOptions } from "../../state/appPlannerActions";
 import { getFoodIcon, toLocalDateISO } from "../../state/appState";
+import { useTranslation } from "../../i18n";
 import NutritionGoalCard from "../NutritionGoalCard";
 import NutritionGoalStats from "../NutritionGoalStats";
 
 export default function TodayTab() {
+  const t = useTranslation();
   const state = useAtomValue(appStateAtom);
   const options = useAtomValue(planOptionsAtom);
   const isSolving = useAtomValue(solvingAtom);
@@ -71,28 +73,28 @@ export default function TodayTab() {
     <>
       <section className="card">
         <div className="card__header">
-          <h2>Planner</h2>
+          <h2>{t.today.Planner}</h2>
           <button
             className="primary"
             onClick={() => generatePlans({ localAvoidFoodIds })}
             disabled={isSolving}
           >
-            {isSolving ? "Solving..." : "Generate Plans"}
+            {isSolving ? t.today.Solving : t.today.GeneratePlans}
           </button>
         </div>
         {shouldShowHowToUse && (
           <ul className="step-list">
             <li className="step-item">
               <span className="step-number">1</span>
-              <div>Review your <strong>Inventory</strong> and <strong>Settings → Goals</strong>.</div>
+              <div>{t.today.HowToUse.Step1}</div>
             </li>
             <li className="step-item">
               <span className="step-number">2</span>
-              <div>(Optional) Select what you already ate below to subtract them from your goals.</div>
+              <div>{t.today.HowToUse.Step2}</div>
             </li>
             <li className="step-item">
               <span className="step-number">3</span>
-              <div>Click <strong>Generate Plans</strong> to find suitable options.</div>
+              <div>{t.today.HowToUse.Step3}</div>
             </li>
           </ul>
         )}
@@ -111,7 +113,7 @@ export default function TodayTab() {
               </header>
               <div className="option__body">
                 <div>
-                  <h4>Servings</h4>
+                  <h4>{t.today.Servings}</h4>
                   <ul>
                     {Object.entries(option.servings).map(([foodId, amount]) => {
                       if (amount <= 0) {
@@ -131,7 +133,7 @@ export default function TodayTab() {
                             className="option-food__avoid"
                             type="button"
                             onClick={() => toggleLocalAvoid(foodId)}
-                            title={isLocallyAvoided ? "Unmark avoid" : "Mark as avoid"}
+                            title={isLocallyAvoided ? t.today.UnmarkAvoid : t.today.MarkAsAvoid}
                           >
                             x
                           </button>
@@ -140,7 +142,7 @@ export default function TodayTab() {
                     })}
                   </ul>
                 </div>
-                <NutritionGoalCard totals={option.totals} goal={plannerRemainingGoal} title="Totals" />
+                <NutritionGoalCard totals={option.totals} goal={plannerRemainingGoal} title={t.today.Totals} />
               </div>
               <button
                 className="ghost"
@@ -152,14 +154,14 @@ export default function TodayTab() {
                 }
                 type="button"
               >
-                Use this plan
+                {t.today.UseThisPlan}
               </button>
             </article>
           ))}
         </div>
         {localAvoidFoodIds.length > 0 && (
           <>
-            <p>Avoid:</p>
+            <p>{t.today.Avoid}:</p>
             <div className="local-avoid-list">
               {localAvoidFoodIds.map((foodId) => {
                 const food = foodById.get(foodId);
@@ -178,13 +180,13 @@ export default function TodayTab() {
           </>
         )}
         {options.length > 0 && (
-          <p className="hint">Use x in results to avoid items. Click <b>Generate Plans</b> to refresh options.</p>
+          <p className="hint">{t.today.RefreshTips}</p>
         )}
       </section>
 
       <section className="card">
         <div className="card__header">
-          <h2>What did you eat?</h2>
+          <h2>{t.today.WhatDidYouEat}</h2>
           <div className="inline-actions">
             <button
               className="ghost"
@@ -192,7 +194,7 @@ export default function TodayTab() {
               type="button"
               disabled={!hasAnySelection}
             >
-              Clear
+              {t.common.Clear}
             </button>
             <button
               className="primary"
@@ -200,13 +202,13 @@ export default function TodayTab() {
               type="button"
               disabled={!hasAnySelection}
             >
-              Save To History
+              {t.today.SaveToHistory}
             </button>
           </div>
         </div>
         <div className="draft-controls">
           <label>
-            Date
+            {t.today.Date}
             <input
               type="date"
               value={localDraftDate}
@@ -215,7 +217,7 @@ export default function TodayTab() {
           </label>
         </div>
 
-        <p className="hint draft-grid-hint">Click a food tile to add +1 unit. Use x to clear that item.</p>
+        <p className="hint draft-grid-hint">{t.today.AddUnitTips}</p>
         <div className="draft-grid">
           {availableDraftFoods.map((food) => {
             const item = draftItemByFoodId.get(food.id);
@@ -270,7 +272,7 @@ export default function TodayTab() {
         <div className="draft-summary">
           <NutritionGoalStats totals={state.todayDraft.totals} goal={state.goal} />
           <p className="draft-summary__price">
-            <strong>Price</strong>
+            <strong>{t.common.Price}</strong>
             <span>${formatPrice(draftPrice.priceLowerBound, draftPrice.hasUnknownPrice)}</span>
           </p>
         </div>

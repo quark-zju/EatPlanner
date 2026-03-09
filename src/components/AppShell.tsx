@@ -4,24 +4,26 @@ import { useAtomValue, useSetAtom } from "jotai";
 import { activeTabAtom, errorAtom, noticeAtom } from "../state/appAtoms";
 import { clearMessages } from "../state/appStoreActions";
 import type { UiTab } from "../state/appState";
+import { useTranslation } from "../i18n";
 
 type AppShellProps = {
   children: ReactNode;
 };
 
-const tabs: { id: UiTab; label: string }[] = [
-  { id: "today", label: "Today" },
-  { id: "inventory", label: "Inventory" },
-  { id: "history", label: "History" },
-  { id: "settings", label: "Settings" },
-];
-
 export default function AppShell({ children }: AppShellProps) {
+  const t = useTranslation();
   const activeTab = useAtomValue(activeTabAtom);
   const setActiveTab = useSetAtom(activeTabAtom);
   const error = useAtomValue(errorAtom);
   const notice = useAtomValue(noticeAtom);
   const iconRef = useRef<HTMLImageElement>(null);
+
+  const tabs: { id: UiTab; label: string }[] = [
+    { id: "today", label: t.tabs.today },
+    { id: "inventory", label: t.tabs.inventory },
+    { id: "history", label: t.tabs.history },
+    { id: "settings", label: t.tabs.settings },
+  ];
 
   const handleIconClick = () => {
     const icon = iconRef.current;
@@ -65,8 +67,8 @@ export default function AppShell({ children }: AppShellProps) {
           onClick={handleIconClick}
         />
         <div>
-          <h1>Eat Planner</h1>
-          <p>Plan meals around the food you already have.</p>
+          <h1>{t.app.Title}</h1>
+          <p>{t.app.Subtitle}</p>
         </div>
       </header>
 
@@ -101,11 +103,11 @@ export default function AppShell({ children }: AppShellProps) {
 
       <footer className="app__footer">
         <button type="button" className="link-button" onClick={() => openLegalPage("privacy.html")}>
-          Privacy
+          {t.app.Privacy}
         </button>
         <span>•</span>
         <button type="button" className="link-button" onClick={() => openLegalPage("terms.html")}>
-          Terms
+          {t.app.Terms}
         </button>
         <span>•</span>
         <a
@@ -113,7 +115,7 @@ export default function AppShell({ children }: AppShellProps) {
           target="_blank"
           rel="noreferrer"
         >
-          GitHub
+          {t.app.GitHub}
         </a>
       </footer>
     </div>

@@ -1,4 +1,5 @@
 import type { Goal, Nutrition } from "../core";
+import { useTranslation } from "../i18n";
 
 type NutritionGoalStatsProps = {
   totals: Nutrition;
@@ -9,13 +10,11 @@ type MacroKey = "carbs" | "fat" | "protein";
 
 const MACROS: MacroKey[] = ["carbs", "fat", "protein"];
 
-const toLabel = (macro: MacroKey) =>
-  macro === "carbs" ? "Carbs" : macro === "fat" ? "Fat" : "Protein";
-
 const toPercent = (value: number, max: number) => Math.max(0, Math.min(100, (value / max) * 100));
 const toInt = (value: number) => Math.round(value);
 
 export default function NutritionGoalStats({ totals, goal }: NutritionGoalStatsProps) {
+  const t = useTranslation();
   return (
     <div className="nutrition-goals">
       {MACROS.map((macro) => {
@@ -30,7 +29,7 @@ export default function NutritionGoalStats({ totals, goal }: NutritionGoalStatsP
         return (
           <div className="nutrition-goal-row" key={macro}>
             <div className="nutrition-goal-row__header">
-              <strong>{toLabel(macro)}</strong>
+              <strong>{t.macros[macro]}</strong>
               <span>
                 {toInt(current)}g / {toInt(target.min)}-{toInt(target.max)}g
               </span>

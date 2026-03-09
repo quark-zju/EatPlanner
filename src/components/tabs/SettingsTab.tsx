@@ -25,9 +25,10 @@ import {
 } from "../../state/appDriveActions";
 import { setPlanOptionLimit, updateGoal } from "../../state/appDomainActions";
 import { resetGoals, resetHistory, resetInventory, setAppError } from "../../state/appStoreActions";
-import { AllLangs, changeLang, getLang } from "../../i18n";
+import { AllLangs, changeLang, getLang, useTranslation } from "../../i18n";
 
 export default function SettingsTab() {
+  const t = useTranslation();
   const state = useAtomValue(appStateAtom);
   const driveConnected = useAtomValue(driveConnectedAtom);
   const driveBusy = useAtomValue(driveBusyAtom);
@@ -65,12 +66,35 @@ export default function SettingsTab() {
 
       <section className="card">
         <div className="card__header">
-          <h2>Goals</h2>
+          <h2>{t.settings.Language}</h2>
+        </div>
+        <div className="goal-grid">
+          <div className="setting-row">
+            <label className="macro-label">{t.settings.Language}</label>
+            <div className="setting-control">
+              <select
+                value={currentLang}
+                onChange={(e) => changeLang(e.target.value as "en" | "cn")}
+              >
+                {AllLangs.map((lang) => (
+                  <option key={lang} value={lang}>
+                    {lang === "en" ? "English" : "简体中文"}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="card">
+        <div className="card__header">
+          <h2>{t.settings.Goals}</h2>
         </div>
         <div className="goal-grid">
           {(["carbs", "fat", "protein"] as const).map((macro) => (
             <div className="goal-row" key={macro}>
-              <label className="macro-label">{macro}</label>
+              <label className="macro-label">{t.macros[macro]}</label>
               <input
                 type="number"
                 value={state.goal[macro].min}
@@ -94,11 +118,11 @@ export default function SettingsTab() {
 
       <section className="card">
         <div className="card__header">
-          <h2>Plan Generation</h2>
+          <h2>{t.settings.PlanGeneration}</h2>
         </div>
         <div className="goal-grid">
           <div className="setting-row">
-            <label className="macro-label">Maximum Plan Count</label>
+            <label className="macro-label">{t.settings.MaximumPlanCount}</label>
             <div className="setting-control">
               <input
                 type="number"
@@ -113,14 +137,13 @@ export default function SettingsTab() {
 
       <section className="card">
         <div className="card__header">
-          <h2>Vision Recognition</h2>
+          <h2>{t.settings.VisionRecognition}</h2>
         </div>
         <p className="hint">
-          Select an AI provider to enable <b>Add from Photo</b> food recognition in the <b>Inventory</b> tab.<br />
-          For best results, capture a nutrition label. Packaging or the food itself may work but can be less accurate.<br />
+          {t.settings.VisionHint}
         </p>
         <div className="hint" style={{ marginTop: 10 }}>
-          Model selection tips (Last updated: Feb 2026):
+          {t.settings.ModelTips}:
           <ul className="settings-note" style={{ marginTop: 5 }}>
             <li>Google Gemini API has <a href='https://ai.google.dev/gemini-api/docs/pricing' target="_blank" rel="noreferrer">free and paid tiers</a>. Free tier usage can be used for training.</li>
             <li>OpenAI GPT API is paid, although cheap. Usage is <a href='https://openai.com/api-data-privacy' target="_blank" rel="noreferrer">not used for training</a>.</li>
@@ -128,15 +151,15 @@ export default function SettingsTab() {
         </div>
         <div className="goal-grid" style={{ marginTop: 10 }} >
           <div className="setting-row">
-            <label className="macro-label">Provider</label>
+            <label className="macro-label">{t.settings.Provider}</label>
             <div className="setting-control">
               <select
                 value={aiProvider}
                 onChange={(e) => setAiProvider(e.target.value as any)}
               >
-                <option value="none">Disabled</option>
-                <option value="gemini">Google (Gemini-3-Flash)</option>
-                <option value="openai">OpenAI (GPT-5-mini)</option>
+                <option value="none">{t.settings.Disabled}</option>
+                <option value="gemini">{t.settings.GoogleGemini}</option>
+                <option value="openai">{t.settings.OpenAIGPT}</option>
               </select>
             </div>
           </div>
@@ -153,7 +176,7 @@ export default function SettingsTab() {
                 style={{ display: "none" }}
               />
               <label className="macro-label" htmlFor="openai-api-key">
-                OpenAI API Key
+                {t.settings.OpenAIKey}
               </label>
               <div className="api-key-control">
                 <input
@@ -172,7 +195,7 @@ export default function SettingsTab() {
                   onClick={() => setOpenAiKey("")}
                   disabled={openAiKey.length === 0}
                 >
-                  Clear
+                  {t.settings.Clear}
                 </button>
               </div>
             </form>
@@ -190,7 +213,7 @@ export default function SettingsTab() {
                 style={{ display: "none" }}
               />
               <label className="macro-label" htmlFor="gemini-api-key">
-                Gemini API Key
+                {t.settings.GeminiKey}
               </label>
               <div className="api-key-control">
                 <input
@@ -209,7 +232,7 @@ export default function SettingsTab() {
                   onClick={() => setGeminiKey("")}
                   disabled={geminiKey.length === 0}
                 >
-                  Clear
+                  {t.settings.Clear}
                 </button>
               </div>
             </form>
@@ -267,96 +290,84 @@ export default function SettingsTab() {
 
       <section className="card">
         <div className="card__header">
-          <h2>Data Controls</h2>
+          <h2>{t.settings.DataControls}</h2>
         </div>
         <div className="settings-subsection">
-          <h3>Import / Export</h3>
+          <h3>{t.settings.ImportExport}</h3>
           <p className="hint settings-note">
-            Includes your <strong>Inventory</strong>, <strong>History</strong>, and{" "}
-            <strong>Goals</strong>. Importing will <strong>completely overwrite</strong> your
-            current local data (it does not merge).
+            {t.settings.ImportExportHint}
           </p>
           <div className="storage-actions">
             <button className="ghost" onClick={() => exportToFile()} type="button">
-              Export File
+              {t.settings.ExportFile}
             </button>
             <button className="ghost" onClick={() => fileInputRef.current?.click()} type="button">
-              Import File
+              {t.settings.ImportFile}
             </button>
             <button className="ghost" onClick={() => copyToClipboard()} type="button">
-              Copy JSON
+              {t.settings.CopyJSON}
             </button>
             <button className="ghost" onClick={() => pasteFromClipboard()} type="button">
-              Paste JSON
+              {t.settings.PasteJSON}
             </button>
           </div>
         </div>
         <div className="settings-subsection">
-          <h3>Reset</h3>
+          <h3>{t.settings.Reset}</h3>
           <p className="hint settings-note">
-            These actions only modify your browser's local data. They do not affect data stored in
-            Google Drive.
+            {t.settings.ResetHint}
           </p>
           <div className="storage-actions">
             <button
               className="ghost"
               onClick={() => {
-                if (window.confirm("Are you sure you want to reset your inventory? This will delete all items.")) {
+                if (window.confirm(t.settings.ResetInventoryConfirm)) {
                   resetInventory();
                 }
               }}
               type="button"
             >
-              Reset Inventory
+              {t.settings.ResetInventory}
             </button>
             <button
               className="ghost"
               onClick={() => {
-                if (window.confirm("Are you sure you want to reset your history? This will delete all meal records.")) {
+                if (window.confirm(t.settings.ResetHistoryConfirm)) {
                   resetHistory();
                 }
               }}
               type="button"
             >
-              Reset History
+              {t.settings.ResetHistory}
             </button>
             <button
               className="ghost"
               onClick={() => {
-                if (window.confirm("Are you sure you want to reset your goals? This will restore default goals.")) {
+                if (window.confirm(t.settings.ResetGoalsConfirm)) {
                   resetGoals();
                 }
               }}
               type="button"
             >
-              Reset Goals
+              {t.settings.ResetGoals}
             </button>
           </div>
         </div>
         <div className="settings-subsection">
-          <h3>Google Drive</h3>
+          <h3>{t.settings.GoogleDrive}</h3>
           <p className="hint settings-note">
-            Google Drive sync uses the app's private storage area and won't touch your regular Drive
-            files. You can manage and delete data uploaded by this app at{" "}
-            <a
-              href="https://drive.google.com/drive/settings"
-              target="_blank"
-              rel="noreferrer"
-            >
-              drive.google.com/drive/settings
-            </a>{" "}
-            under "Manage apps".
+            {t.settings.DriveHint}
           </p>
           <div className="storage-actions">
             {!driveConnected && (
               <button className="ghost" onClick={() => connectDrive()} disabled={driveBusy}>
-                Connect Drive
+                {t.settings.ConnectDrive}
               </button>
             )}
             {driveConnected && (
               <>
                 <button className="ghost" onClick={() => disconnectDrive()} disabled={driveBusy}>
-                  Disconnect Drive
+                  {t.settings.DisconnectDrive}
                 </button>
                 <button
                   className="ghost"
@@ -364,7 +375,7 @@ export default function SettingsTab() {
                   disabled={driveBusy}
                   type="button"
                 >
-                  Save to Drive
+                  {t.settings.SaveToDrive}
                 </button>
                 <button
                   className="ghost"
@@ -372,7 +383,7 @@ export default function SettingsTab() {
                   disabled={driveBusy}
                   type="button"
                 >
-                  Load from Drive
+                  {t.settings.LoadFromDrive}
                 </button>
               </>
             )}

@@ -18,6 +18,7 @@ import {
 } from "../../state/appInventoryActions";
 import { DEFAULT_FOOD_ICON } from "../../state/appState";
 import { inferFoodIconFromName } from "../../state/foodIcons";
+import { useTranslation } from "../../i18n";
 
 const EMPTY_NEW_FOOD = {
   name: "",
@@ -31,6 +32,7 @@ const EMPTY_NEW_FOOD = {
 };
 
 export default function InventoryTab() {
+  const t = useTranslation();
   const state = useAtomValue(appStateAtom);
   const pantryByFood = useAtomValue(getPantryByFoodAtom);
   const aiProvider = useAtomValue(aiProviderAtom);
@@ -100,7 +102,7 @@ export default function InventoryTab() {
 
   const handleVisionUpload = async (file: File) => {
     if (!isVisionEnabled) {
-      setAppError("Enable Vision Recognition and add an API key in Settings first.");
+      setAppError(t.inventory.EnableVisionFirst);
       return;
     }
     setAppNotice(null);
@@ -125,11 +127,11 @@ export default function InventoryTab() {
       }));
       setAppNotice(
         result.confidence === "label"
-          ? "Nutrition label parsed. Review and edit before adding."
-          : "Nutrition estimated from photo. Review and edit before adding."
+          ? t.inventory.NutritionFromLabel
+          : t.inventory.NutritionEstimated
       );
     } catch (err) {
-      setAppError(err instanceof Error ? err.message : "Image recognition failed.");
+      setAppError(err instanceof Error ? err.message : t.inventory.VisionFailed);
     } finally {
       setVisionBusy(false);
     }
@@ -138,7 +140,7 @@ export default function InventoryTab() {
   return (
     <section className="card">
       <div className="card__header">
-        <h2>Pantry Foods</h2>
+        <h2>{t.inventory.PantryFoods}</h2>
         <div className="storage-actions">
           <>
             <button
@@ -146,14 +148,14 @@ export default function InventoryTab() {
               type="button"
               onClick={() => {
                 if (!isVisionEnabled) {
-                  setAppNotice("Enable image recognition in Settings to use photo recognition.");
+                  setAppNotice(t.inventory.EnableVisionFirst);
                   return;
                 }
                 fileInputRef.current?.click();
               }}
               disabled={visionBusy}
             >
-              {visionBusy ? "Analyzing..." : "Add from photo"}
+              {visionBusy ? t.common.Analyzing : t.inventory.AddFromPhoto}
             </button>
             <input
               ref={fileInputRef}
@@ -177,7 +179,7 @@ export default function InventoryTab() {
             disabled={!hasSelection}
             onClick={() => setSelectedFoodIds([])}
           >
-            Deselect
+            {t.common.Deselect}
           </button>
           <button
             className="ghost"
@@ -188,7 +190,7 @@ export default function InventoryTab() {
               clearMissingSelections();
             }}
           >
-            Move to top
+            {t.inventory.MoveToTop}
           </button>
           <button
             className="ghost"
@@ -199,7 +201,7 @@ export default function InventoryTab() {
               setSelectedFoodIds([]);
             }}
           >
-            Delete {selectedCount} items
+            {t.inventory.DeleteItems(selectedCount)}
           </button>
         </div>
       </div>
@@ -207,15 +209,15 @@ export default function InventoryTab() {
         <table className="editor-table pantry-editor-table">
           <thead>
             <tr>
-              <th className="col-name">Name</th>
-              <th className="col-icon">Icon</th>
-              <th className="col-unit">Unit</th>
-              <th className="col-right">Carbs</th>
-              <th className="col-right">Fat</th>
-              <th className="col-right">Protein</th>
-              <th className="col-right">Price</th>
-              <th className="col-right">Stock</th>
-              <th>Select</th>
+              <th className="col-name">{t.inventory.Name}</th>
+              <th className="col-icon">{t.inventory.Icon}</th>
+              <th className="col-unit">{t.inventory.Unit}</th>
+              <th className="col-right">{t.inventory.Carbs}</th>
+              <th className="col-right">{t.inventory.Fat}</th>
+              <th className="col-right">{t.inventory.Protein}</th>
+              <th className="col-right">{t.inventory.Price}</th>
+              <th className="col-right">{t.inventory.Stock}</th>
+              <th>{t.common.Select}</th>
             </tr>
           </thead>
           <tbody>
@@ -334,7 +336,7 @@ export default function InventoryTab() {
               <td className="col-name">
                 <input
                   value={newFood.name}
-                  placeholder="New food name..."
+                  placeholder={t.inventory.NewFoodName}
                   onChange={(event) =>
                     setNewFood((prev) => ({ ...prev, name: event.target.value }))
                   }
@@ -412,14 +414,14 @@ export default function InventoryTab() {
                   disabled={!canAddNewFood}
                   onClick={() => commitNewFood()}
                 >
-                  Add
+                  {t.common.Add}
                 </button>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-      <p className="hint">Stock accepts numbers or inf for restaurant-style items.</p>
+      <p className="hint">{t.inventory.StockHint}</p>
     </section>
   );
 }
