@@ -116,6 +116,13 @@ const en: LocaleType = {
     KeepKeyPrivate: "Keep the key private and do not share it with anyone.",
     GoogleFreeTier: "Google Gemini API has free and paid tiers. Free tier usage can be used for training.",
     OpenAIPaid: "OpenAI GPT API is paid, although cheap. Usage is",
+    OpenAIPaidLink: "not used for training",
+    CreditExpirePrefix: "Credits can expire per",
+    CreditExpireLink: "OpenAI's terms",
+    CreditExpireSuffix: ", so it's best to add only a small amount.",
+    CreditsInfoPrefix: "If you have leftover credit, you can also use it at",
+    CreditsInfoLink: "Chat",
+    CreditsInfoSuffix: "for advanced models and other features.",
     DataControls: "Data Controls",
     ImportExport: "Import / Export",
     ImportExportHint:

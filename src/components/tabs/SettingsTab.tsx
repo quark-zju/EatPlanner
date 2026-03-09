@@ -123,7 +123,7 @@ export default function SettingsTab() {
           {t.settings.ModelTips}:
           <ul className="settings-note" style={{ marginTop: 5 }}>
             <li>{t.settings.GoogleFreeTier}</li>
-            <li>{t.settings.OpenAIPaid} <a href='https://openai.com/api-data-privacy' target="_blank" rel="noreferrer">not used for training</a>.</li>
+            <li>{t.settings.OpenAIPaid} <a href='https://openai.com/api-data-privacy' target="_blank" rel="noreferrer">{t.settings.OpenAIPaidLink}</a>.</li>
           </ul>
         </div>
         <div className="goal-grid" style={{ marginTop: 10 }} >
@@ -147,7 +147,7 @@ export default function SettingsTab() {
               <input
                 type="text"
                 name="username"
-                value="OpenAI API Key"
+                value={t.settings.OpenAIKey}
                 readOnly
                 autoComplete="username"
                 style={{ display: "none" }}
@@ -184,7 +184,7 @@ export default function SettingsTab() {
               <input
                 type="text"
                 name="username"
-                value="Gemini API Key"
+                value={t.settings.GeminiKey}
                 readOnly
                 autoComplete="username"
                 style={{ display: "none" }}
@@ -244,12 +244,17 @@ export default function SettingsTab() {
                     platform.openai.com/<wbr />account/<wbr />billing
                   </a>
                 </li>
-                <li>
-                  Credits can expire per{" "}
+<li>
+                  {t.settings.CreditExpirePrefix}{" "}
                   <a href="https://openai.com/policies/service-credit-terms/#:~:text=expire">
-                    OpenAI's terms
+                    {t.settings.CreditExpireLink}
                   </a>
-                  , so it’s best to add only a small amount.
+                  {t.settings.CreditExpireSuffix}
+                </li>
+                <li>
+                  {t.settings.CreditsInfoPrefix}{" "}
+                  <a href="https://platform.openai.com/chat">{t.settings.CreditsInfoLink}</a>{" "}
+                  {t.settings.CreditsInfoSuffix}
                 </li>
                 <li>
                   If you have leftover credit, you can also use it at{" "}
