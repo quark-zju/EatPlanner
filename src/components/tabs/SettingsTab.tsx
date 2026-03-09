@@ -43,29 +43,6 @@ export default function SettingsTab() {
     <>
       <section className="card">
         <div className="card__header">
-          <h2>Language</h2>
-        </div>
-        <div className="goal-grid">
-          <div className="setting-row">
-            <label className="macro-label">Language</label>
-            <div className="setting-control">
-              <select
-                value={currentLang}
-                onChange={(e) => changeLang(e.target.value as "en" | "cn")}
-              >
-                {AllLangs.map((lang) => (
-                  <option key={lang} value={lang}>
-                    {lang === "en" ? "English" : "简体中文"}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="card">
-        <div className="card__header">
           <h2>{t.settings.Language}</h2>
         </div>
         <div className="goal-grid">
