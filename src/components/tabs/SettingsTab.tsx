@@ -25,6 +25,7 @@ import {
 } from "../../state/appDriveActions";
 import { setPlanOptionLimit, updateGoal } from "../../state/appDomainActions";
 import { resetGoals, resetHistory, resetInventory, setAppError } from "../../state/appStoreActions";
+import { AllLangs, changeLang, getLang } from "../../i18n";
 
 export default function SettingsTab() {
   const state = useAtomValue(appStateAtom);
@@ -33,11 +34,35 @@ export default function SettingsTab() {
   const [aiProvider, setAiProvider] = useAtom(aiProviderAtom);
   const [openAiKey, setOpenAiKey] = useAtom(openAiKeyAtom);
   const [geminiKey, setGeminiKey] = useAtom(geminiKeyAtom);
+  const currentLang = getLang();
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   return (
     <>
+      <section className="card">
+        <div className="card__header">
+          <h2>Language</h2>
+        </div>
+        <div className="goal-grid">
+          <div className="setting-row">
+            <label className="macro-label">Language</label>
+            <div className="setting-control">
+              <select
+                value={currentLang}
+                onChange={(e) => changeLang(e.target.value as "en" | "cn")}
+              >
+                {AllLangs.map((lang) => (
+                  <option key={lang} value={lang}>
+                    {lang === "en" ? "English" : "简体中文"}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="card">
         <div className="card__header">
           <h2>Goals</h2>
