@@ -122,8 +122,8 @@ export default function SettingsTab() {
         <div className="hint" style={{ marginTop: 10 }}>
           {t.settings.ModelTips}:
           <ul className="settings-note" style={{ marginTop: 5 }}>
-            <li>Google Gemini API has <a href='https://ai.google.dev/gemini-api/docs/pricing' target="_blank" rel="noreferrer">free and paid tiers</a>. Free tier usage can be used for training.</li>
-            <li>OpenAI GPT API is paid, although cheap. Usage is <a href='https://openai.com/api-data-privacy' target="_blank" rel="noreferrer">not used for training</a>.</li>
+            <li>{t.settings.GoogleFreeTier}</li>
+            <li>{t.settings.OpenAIPaid} <a href='https://openai.com/api-data-privacy' target="_blank" rel="noreferrer">not used for training</a>.</li>
           </ul>
         </div>
         <div className="goal-grid" style={{ marginTop: 10 }} >
@@ -220,11 +220,23 @@ export default function SettingsTab() {
           <ul className="hint settings-note">
             {aiProvider === "openai" && (
               <>
-                <li>
-                  Create a key at{" "}
+<li>
+                  {t.settings.CreateKey}{" "}
                   <a href="https://platform.openai.com/api-keys" target="_blank" rel="noreferrer">
                     platform.openai.com/api-keys
                   </a>
+                </li>
+                <li>
+                  {t.settings.AddCredit}{" "}
+                  <a href="https://platform.openai.com/account/billing">
+                    platform.openai.com/<wbr />account/<wbr />billing
+                  </a>
+                </li>
+                <li>
+                  {t.settings.CreditExpire}
+                </li>
+                <li>
+                  {t.settings.CreditsInfo}
                 </li>
                 <li>
                   Add credit at{" "}
@@ -248,18 +260,17 @@ export default function SettingsTab() {
             )}
             {aiProvider === "gemini" && (
               <li>
-                Create a key at{" "}
+                {t.settings.CreateKey}{" "}
                 <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer">
                   aistudio.google.com/app/apikey
                 </a>
               </li>
             )}
             <li>
-              This key stays only in your browser (localStorage) and is excluded from Google Drive
-              sync and export/import.
+              {t.settings.KeyStaysLocal}
             </li>
             <li>
-              Keep the key private and do not share it with anyone.
+              {t.settings.KeepKeyPrivate}
             </li>
           </ul>
         )}

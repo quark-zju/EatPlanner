@@ -114,6 +114,8 @@ const en: LocaleType = {
     KeyStaysLocal:
       "This key stays only in your browser (localStorage) and is excluded from Google Drive sync and export/import.",
     KeepKeyPrivate: "Keep the key private and do not share it with anyone.",
+    GoogleFreeTier: "Google Gemini API has free and paid tiers. Free tier usage can be used for training.",
+    OpenAIPaid: "OpenAI GPT API is paid, although cheap. Usage is",
     DataControls: "Data Controls",
     ImportExport: "Import / Export",
     ImportExportHint:
