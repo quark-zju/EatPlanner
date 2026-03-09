@@ -76,14 +76,14 @@ for model, data in rows:
     lp = f"({100*l//total_loc}%)" if total_loc else "(0%)"
     cog.outl(f"| {safe_model} | {c} {cp} | {l} {lp} |")
 ]]] -->
-AI models sorted by contribution (Last updated: 2026-03-02):
+AI models sorted by contribution (Last updated: 2026-03-08):
 
 | Model | Commit | LOC |
 | --- | ---: | ---: |
-| gpt-5.3-codex | 96 (47%) | 12005 (75%) |
-| gpt-5.2-codex | 47 (23%) | 1847 (11%) |
-| manual | 23 (11%) | 843 (5%) |
-| MiniMax-M2.5 | 20 (9%) | 463 (2%) |
+| gpt-5.3-codex | 102 (46%) | 12042 (57%) |
+| gpt-5.2-codex | 47 (21%) | 1847 (8%) |
+| MiniMax-M2.5 | 30 (13%) | 635 (3%) |
+| manual | 25 (11%) | 5777 (27%) |
 | claude-sonnet-4.6 | 10 (4%) | 229 (1%) |
-| gemini-3-flash-preview | 6 (2%) | 511 (3%) |
+| gemini-3-flash-preview | 6 (2%) | 511 (2%) |
 <!-- [[[end]]] -->
