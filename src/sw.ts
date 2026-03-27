@@ -30,7 +30,10 @@ cleanupOutdatedCaches();
 precacheAndRoute(self.__WB_MANIFEST);
 
 registerRoute(
-  ({ request }) => request.mode === "navigate",
+  ({ request, url }) =>
+    request.mode === "navigate" &&
+    !url.pathname.startsWith("/_") &&
+    !/\/[^/?]+\.[^/]+$/.test(url.pathname),
   createHandlerBoundToURL("/index.html")
 );
 
